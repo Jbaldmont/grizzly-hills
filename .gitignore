@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local tooling config (not part of the public repo)
+CLAUDE.md
+.claude/
