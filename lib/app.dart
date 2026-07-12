@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import 'core/strings.dart';
 import 'core/theme/app_themes.dart';
 import 'core/theme/theme_controller.dart';
+import 'features/monthly_budget/month_repository.dart';
 import 'shell/app_shell.dart';
 
 class GrizzlyApp extends StatelessWidget {
-  const GrizzlyApp({super.key, required this.themeController});
+  const GrizzlyApp({
+    super.key,
+    required this.themeController,
+    required this.monthRepository,
+  });
 
   final ThemeController themeController;
+  final MonthRepository monthRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +24,10 @@ class GrizzlyApp extends StatelessWidget {
         theme: buildLightTheme(themeController.scheme),
         darkTheme: buildDarkTheme(themeController.scheme),
         themeMode: themeController.mode,
-        home: AppShell(themeController: themeController),
+        home: AppShell(
+          themeController: themeController,
+          monthRepository: monthRepository,
+        ),
       ),
     );
   }
