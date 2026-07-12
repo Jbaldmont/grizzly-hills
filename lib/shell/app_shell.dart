@@ -5,13 +5,19 @@ import '../features/business/business_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/loans/loans_screen.dart';
 import '../features/mom/mom_screen.dart';
+import '../features/monthly_budget/month_repository.dart';
 import '../features/savings/savings_screen.dart';
 import '../features/settings/settings_screen.dart';
 
 class AppShell extends StatefulWidget {
-  const AppShell({super.key, required this.themeController});
+  const AppShell({
+    super.key,
+    required this.themeController,
+    required this.monthRepository,
+  });
 
   final ThemeController themeController;
+  final MonthRepository monthRepository;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -26,12 +32,12 @@ class _AppShellState extends State<AppShell> {
     Strings.tabMom,
   ];
 
-  static const List<Widget> _screens = [
-    HomeScreen(),
-    LoansScreen(),
-    SavingsScreen(),
-    BusinessScreen(),
-    MomScreen(),
+  late final List<Widget> _screens = [
+    HomeScreen(repository: widget.monthRepository),
+    const LoansScreen(),
+    const SavingsScreen(),
+    const BusinessScreen(),
+    const MomScreen(),
   ];
 
   int _selectedIndex = 0;
