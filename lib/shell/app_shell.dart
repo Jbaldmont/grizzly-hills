@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../core/strings.dart';
 import '../core/theme/theme_controller.dart';
 import '../features/business/business_screen.dart';
+import '../features/expenses/expense_form_sheet.dart';
+import '../features/expenses/expense_repository.dart';
 import '../features/home/home_screen.dart';
 import '../features/loans/loans_screen.dart';
 import '../features/mom/mom_screen.dart';
@@ -14,16 +16,21 @@ class AppShell extends StatefulWidget {
     super.key,
     required this.themeController,
     required this.monthRepository,
+    required this.expenseRepository,
   });
 
   final ThemeController themeController;
   final MonthRepository monthRepository;
+  final ExpenseRepository expenseRepository;
 
   @override
   State<AppShell> createState() => _AppShellState();
 }
 
 class _AppShellState extends State<AppShell> {
+  late final Stream<ActiveMonth?> _activeMonth =
+      widget.monthRepository.watchActiveMonth();
+
   static const List<String> _titles = [
     Strings.tabHome,
     Strings.tabLoans,
@@ -33,7 +40,10 @@ class _AppShellState extends State<AppShell> {
   ];
 
   late final List<Widget> _screens = [
-    HomeScreen(repository: widget.monthRepository),
+    HomeScreen(
+      monthRepository: widget.monthRepository,
+      expenseRepository: widget.expenseRepository,
+    ),
     const LoansScreen(),
     const SavingsScreen(),
     const BusinessScreen(),
@@ -93,10 +103,28 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _buildExpenseFab() {
-    return FloatingActionButton(
-      tooltip: Strings.quickExpenseTooltip,
-      onPressed: _showQuickExpensePlaceholder,
-      child: const Icon(Icons.add),
+    return StreamBuilder<ActiveMonth?>(
+      stream: _activeMonth,
+      builder: (context, snapshot) => FloatingActionButton(
+        tooltip: Strings.quickExpenseTooltip,
+        onPressed: () => _openQuickExpense(snapshot.data),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _openQuickExpense(ActiveMonth? activeMonth) {
+    if (activeMonth == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(Strings.openMonthFirst)),
+      );
+      return;
+    }
+    showQuickExpenseSheet(
+      context,
+      activeMonth: activeMonth,
+      expenseRepository: widget.expenseRepository,
+      monthRepository: widget.monthRepository,
     );
   }
 
@@ -105,12 +133,6 @@ class _AppShellState extends State<AppShell> {
       MaterialPageRoute<void>(
         builder: (_) => SettingsScreen(themeController: widget.themeController),
       ),
-    );
-  }
-
-  void _showQuickExpensePlaceholder() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(Strings.quickExpensePlaceholder)),
     );
   }
 }

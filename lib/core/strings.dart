@@ -16,8 +16,6 @@ abstract final class Strings {
 
   static const comingSoon = 'Próximamente';
   static const quickExpenseTooltip = 'Registrar gasto';
-  static const quickExpensePlaceholder =
-      'El registro de gastos llega con la feature de gastos';
 
   static const currency = 'Bs';
 
@@ -36,6 +34,44 @@ abstract final class Strings {
       'quedará en negativo. ¿Quieres continuar?';
   static const cancel = 'Cancelar';
   static const continueAnyway = 'Continuar igual';
+
+  static const newExpenseTitle = 'Nuevo gasto';
+  static const editExpenseTitle = 'Editar gasto';
+  static const amountLabel = 'Monto';
+  static const descriptionLabel = 'Descripción (opcional)';
+  static const dateLabel = 'Fecha';
+  static const destinationLabel = 'Destino';
+  static const save = 'Guardar';
+  static const delete = 'Eliminar';
+  static const deleteExpenseTitle = '¿Eliminar gasto?';
+  static const deleteExpenseBody = 'Esta acción no se puede deshacer.';
+  static const destinationRequiredError = 'Elige un destino';
+  static const openMonthFirst = 'Primero abre el mes en Inicio';
+  static const insufficientBudgetTitle = 'Saldo insuficiente';
+  static const insufficientBudgetExplanation =
+      'Este gasto deja el grupo en negativo.';
+  static const shortfallLabel = 'Te falta';
+  static const requestExtension = 'Solicitar extensión';
+  static const extensionAppliedMessage = 'Extensión aplicada al grupo';
+  static const generalBudgetAlsoInsufficient =
+      'El presupuesto general tampoco alcanza para cubrir la diferencia.';
+  static const unexpectedLabel = 'Imprevisto';
+  static const unexpectedSectionTitle = 'Imprevistos';
+  static const fixedSectionTitle = 'Fijos del mes';
+  static const fixedPaidRowLabel = 'Fijos pagados';
+  static const unexpectedRowLabel = 'Imprevistos';
+  static const availableGeneralRowLabel = 'Disponible general';
+  static const markFixedAmountLabel = 'Monto pagado';
+  static const unmarkFixedTitle = '¿Quitar el pago?';
+  static const unmarkFixedBody = 'El fijo volverá a quedar pendiente este mes.';
+  static const remove = 'Quitar';
+  static const pay = 'Pagar';
+  static const noExpensesYet = 'Aún no hay gastos aquí';
+  static const noDescription = 'Sin descripción';
+  static const expenseSingular = 'gasto';
+  static const expensePlural = 'gastos';
+  static const budgetOfLabel = 'de';
+  static const remainingLabel = 'Quedan';
   static const salaryLabel = 'Sueldo del mes';
   static const salaryRequiredError = 'Ingresa tu sueldo';
   static const invalidAmountError = 'Monto inválido';

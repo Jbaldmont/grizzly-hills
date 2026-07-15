@@ -1,22 +1,34 @@
 import 'package:flutter/material.dart';
+
+import '../../core/db/app_database.dart';
 import '../../core/dimens.dart';
 import '../../core/strings.dart';
+import '../expenses/expense_list_screen.dart';
+import '../expenses/expense_repository.dart';
+import '../expenses/month_overview.dart';
 import '../monthly_budget/month_repository.dart';
 import '../monthly_budget/start_month_screen.dart';
+import 'widgets/fixed_expenses_card.dart';
 import 'widgets/group_card.dart';
 import 'widgets/month_header_card.dart';
+import 'widgets/unexpected_card.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.repository});
+  const HomeScreen({
+    super.key,
+    required this.monthRepository,
+    required this.expenseRepository,
+  });
 
-  final MonthRepository repository;
+  final MonthRepository monthRepository;
+  final ExpenseRepository expenseRepository;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final Stream<ActiveMonth?> _activeMonth = widget.repository
+  late final Stream<ActiveMonth?> _activeMonth = widget.monthRepository
       .watchActiveMonth();
 
   @override
@@ -34,8 +46,11 @@ class _HomeScreenState extends State<HomeScreen> {
         if (activeMonth == null) {
           return _EmptyState(onStartMonth: _openStartMonth);
         }
-        return _MonthSummary(
+        return _MonthContent(
+          key: ValueKey(activeMonth.month.id),
           activeMonth: activeMonth,
+          monthRepository: widget.monthRepository,
+          expenseRepository: widget.expenseRepository,
           onEdit: () => _openEditMonth(activeMonth),
         );
       },
@@ -45,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openStartMonth() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => StartMonthScreen(repository: widget.repository),
+        builder: (_) => StartMonthScreen(repository: widget.monthRepository),
       ),
     );
   }
@@ -54,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => StartMonthScreen(
-          repository: widget.repository,
+          repository: widget.monthRepository,
           monthToEdit: activeMonth,
         ),
       ),
@@ -62,10 +77,65 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _MonthSummary extends StatelessWidget {
-  const _MonthSummary({required this.activeMonth, required this.onEdit});
+class _MonthContent extends StatefulWidget {
+  const _MonthContent({
+    super.key,
+    required this.activeMonth,
+    required this.monthRepository,
+    required this.expenseRepository,
+    required this.onEdit,
+  });
 
   final ActiveMonth activeMonth;
+  final MonthRepository monthRepository;
+  final ExpenseRepository expenseRepository;
+  final VoidCallback onEdit;
+
+  @override
+  State<_MonthContent> createState() => _MonthContentState();
+}
+
+class _MonthContentState extends State<_MonthContent> {
+  late final Stream<List<Expense>> _expenses = widget.expenseRepository
+      .watchExpenses(widget.activeMonth.month.id);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Expense>>(
+      stream: _expenses,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const _ErrorState();
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final overview = MonthOverview(
+          activeMonth: widget.activeMonth,
+          expenses: snapshot.data ?? [],
+        );
+        return _MonthSummary(
+          overview: overview,
+          monthRepository: widget.monthRepository,
+          expenseRepository: widget.expenseRepository,
+          onEdit: widget.onEdit,
+        );
+      },
+    );
+  }
+}
+
+class _MonthSummary extends StatelessWidget {
+  const _MonthSummary({
+    required this.overview,
+    required this.monthRepository,
+    required this.expenseRepository,
+    required this.onEdit,
+  });
+
+  final MonthOverview overview;
+  final MonthRepository monthRepository;
+  final ExpenseRepository expenseRepository;
   final VoidCallback onEdit;
 
   @override
@@ -73,15 +143,43 @@ class _MonthSummary extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(Dimens.spacingMd),
       children: [
-        MonthHeaderCard(activeMonth: activeMonth, onEdit: onEdit),
+        MonthHeaderCard(overview: overview, onEdit: onEdit),
         const SizedBox(height: Dimens.spacingMd),
         Text(
           Strings.groupsSectionTitle,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: Dimens.spacingSm),
-        for (final group in activeMonth.groups) GroupCard(group: group),
+        for (final group in overview.activeMonth.groups)
+          GroupCard(
+            group: group,
+            spentCents: overview.spentInGroupCents(group.id),
+            onTap: () => _openExpenseList(context, group: group),
+          ),
+        const SizedBox(height: Dimens.spacingMd),
+        FixedExpensesCard(
+          overview: overview,
+          expenseRepository: expenseRepository,
+        ),
+        const SizedBox(height: Dimens.spacingSm),
+        UnexpectedCard(
+          overview: overview,
+          onTap: () => _openExpenseList(context),
+        ),
       ],
+    );
+  }
+
+  void _openExpenseList(BuildContext context, {BudgetGroup? group}) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ExpenseListScreen(
+          monthId: overview.activeMonth.month.id,
+          monthRepository: monthRepository,
+          expenseRepository: expenseRepository,
+          group: group,
+        ),
+      ),
     );
   }
 }

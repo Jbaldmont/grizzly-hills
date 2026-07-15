@@ -48,6 +48,23 @@ class MonthRepository {
     return query.get();
   }
 
+  Future<ActiveMonth?> loadActiveMonth(int monthId) async {
+    final month = await (_db.select(
+      _db.months,
+    )..where((row) => row.id.equals(monthId))).getSingleOrNull();
+    if (month == null) {
+      return null;
+    }
+    final groups =
+        await (_db.select(_db.budgetGroups)
+              ..where((budgetGroup) => budgetGroup.monthId.equals(monthId))
+              ..orderBy([
+                (budgetGroup) => OrderingTerm.asc(budgetGroup.position),
+              ]))
+            .get();
+    return ActiveMonth(month: month, groups: groups);
+  }
+
   Future<void> startMonth({
     required DateTime date,
     required int salaryCents,
@@ -91,6 +108,24 @@ class MonthRepository {
               ..where((g) => g.id.equals(entry.key)))
             .write(BudgetGroupsCompanion(budgetCents: Value(entry.value)));
       }
+    });
+  }
+
+  Future<void> transferFromGeneralToGroup({
+    required int groupId,
+    required int amountCents,
+  }) {
+    return _db.transaction(() async {
+      final group = await (_db.select(
+        _db.budgetGroups,
+      )..where((budgetGroup) => budgetGroup.id.equals(groupId))).getSingle();
+      await (_db.update(
+        _db.budgetGroups,
+      )..where((budgetGroup) => budgetGroup.id.equals(groupId))).write(
+            BudgetGroupsCompanion(
+              budgetCents: Value(group.budgetCents + amountCents),
+            ),
+          );
     });
   }
 
