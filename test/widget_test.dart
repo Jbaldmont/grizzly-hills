@@ -1,26 +1,10 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grizzly_hills/app.dart';
 import 'package:grizzly_hills/core/db/app_database.dart';
 import 'package:grizzly_hills/core/strings.dart';
-import 'package:grizzly_hills/core/theme/theme_controller.dart';
-import 'package:grizzly_hills/features/monthly_budget/month_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-Future<GrizzlyApp> _buildApp(AppDatabase db) async {
-  SharedPreferences.setMockInitialValues(<String, Object>{});
-  final themeController = await ThemeController.load();
-  return GrizzlyApp(
-    themeController: themeController,
-    monthRepository: MonthRepository(db),
-  );
-}
-
-Future<void> _disposeApp(WidgetTester tester) async {
-  await tester.pumpWidget(const SizedBox.shrink());
-  await tester.pump(const Duration(milliseconds: 1));
-}
+import 'app_test_utils.dart';
 
 void main() {
   late AppDatabase db;
@@ -34,7 +18,7 @@ void main() {
   });
 
   testWidgets('muestra las cinco pestañas de navegación', (tester) async {
-    await tester.pumpWidget(await _buildApp(db));
+    await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();
 
     expect(find.text(Strings.tabHome), findsWidgets);
@@ -43,41 +27,31 @@ void main() {
     expect(find.text(Strings.tabBusiness), findsOneWidget);
     expect(find.text(Strings.tabMom), findsOneWidget);
 
-    await _disposeApp(tester);
+    await disposeTestApp(tester);
   });
 
   testWidgets('sin mes abierto, Inicio invita a registrar el sueldo', (
     tester,
   ) async {
-    await tester.pumpWidget(await _buildApp(db));
+    await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();
 
     expect(find.text(Strings.homeEmptyTitle), findsOneWidget);
     expect(find.text(Strings.startMonthCta), findsOneWidget);
 
-    await _disposeApp(tester);
+    await disposeTestApp(tester);
   });
 
   testWidgets('flujo completo: abrir el mes crea los grupos de la plantilla', (
     tester,
   ) async {
-    await tester.pumpWidget(await _buildApp(db));
+    await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text(Strings.startMonthCta));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(find.byType(TextFormField).first, '3000');
-    await tester.scrollUntilVisible(
-      find.text(Strings.startMonthConfirm),
-      200,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.tap(find.text(Strings.startMonthConfirm));
-    await tester.pumpAndSettle();
+    await openTestMonth(tester);
 
     expect(find.text('Agua, Luz y Teléfonos'), findsOneWidget);
-    expect(find.text(Strings.generalBudgetRowLabel), findsOneWidget);
+    expect(find.text(Strings.availableGeneralRowLabel), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Gasolina'),
@@ -86,13 +60,13 @@ void main() {
     );
     expect(find.text('Gasolina'), findsOneWidget);
 
-    await _disposeApp(tester);
+    await disposeTestApp(tester);
   });
 
   testWidgets('sueldo menor a lo asignado pide confirmación al abrir el mes', (
     tester,
   ) async {
-    await tester.pumpWidget(await _buildApp(db));
+    await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text(Strings.startMonthCta));
@@ -118,25 +92,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(Strings.homeEmptyTitle), findsNothing);
-    expect(find.text(Strings.generalBudgetRowLabel), findsOneWidget);
+    expect(find.text(Strings.availableGeneralRowLabel), findsOneWidget);
 
-    await _disposeApp(tester);
+    await disposeTestApp(tester);
   });
 
   testWidgets('permite editar el sueldo del mes abierto', (tester) async {
-    await tester.pumpWidget(await _buildApp(db));
+    await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text(Strings.startMonthCta));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextFormField).first, '3000');
-    await tester.scrollUntilVisible(
-      find.text(Strings.startMonthConfirm),
-      200,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.tap(find.text(Strings.startMonthConfirm));
-    await tester.pumpAndSettle();
+    await openTestMonth(tester);
 
     await tester.tap(find.byIcon(Icons.edit_outlined));
     await tester.pumpAndSettle();
@@ -153,11 +118,11 @@ void main() {
 
     expect(find.text('Bs 5.000'), findsOneWidget);
 
-    await _disposeApp(tester);
+    await disposeTestApp(tester);
   });
 
   testWidgets('abre Ajustes y cambia el tema de color', (tester) async {
-    await tester.pumpWidget(await _buildApp(db));
+    await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.settings_outlined));
@@ -167,6 +132,6 @@ void main() {
     await tester.tap(find.text('Money'));
     await tester.pumpAndSettle();
 
-    await _disposeApp(tester);
+    await disposeTestApp(tester);
   });
 }

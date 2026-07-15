@@ -1067,12 +1067,848 @@ class GroupTemplatesCompanion extends UpdateCompanion<GroupTemplate> {
   }
 }
 
+class $FixedExpenseTemplatesTable extends FixedExpenseTemplates
+    with TableInfo<$FixedExpenseTemplatesTable, FixedExpenseTemplate> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FixedExpenseTemplatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastAmountCentsMeta = const VerificationMeta(
+    'lastAmountCents',
+  );
+  @override
+  late final GeneratedColumn<int> lastAmountCents = GeneratedColumn<int>(
+    'last_amount_cents',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, lastAmountCents, position];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'fixed_expense_templates';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FixedExpenseTemplate> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('last_amount_cents')) {
+      context.handle(
+        _lastAmountCentsMeta,
+        lastAmountCents.isAcceptableOrUnknown(
+          data['last_amount_cents']!,
+          _lastAmountCentsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FixedExpenseTemplate map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FixedExpenseTemplate(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      lastAmountCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_amount_cents'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+    );
+  }
+
+  @override
+  $FixedExpenseTemplatesTable createAlias(String alias) {
+    return $FixedExpenseTemplatesTable(attachedDatabase, alias);
+  }
+}
+
+class FixedExpenseTemplate extends DataClass
+    implements Insertable<FixedExpenseTemplate> {
+  final int id;
+  final String name;
+  final int lastAmountCents;
+  final int position;
+  const FixedExpenseTemplate({
+    required this.id,
+    required this.name,
+    required this.lastAmountCents,
+    required this.position,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['last_amount_cents'] = Variable<int>(lastAmountCents);
+    map['position'] = Variable<int>(position);
+    return map;
+  }
+
+  FixedExpenseTemplatesCompanion toCompanion(bool nullToAbsent) {
+    return FixedExpenseTemplatesCompanion(
+      id: Value(id),
+      name: Value(name),
+      lastAmountCents: Value(lastAmountCents),
+      position: Value(position),
+    );
+  }
+
+  factory FixedExpenseTemplate.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FixedExpenseTemplate(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      lastAmountCents: serializer.fromJson<int>(json['lastAmountCents']),
+      position: serializer.fromJson<int>(json['position']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'lastAmountCents': serializer.toJson<int>(lastAmountCents),
+      'position': serializer.toJson<int>(position),
+    };
+  }
+
+  FixedExpenseTemplate copyWith({
+    int? id,
+    String? name,
+    int? lastAmountCents,
+    int? position,
+  }) => FixedExpenseTemplate(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    lastAmountCents: lastAmountCents ?? this.lastAmountCents,
+    position: position ?? this.position,
+  );
+  FixedExpenseTemplate copyWithCompanion(FixedExpenseTemplatesCompanion data) {
+    return FixedExpenseTemplate(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      lastAmountCents: data.lastAmountCents.present
+          ? data.lastAmountCents.value
+          : this.lastAmountCents,
+      position: data.position.present ? data.position.value : this.position,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FixedExpenseTemplate(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('lastAmountCents: $lastAmountCents, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, lastAmountCents, position);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FixedExpenseTemplate &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.lastAmountCents == this.lastAmountCents &&
+          other.position == this.position);
+}
+
+class FixedExpenseTemplatesCompanion
+    extends UpdateCompanion<FixedExpenseTemplate> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int> lastAmountCents;
+  final Value<int> position;
+  const FixedExpenseTemplatesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.lastAmountCents = const Value.absent(),
+    this.position = const Value.absent(),
+  });
+  FixedExpenseTemplatesCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.lastAmountCents = const Value.absent(),
+    required int position,
+  }) : name = Value(name),
+       position = Value(position);
+  static Insertable<FixedExpenseTemplate> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? lastAmountCents,
+    Expression<int>? position,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (lastAmountCents != null) 'last_amount_cents': lastAmountCents,
+      if (position != null) 'position': position,
+    });
+  }
+
+  FixedExpenseTemplatesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<int>? lastAmountCents,
+    Value<int>? position,
+  }) {
+    return FixedExpenseTemplatesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      lastAmountCents: lastAmountCents ?? this.lastAmountCents,
+      position: position ?? this.position,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (lastAmountCents.present) {
+      map['last_amount_cents'] = Variable<int>(lastAmountCents.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FixedExpenseTemplatesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('lastAmountCents: $lastAmountCents, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExpensesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _monthIdMeta = const VerificationMeta(
+    'monthId',
+  );
+  @override
+  late final GeneratedColumn<int> monthId = GeneratedColumn<int>(
+    'month_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES months (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<int> groupId = GeneratedColumn<int>(
+    'group_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES budget_groups (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _fixedTemplateIdMeta = const VerificationMeta(
+    'fixedTemplateId',
+  );
+  @override
+  late final GeneratedColumn<int> fixedTemplateId = GeneratedColumn<int>(
+    'fixed_template_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES fixed_expense_templates (id) ON DELETE SET NULL',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ExpenseKind, String> kind =
+      GeneratedColumn<String>(
+        'kind',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<ExpenseKind>($ExpensesTable.$converterkind);
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountCentsMeta = const VerificationMeta(
+    'amountCents',
+  );
+  @override
+  late final GeneratedColumn<int> amountCents = GeneratedColumn<int>(
+    'amount_cents',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    monthId,
+    groupId,
+    fixedTemplateId,
+    kind,
+    description,
+    amountCents,
+    date,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'expenses';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Expense> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('month_id')) {
+      context.handle(
+        _monthIdMeta,
+        monthId.isAcceptableOrUnknown(data['month_id']!, _monthIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_monthIdMeta);
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
+    }
+    if (data.containsKey('fixed_template_id')) {
+      context.handle(
+        _fixedTemplateIdMeta,
+        fixedTemplateId.isAcceptableOrUnknown(
+          data['fixed_template_id']!,
+          _fixedTemplateIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('amount_cents')) {
+      context.handle(
+        _amountCentsMeta,
+        amountCents.isAcceptableOrUnknown(
+          data['amount_cents']!,
+          _amountCentsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_amountCentsMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Expense map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Expense(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      monthId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}month_id'],
+      )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}group_id'],
+      ),
+      fixedTemplateId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fixed_template_id'],
+      ),
+      kind: $ExpensesTable.$converterkind.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}kind'],
+        )!,
+      ),
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      amountCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_cents'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+    );
+  }
+
+  @override
+  $ExpensesTable createAlias(String alias) {
+    return $ExpensesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<ExpenseKind, String, String> $converterkind =
+      const EnumNameConverter<ExpenseKind>(ExpenseKind.values);
+}
+
+class Expense extends DataClass implements Insertable<Expense> {
+  final int id;
+  final int monthId;
+  final int? groupId;
+  final int? fixedTemplateId;
+  final ExpenseKind kind;
+  final String description;
+  final int amountCents;
+  final DateTime date;
+  const Expense({
+    required this.id,
+    required this.monthId,
+    this.groupId,
+    this.fixedTemplateId,
+    required this.kind,
+    required this.description,
+    required this.amountCents,
+    required this.date,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['month_id'] = Variable<int>(monthId);
+    if (!nullToAbsent || groupId != null) {
+      map['group_id'] = Variable<int>(groupId);
+    }
+    if (!nullToAbsent || fixedTemplateId != null) {
+      map['fixed_template_id'] = Variable<int>(fixedTemplateId);
+    }
+    {
+      map['kind'] = Variable<String>($ExpensesTable.$converterkind.toSql(kind));
+    }
+    map['description'] = Variable<String>(description);
+    map['amount_cents'] = Variable<int>(amountCents);
+    map['date'] = Variable<DateTime>(date);
+    return map;
+  }
+
+  ExpensesCompanion toCompanion(bool nullToAbsent) {
+    return ExpensesCompanion(
+      id: Value(id),
+      monthId: Value(monthId),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
+      fixedTemplateId: fixedTemplateId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fixedTemplateId),
+      kind: Value(kind),
+      description: Value(description),
+      amountCents: Value(amountCents),
+      date: Value(date),
+    );
+  }
+
+  factory Expense.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Expense(
+      id: serializer.fromJson<int>(json['id']),
+      monthId: serializer.fromJson<int>(json['monthId']),
+      groupId: serializer.fromJson<int?>(json['groupId']),
+      fixedTemplateId: serializer.fromJson<int?>(json['fixedTemplateId']),
+      kind: $ExpensesTable.$converterkind.fromJson(
+        serializer.fromJson<String>(json['kind']),
+      ),
+      description: serializer.fromJson<String>(json['description']),
+      amountCents: serializer.fromJson<int>(json['amountCents']),
+      date: serializer.fromJson<DateTime>(json['date']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'monthId': serializer.toJson<int>(monthId),
+      'groupId': serializer.toJson<int?>(groupId),
+      'fixedTemplateId': serializer.toJson<int?>(fixedTemplateId),
+      'kind': serializer.toJson<String>(
+        $ExpensesTable.$converterkind.toJson(kind),
+      ),
+      'description': serializer.toJson<String>(description),
+      'amountCents': serializer.toJson<int>(amountCents),
+      'date': serializer.toJson<DateTime>(date),
+    };
+  }
+
+  Expense copyWith({
+    int? id,
+    int? monthId,
+    Value<int?> groupId = const Value.absent(),
+    Value<int?> fixedTemplateId = const Value.absent(),
+    ExpenseKind? kind,
+    String? description,
+    int? amountCents,
+    DateTime? date,
+  }) => Expense(
+    id: id ?? this.id,
+    monthId: monthId ?? this.monthId,
+    groupId: groupId.present ? groupId.value : this.groupId,
+    fixedTemplateId: fixedTemplateId.present
+        ? fixedTemplateId.value
+        : this.fixedTemplateId,
+    kind: kind ?? this.kind,
+    description: description ?? this.description,
+    amountCents: amountCents ?? this.amountCents,
+    date: date ?? this.date,
+  );
+  Expense copyWithCompanion(ExpensesCompanion data) {
+    return Expense(
+      id: data.id.present ? data.id.value : this.id,
+      monthId: data.monthId.present ? data.monthId.value : this.monthId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      fixedTemplateId: data.fixedTemplateId.present
+          ? data.fixedTemplateId.value
+          : this.fixedTemplateId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      amountCents: data.amountCents.present
+          ? data.amountCents.value
+          : this.amountCents,
+      date: data.date.present ? data.date.value : this.date,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Expense(')
+          ..write('id: $id, ')
+          ..write('monthId: $monthId, ')
+          ..write('groupId: $groupId, ')
+          ..write('fixedTemplateId: $fixedTemplateId, ')
+          ..write('kind: $kind, ')
+          ..write('description: $description, ')
+          ..write('amountCents: $amountCents, ')
+          ..write('date: $date')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    monthId,
+    groupId,
+    fixedTemplateId,
+    kind,
+    description,
+    amountCents,
+    date,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Expense &&
+          other.id == this.id &&
+          other.monthId == this.monthId &&
+          other.groupId == this.groupId &&
+          other.fixedTemplateId == this.fixedTemplateId &&
+          other.kind == this.kind &&
+          other.description == this.description &&
+          other.amountCents == this.amountCents &&
+          other.date == this.date);
+}
+
+class ExpensesCompanion extends UpdateCompanion<Expense> {
+  final Value<int> id;
+  final Value<int> monthId;
+  final Value<int?> groupId;
+  final Value<int?> fixedTemplateId;
+  final Value<ExpenseKind> kind;
+  final Value<String> description;
+  final Value<int> amountCents;
+  final Value<DateTime> date;
+  const ExpensesCompanion({
+    this.id = const Value.absent(),
+    this.monthId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.fixedTemplateId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.description = const Value.absent(),
+    this.amountCents = const Value.absent(),
+    this.date = const Value.absent(),
+  });
+  ExpensesCompanion.insert({
+    this.id = const Value.absent(),
+    required int monthId,
+    this.groupId = const Value.absent(),
+    this.fixedTemplateId = const Value.absent(),
+    required ExpenseKind kind,
+    required String description,
+    required int amountCents,
+    required DateTime date,
+  }) : monthId = Value(monthId),
+       kind = Value(kind),
+       description = Value(description),
+       amountCents = Value(amountCents),
+       date = Value(date);
+  static Insertable<Expense> custom({
+    Expression<int>? id,
+    Expression<int>? monthId,
+    Expression<int>? groupId,
+    Expression<int>? fixedTemplateId,
+    Expression<String>? kind,
+    Expression<String>? description,
+    Expression<int>? amountCents,
+    Expression<DateTime>? date,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (monthId != null) 'month_id': monthId,
+      if (groupId != null) 'group_id': groupId,
+      if (fixedTemplateId != null) 'fixed_template_id': fixedTemplateId,
+      if (kind != null) 'kind': kind,
+      if (description != null) 'description': description,
+      if (amountCents != null) 'amount_cents': amountCents,
+      if (date != null) 'date': date,
+    });
+  }
+
+  ExpensesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? monthId,
+    Value<int?>? groupId,
+    Value<int?>? fixedTemplateId,
+    Value<ExpenseKind>? kind,
+    Value<String>? description,
+    Value<int>? amountCents,
+    Value<DateTime>? date,
+  }) {
+    return ExpensesCompanion(
+      id: id ?? this.id,
+      monthId: monthId ?? this.monthId,
+      groupId: groupId ?? this.groupId,
+      fixedTemplateId: fixedTemplateId ?? this.fixedTemplateId,
+      kind: kind ?? this.kind,
+      description: description ?? this.description,
+      amountCents: amountCents ?? this.amountCents,
+      date: date ?? this.date,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (monthId.present) {
+      map['month_id'] = Variable<int>(monthId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<int>(groupId.value);
+    }
+    if (fixedTemplateId.present) {
+      map['fixed_template_id'] = Variable<int>(fixedTemplateId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(
+        $ExpensesTable.$converterkind.toSql(kind.value),
+      );
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (amountCents.present) {
+      map['amount_cents'] = Variable<int>(amountCents.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpensesCompanion(')
+          ..write('id: $id, ')
+          ..write('monthId: $monthId, ')
+          ..write('groupId: $groupId, ')
+          ..write('fixedTemplateId: $fixedTemplateId, ')
+          ..write('kind: $kind, ')
+          ..write('description: $description, ')
+          ..write('amountCents: $amountCents, ')
+          ..write('date: $date')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $MonthsTable months = $MonthsTable(this);
   late final $BudgetGroupsTable budgetGroups = $BudgetGroupsTable(this);
   late final $GroupTemplatesTable groupTemplates = $GroupTemplatesTable(this);
+  late final $FixedExpenseTemplatesTable fixedExpenseTemplates =
+      $FixedExpenseTemplatesTable(this);
+  late final $ExpensesTable expenses = $ExpensesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1081,6 +1917,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     months,
     budgetGroups,
     groupTemplates,
+    fixedExpenseTemplates,
+    expenses,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -1090,6 +1928,27 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('budget_groups', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'months',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('expenses', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'budget_groups',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('expenses', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'fixed_expense_templates',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('expenses', kind: UpdateKind.update)],
     ),
   ]);
 }
@@ -1130,6 +1989,25 @@ final class $$MonthsTableReferences
     ).filter((f) => f.monthId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_budgetGroupsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ExpensesTable, List<Expense>> _expensesRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.expenses,
+    aliasName: 'months__id__expenses__month_id',
+  );
+
+  $$ExpensesTableProcessedTableManager get expensesRefs {
+    final manager = $$ExpensesTableTableManager(
+      $_db,
+      $_db.expenses,
+    ).filter((f) => f.monthId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_expensesRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -1191,6 +2069,31 @@ class $$MonthsTableFilterComposer
           }) => $$BudgetGroupsTableFilterComposer(
             $db: $db,
             $table: $db.budgetGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> expensesRefs(
+    Expression<bool> Function($$ExpensesTableFilterComposer f) f,
+  ) {
+    final $$ExpensesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.monthId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableFilterComposer(
+            $db: $db,
+            $table: $db.expenses,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -1294,6 +2197,31 @@ class $$MonthsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> expensesRefs<T extends Object>(
+    Expression<T> Function($$ExpensesTableAnnotationComposer a) f,
+  ) {
+    final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.monthId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$MonthsTableTableManager
@@ -1309,7 +2237,7 @@ class $$MonthsTableTableManager
           $$MonthsTableUpdateCompanionBuilder,
           (Month, $$MonthsTableReferences),
           Month,
-          PrefetchHooks Function({bool budgetGroupsRefs})
+          PrefetchHooks Function({bool budgetGroupsRefs, bool expensesRefs})
         > {
   $$MonthsTableTableManager(_$AppDatabase db, $MonthsTable table)
     : super(
@@ -1360,31 +2288,59 @@ class $$MonthsTableTableManager
                     (e.readTable(table), $$MonthsTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback: ({budgetGroupsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (budgetGroupsRefs) db.budgetGroups],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (budgetGroupsRefs)
-                    await $_getPrefetchedData<Month, $MonthsTable, BudgetGroup>(
-                      currentTable: table,
-                      referencedTable: $$MonthsTableReferences
-                          ._budgetGroupsRefsTable(db),
-                      managerFromTypedResult: (p0) => $$MonthsTableReferences(
-                        db,
-                        table,
-                        p0,
-                      ).budgetGroupsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.monthId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({budgetGroupsRefs = false, expensesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (budgetGroupsRefs) db.budgetGroups,
+                    if (expensesRefs) db.expenses,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (budgetGroupsRefs)
+                        await $_getPrefetchedData<
+                          Month,
+                          $MonthsTable,
+                          BudgetGroup
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MonthsTableReferences
+                              ._budgetGroupsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MonthsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).budgetGroupsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.monthId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (expensesRefs)
+                        await $_getPrefetchedData<Month, $MonthsTable, Expense>(
+                          currentTable: table,
+                          referencedTable: $$MonthsTableReferences
+                              ._expensesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MonthsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).expensesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.monthId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -1401,7 +2357,7 @@ typedef $$MonthsTableProcessedTableManager =
       $$MonthsTableUpdateCompanionBuilder,
       (Month, $$MonthsTableReferences),
       Month,
-      PrefetchHooks Function({bool budgetGroupsRefs})
+      PrefetchHooks Function({bool budgetGroupsRefs, bool expensesRefs})
     >;
 typedef $$BudgetGroupsTableCreateCompanionBuilder =
     BudgetGroupsCompanion Function({
@@ -1438,6 +2394,25 @@ final class $$BudgetGroupsTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$ExpensesTable, List<Expense>> _expensesRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.expenses,
+    aliasName: 'budget_groups__id__expenses__group_id',
+  );
+
+  $$ExpensesTableProcessedTableManager get expensesRefs {
+    final manager = $$ExpensesTableTableManager(
+      $_db,
+      $_db.expenses,
+    ).filter((f) => f.groupId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_expensesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -1492,6 +2467,31 @@ class $$BudgetGroupsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> expensesRefs(
+    Expression<bool> Function($$ExpensesTableFilterComposer f) f,
+  ) {
+    final $$ExpensesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.groupId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableFilterComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -1593,6 +2593,31 @@ class $$BudgetGroupsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> expensesRefs<T extends Object>(
+    Expression<T> Function($$ExpensesTableAnnotationComposer a) f,
+  ) {
+    final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.groupId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$BudgetGroupsTableTableManager
@@ -1608,7 +2633,7 @@ class $$BudgetGroupsTableTableManager
           $$BudgetGroupsTableUpdateCompanionBuilder,
           (BudgetGroup, $$BudgetGroupsTableReferences),
           BudgetGroup,
-          PrefetchHooks Function({bool monthId})
+          PrefetchHooks Function({bool monthId, bool expensesRefs})
         > {
   $$BudgetGroupsTableTableManager(_$AppDatabase db, $BudgetGroupsTable table)
     : super(
@@ -1657,10 +2682,10 @@ class $$BudgetGroupsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({monthId = false}) {
+          prefetchHooksCallback: ({monthId = false, expensesRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [],
+              explicitlyWatchedTables: [if (expensesRefs) db.expenses],
               addJoins:
                   <
                     T extends TableManagerState<
@@ -1694,7 +2719,27 @@ class $$BudgetGroupsTableTableManager
                     return state;
                   },
               getPrefetchedDataCallback: (items) async {
-                return [];
+                return [
+                  if (expensesRefs)
+                    await $_getPrefetchedData<
+                      BudgetGroup,
+                      $BudgetGroupsTable,
+                      Expense
+                    >(
+                      currentTable: table,
+                      referencedTable: $$BudgetGroupsTableReferences
+                          ._expensesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$BudgetGroupsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).expensesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.groupId == item.id),
+                      typedResults: items,
+                    ),
+                ];
               },
             );
           },
@@ -1714,7 +2759,7 @@ typedef $$BudgetGroupsTableProcessedTableManager =
       $$BudgetGroupsTableUpdateCompanionBuilder,
       (BudgetGroup, $$BudgetGroupsTableReferences),
       BudgetGroup,
-      PrefetchHooks Function({bool monthId})
+      PrefetchHooks Function({bool monthId, bool expensesRefs})
     >;
 typedef $$GroupTemplatesTableCreateCompanionBuilder =
     GroupTemplatesCompanion Function({
@@ -1895,6 +2940,862 @@ typedef $$GroupTemplatesTableProcessedTableManager =
       GroupTemplate,
       PrefetchHooks Function()
     >;
+typedef $$FixedExpenseTemplatesTableCreateCompanionBuilder =
+    FixedExpenseTemplatesCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<int> lastAmountCents,
+      required int position,
+    });
+typedef $$FixedExpenseTemplatesTableUpdateCompanionBuilder =
+    FixedExpenseTemplatesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<int> lastAmountCents,
+      Value<int> position,
+    });
+
+final class $$FixedExpenseTemplatesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $FixedExpenseTemplatesTable,
+          FixedExpenseTemplate
+        > {
+  $$FixedExpenseTemplatesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$ExpensesTable, List<Expense>> _expensesRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.expenses,
+    aliasName: 'fixed_expense_templates__id__expenses__fixed_template_id',
+  );
+
+  $$ExpensesTableProcessedTableManager get expensesRefs {
+    final manager = $$ExpensesTableTableManager(
+      $_db,
+      $_db.expenses,
+    ).filter((f) => f.fixedTemplateId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_expensesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$FixedExpenseTemplatesTableFilterComposer
+    extends Composer<_$AppDatabase, $FixedExpenseTemplatesTable> {
+  $$FixedExpenseTemplatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastAmountCents => $composableBuilder(
+    column: $table.lastAmountCents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> expensesRefs(
+    Expression<bool> Function($$ExpensesTableFilterComposer f) f,
+  ) {
+    final $$ExpensesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.fixedTemplateId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableFilterComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$FixedExpenseTemplatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $FixedExpenseTemplatesTable> {
+  $$FixedExpenseTemplatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastAmountCents => $composableBuilder(
+    column: $table.lastAmountCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FixedExpenseTemplatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FixedExpenseTemplatesTable> {
+  $$FixedExpenseTemplatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get lastAmountCents => $composableBuilder(
+    column: $table.lastAmountCents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  Expression<T> expensesRefs<T extends Object>(
+    Expression<T> Function($$ExpensesTableAnnotationComposer a) f,
+  ) {
+    final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.fixedTemplateId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$FixedExpenseTemplatesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FixedExpenseTemplatesTable,
+          FixedExpenseTemplate,
+          $$FixedExpenseTemplatesTableFilterComposer,
+          $$FixedExpenseTemplatesTableOrderingComposer,
+          $$FixedExpenseTemplatesTableAnnotationComposer,
+          $$FixedExpenseTemplatesTableCreateCompanionBuilder,
+          $$FixedExpenseTemplatesTableUpdateCompanionBuilder,
+          (FixedExpenseTemplate, $$FixedExpenseTemplatesTableReferences),
+          FixedExpenseTemplate,
+          PrefetchHooks Function({bool expensesRefs})
+        > {
+  $$FixedExpenseTemplatesTableTableManager(
+    _$AppDatabase db,
+    $FixedExpenseTemplatesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FixedExpenseTemplatesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$FixedExpenseTemplatesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$FixedExpenseTemplatesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> lastAmountCents = const Value.absent(),
+                Value<int> position = const Value.absent(),
+              }) => FixedExpenseTemplatesCompanion(
+                id: id,
+                name: name,
+                lastAmountCents: lastAmountCents,
+                position: position,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<int> lastAmountCents = const Value.absent(),
+                required int position,
+              }) => FixedExpenseTemplatesCompanion.insert(
+                id: id,
+                name: name,
+                lastAmountCents: lastAmountCents,
+                position: position,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$FixedExpenseTemplatesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({expensesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (expensesRefs) db.expenses],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (expensesRefs)
+                    await $_getPrefetchedData<
+                      FixedExpenseTemplate,
+                      $FixedExpenseTemplatesTable,
+                      Expense
+                    >(
+                      currentTable: table,
+                      referencedTable: $$FixedExpenseTemplatesTableReferences
+                          ._expensesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$FixedExpenseTemplatesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).expensesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.fixedTemplateId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$FixedExpenseTemplatesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FixedExpenseTemplatesTable,
+      FixedExpenseTemplate,
+      $$FixedExpenseTemplatesTableFilterComposer,
+      $$FixedExpenseTemplatesTableOrderingComposer,
+      $$FixedExpenseTemplatesTableAnnotationComposer,
+      $$FixedExpenseTemplatesTableCreateCompanionBuilder,
+      $$FixedExpenseTemplatesTableUpdateCompanionBuilder,
+      (FixedExpenseTemplate, $$FixedExpenseTemplatesTableReferences),
+      FixedExpenseTemplate,
+      PrefetchHooks Function({bool expensesRefs})
+    >;
+typedef $$ExpensesTableCreateCompanionBuilder =
+    ExpensesCompanion Function({
+      Value<int> id,
+      required int monthId,
+      Value<int?> groupId,
+      Value<int?> fixedTemplateId,
+      required ExpenseKind kind,
+      required String description,
+      required int amountCents,
+      required DateTime date,
+    });
+typedef $$ExpensesTableUpdateCompanionBuilder =
+    ExpensesCompanion Function({
+      Value<int> id,
+      Value<int> monthId,
+      Value<int?> groupId,
+      Value<int?> fixedTemplateId,
+      Value<ExpenseKind> kind,
+      Value<String> description,
+      Value<int> amountCents,
+      Value<DateTime> date,
+    });
+
+final class $$ExpensesTableReferences
+    extends BaseReferences<_$AppDatabase, $ExpensesTable, Expense> {
+  $$ExpensesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $MonthsTable _monthIdTable(_$AppDatabase db) =>
+      db.months.createAlias('expenses__month_id__months__id');
+
+  $$MonthsTableProcessedTableManager get monthId {
+    final $_column = $_itemColumn<int>('month_id')!;
+
+    final manager = $$MonthsTableTableManager(
+      $_db,
+      $_db.months,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_monthIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $BudgetGroupsTable _groupIdTable(_$AppDatabase db) =>
+      db.budgetGroups.createAlias('expenses__group_id__budget_groups__id');
+
+  $$BudgetGroupsTableProcessedTableManager? get groupId {
+    final $_column = $_itemColumn<int>('group_id');
+    if ($_column == null) return null;
+    final manager = $$BudgetGroupsTableTableManager(
+      $_db,
+      $_db.budgetGroups,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_groupIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $FixedExpenseTemplatesTable _fixedTemplateIdTable(_$AppDatabase db) =>
+      db.fixedExpenseTemplates.createAlias(
+        'expenses__fixed_template_id__fixed_expense_templates__id',
+      );
+
+  $$FixedExpenseTemplatesTableProcessedTableManager? get fixedTemplateId {
+    final $_column = $_itemColumn<int>('fixed_template_id');
+    if ($_column == null) return null;
+    final manager = $$FixedExpenseTemplatesTableTableManager(
+      $_db,
+      $_db.fixedExpenseTemplates,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_fixedTemplateIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ExpensesTableFilterComposer
+    extends Composer<_$AppDatabase, $ExpensesTable> {
+  $$ExpensesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ExpenseKind, ExpenseKind, String> get kind =>
+      $composableBuilder(
+        column: $table.kind,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amountCents => $composableBuilder(
+    column: $table.amountCents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$MonthsTableFilterComposer get monthId {
+    final $$MonthsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.monthId,
+      referencedTable: $db.months,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MonthsTableFilterComposer(
+            $db: $db,
+            $table: $db.months,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$BudgetGroupsTableFilterComposer get groupId {
+    final $$BudgetGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupId,
+      referencedTable: $db.budgetGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.budgetGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$FixedExpenseTemplatesTableFilterComposer get fixedTemplateId {
+    final $$FixedExpenseTemplatesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.fixedTemplateId,
+          referencedTable: $db.fixedExpenseTemplates,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$FixedExpenseTemplatesTableFilterComposer(
+                $db: $db,
+                $table: $db.fixedExpenseTemplates,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ExpensesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExpensesTable> {
+  $$ExpensesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amountCents => $composableBuilder(
+    column: $table.amountCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$MonthsTableOrderingComposer get monthId {
+    final $$MonthsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.monthId,
+      referencedTable: $db.months,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MonthsTableOrderingComposer(
+            $db: $db,
+            $table: $db.months,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$BudgetGroupsTableOrderingComposer get groupId {
+    final $$BudgetGroupsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupId,
+      referencedTable: $db.budgetGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetGroupsTableOrderingComposer(
+            $db: $db,
+            $table: $db.budgetGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$FixedExpenseTemplatesTableOrderingComposer get fixedTemplateId {
+    final $$FixedExpenseTemplatesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.fixedTemplateId,
+          referencedTable: $db.fixedExpenseTemplates,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$FixedExpenseTemplatesTableOrderingComposer(
+                $db: $db,
+                $table: $db.fixedExpenseTemplates,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ExpensesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExpensesTable> {
+  $$ExpensesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ExpenseKind, String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get amountCents => $composableBuilder(
+    column: $table.amountCents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  $$MonthsTableAnnotationComposer get monthId {
+    final $$MonthsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.monthId,
+      referencedTable: $db.months,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MonthsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.months,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$BudgetGroupsTableAnnotationComposer get groupId {
+    final $$BudgetGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupId,
+      referencedTable: $db.budgetGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.budgetGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$FixedExpenseTemplatesTableAnnotationComposer get fixedTemplateId {
+    final $$FixedExpenseTemplatesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.fixedTemplateId,
+          referencedTable: $db.fixedExpenseTemplates,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$FixedExpenseTemplatesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.fixedExpenseTemplates,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ExpensesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExpensesTable,
+          Expense,
+          $$ExpensesTableFilterComposer,
+          $$ExpensesTableOrderingComposer,
+          $$ExpensesTableAnnotationComposer,
+          $$ExpensesTableCreateCompanionBuilder,
+          $$ExpensesTableUpdateCompanionBuilder,
+          (Expense, $$ExpensesTableReferences),
+          Expense,
+          PrefetchHooks Function({
+            bool monthId,
+            bool groupId,
+            bool fixedTemplateId,
+          })
+        > {
+  $$ExpensesTableTableManager(_$AppDatabase db, $ExpensesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExpensesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExpensesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExpensesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> monthId = const Value.absent(),
+                Value<int?> groupId = const Value.absent(),
+                Value<int?> fixedTemplateId = const Value.absent(),
+                Value<ExpenseKind> kind = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<int> amountCents = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+              }) => ExpensesCompanion(
+                id: id,
+                monthId: monthId,
+                groupId: groupId,
+                fixedTemplateId: fixedTemplateId,
+                kind: kind,
+                description: description,
+                amountCents: amountCents,
+                date: date,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int monthId,
+                Value<int?> groupId = const Value.absent(),
+                Value<int?> fixedTemplateId = const Value.absent(),
+                required ExpenseKind kind,
+                required String description,
+                required int amountCents,
+                required DateTime date,
+              }) => ExpensesCompanion.insert(
+                id: id,
+                monthId: monthId,
+                groupId: groupId,
+                fixedTemplateId: fixedTemplateId,
+                kind: kind,
+                description: description,
+                amountCents: amountCents,
+                date: date,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ExpensesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({monthId = false, groupId = false, fixedTemplateId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (monthId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.monthId,
+                                    referencedTable: $$ExpensesTableReferences
+                                        ._monthIdTable(db),
+                                    referencedColumn: $$ExpensesTableReferences
+                                        ._monthIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (groupId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.groupId,
+                                    referencedTable: $$ExpensesTableReferences
+                                        ._groupIdTable(db),
+                                    referencedColumn: $$ExpensesTableReferences
+                                        ._groupIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (fixedTemplateId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.fixedTemplateId,
+                                    referencedTable: $$ExpensesTableReferences
+                                        ._fixedTemplateIdTable(db),
+                                    referencedColumn: $$ExpensesTableReferences
+                                        ._fixedTemplateIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$ExpensesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExpensesTable,
+      Expense,
+      $$ExpensesTableFilterComposer,
+      $$ExpensesTableOrderingComposer,
+      $$ExpensesTableAnnotationComposer,
+      $$ExpensesTableCreateCompanionBuilder,
+      $$ExpensesTableUpdateCompanionBuilder,
+      (Expense, $$ExpensesTableReferences),
+      Expense,
+      PrefetchHooks Function({bool monthId, bool groupId, bool fixedTemplateId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1905,4 +3806,8 @@ class $AppDatabaseManager {
       $$BudgetGroupsTableTableManager(_db, _db.budgetGroups);
   $$GroupTemplatesTableTableManager get groupTemplates =>
       $$GroupTemplatesTableTableManager(_db, _db.groupTemplates);
+  $$FixedExpenseTemplatesTableTableManager get fixedExpenseTemplates =>
+      $$FixedExpenseTemplatesTableTableManager(_db, _db.fixedExpenseTemplates);
+  $$ExpensesTableTableManager get expenses =>
+      $$ExpensesTableTableManager(_db, _db.expenses);
 }

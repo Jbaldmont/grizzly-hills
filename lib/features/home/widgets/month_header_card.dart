@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/dimens.dart';
 import '../../../core/money.dart';
 import '../../../core/strings.dart';
-import '../../monthly_budget/month_repository.dart';
+import '../../expenses/month_overview.dart';
 
 class MonthHeaderCard extends StatelessWidget {
   const MonthHeaderCard({
     super.key,
-    required this.activeMonth,
+    required this.overview,
     required this.onEdit,
   });
 
-  final ActiveMonth activeMonth;
+  final MonthOverview overview;
   final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final month = activeMonth.month;
+    final month = overview.activeMonth.month;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(Dimens.spacingMd),
@@ -45,12 +46,24 @@ class MonthHeaderCard extends StatelessWidget {
             ),
             _AmountRow(
               label: Strings.assignedRowLabel,
-              amountCents: activeMonth.assignedCents,
+              amountCents: overview.activeMonth.assignedCents,
+            ),
+            _AmountRow(
+              label: Strings.generalBudgetRowLabel,
+              amountCents: overview.activeMonth.generalBudgetCents,
+            ),
+            _AmountRow(
+              label: Strings.fixedPaidRowLabel,
+              amountCents: -overview.fixedCents,
+            ),
+            _AmountRow(
+              label: Strings.unexpectedRowLabel,
+              amountCents: -overview.unexpectedCents,
             ),
             const Divider(),
             _AmountRow(
-              label: Strings.generalBudgetRowLabel,
-              amountCents: activeMonth.generalBudgetCents,
+              label: Strings.availableGeneralRowLabel,
+              amountCents: overview.availableGeneralCents,
               emphasized: true,
             ),
           ],
