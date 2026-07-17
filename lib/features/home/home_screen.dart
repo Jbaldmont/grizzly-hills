@@ -155,6 +155,7 @@ class _MonthSummary extends StatelessWidget {
           GroupCard(
             group: group,
             spentCents: overview.spentInGroupCents(group.id),
+            extensionCents: overview.extensionCentsForGroup(group.id),
             onTap: () => _openExpenseList(context, group: group),
           ),
         const SizedBox(height: Dimens.spacingMd),

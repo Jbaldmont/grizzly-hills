@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 part 'app_database.g.dart';
 
-enum ExpenseKind { group, fixed, unexpected }
+enum ExpenseKind { group, fixed, unexpected, budgetExtension }
 
 class Months extends Table {
   IntColumn get id => integer().autoIncrement()();

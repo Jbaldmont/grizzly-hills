@@ -111,24 +111,6 @@ class MonthRepository {
     });
   }
 
-  Future<void> transferFromGeneralToGroup({
-    required int groupId,
-    required int amountCents,
-  }) {
-    return _db.transaction(() async {
-      final group = await (_db.select(
-        _db.budgetGroups,
-      )..where((budgetGroup) => budgetGroup.id.equals(groupId))).getSingle();
-      await (_db.update(
-        _db.budgetGroups,
-      )..where((budgetGroup) => budgetGroup.id.equals(groupId))).write(
-            BudgetGroupsCompanion(
-              budgetCents: Value(group.budgetCents + amountCents),
-            ),
-          );
-    });
-  }
-
   Future<void> transferBetweenGroups({
     required int sourceGroupId,
     required int targetGroupId,

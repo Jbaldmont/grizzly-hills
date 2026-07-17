@@ -9,6 +9,7 @@ import '../home/widgets/group_card.dart';
 import '../monthly_budget/month_repository.dart';
 import 'expense_form_sheet.dart';
 import 'expense_repository.dart';
+import 'month_overview.dart';
 
 class ExpenseListScreen extends StatefulWidget {
   const ExpenseListScreen({
@@ -53,22 +54,29 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          final expenses = _filter(snapshot.data ?? []);
-          return _buildList(expenses);
+          return _buildList(snapshot.data ?? []);
         },
       ),
     );
   }
 
-  Widget _buildList(List<Expense> expenses) {
+  Widget _buildList(List<Expense> allExpenses) {
     final group = widget.group;
+    final expenses = _filter(allExpenses);
     final totalCents =
         expenses.fold(0, (sum, expense) => sum + expense.amountCents);
     return ListView(
       padding: const EdgeInsets.all(Dimens.spacingMd),
       children: [
         if (group != null)
-          GroupCard(group: group, spentCents: totalCents)
+          GroupCard(
+            group: group,
+            spentCents: totalCents,
+            extensionCents: MonthOverview.extensionCentsIn(
+              allExpenses,
+              group.id,
+            ),
+          )
         else
           _UnexpectedTotalCard(totalCents: totalCents),
         const SizedBox(height: Dimens.spacingSm),
@@ -76,12 +84,15 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           const _EmptyList()
         else
           for (final expense in expenses)
-            _ExpenseTile(
-              expense: expense,
-              onTap: () => _openForm(expenseToEdit: expense),
-              onConfirmDelete: () =>
-                  widget.expenseRepository.deleteExpense(expense.id),
-            ),
+            if (expense.kind == ExpenseKind.budgetExtension)
+              _ExpenseTile(expense: expense)
+            else
+              _ExpenseTile(
+                expense: expense,
+                onTap: () => _openForm(expenseToEdit: expense),
+                onConfirmDelete: () =>
+                    widget.expenseRepository.deleteExpense(expense.id),
+              ),
       ],
     );
   }
@@ -91,8 +102,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     return [
       for (final expense in expenses)
         if (group != null
-            ? expense.groupId == group.id
-            : expense.kind == ExpenseKind.unexpected)
+            ? expense.kind == ExpenseKind.group && expense.groupId == group.id
+            : expense.kind == ExpenseKind.unexpected ||
+                expense.kind == ExpenseKind.budgetExtension)
           expense,
     ];
   }
@@ -115,17 +127,38 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
 class _ExpenseTile extends StatelessWidget {
   const _ExpenseTile({
     required this.expense,
-    required this.onTap,
-    required this.onConfirmDelete,
+    this.onTap,
+    this.onConfirmDelete,
   });
 
   final Expense expense;
-  final VoidCallback onTap;
-  final Future<void> Function() onConfirmDelete;
+  final VoidCallback? onTap;
+  final Future<void> Function()? onConfirmDelete;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final onConfirmDelete = this.onConfirmDelete;
+    final tile = ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: onTap == null && onConfirmDelete == null
+          ? const Icon(Icons.lock_outline)
+          : null,
+      title: Text(
+        expense.description.isEmpty
+            ? Strings.noDescription
+            : expense.description,
+      ),
+      subtitle: Text(formatShortDate(expense.date)),
+      trailing: Text(
+        formatBs(expense.amountCents),
+        style: theme.textTheme.titleMedium,
+      ),
+      onTap: onTap,
+    );
+    if (onConfirmDelete == null) {
+      return tile;
+    }
     return Dismissible(
       key: ValueKey(expense.id),
       direction: DismissDirection.endToStart,
@@ -138,20 +171,7 @@ class _ExpenseTile extends StatelessWidget {
       ),
       confirmDismiss: (_) => _confirmDelete(context),
       onDismissed: (_) => onConfirmDelete(),
-      child: ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(
-          expense.description.isEmpty
-              ? Strings.noDescription
-              : expense.description,
-        ),
-        subtitle: Text(formatShortDate(expense.date)),
-        trailing: Text(
-          formatBs(expense.amountCents),
-          style: theme.textTheme.titleMedium,
-        ),
-        onTap: onTap,
-      ),
+      child: tile,
     );
   }
 

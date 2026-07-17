@@ -52,7 +52,11 @@ abstract final class Strings {
       'Este gasto deja el grupo en negativo.';
   static const shortfallLabel = 'Te falta';
   static const requestExtension = 'Solicitar extensión';
-  static const extensionAppliedMessage = 'Extensión aplicada al grupo';
+  static const extensionAppliedMessage = 'Extensión registrada en imprevistos';
+  static String extensionDescription(String groupName) =>
+      'Extensión: $groupName';
+  static String budgetWithExtension(String baseAmount, String extensionAmount) =>
+      '$baseAmount + $extensionAmount ext.';
   static const generalBudgetAlsoInsufficient =
       'El presupuesto general tampoco alcanza para cubrir la diferencia.';
   static const unexpectedLabel = 'Imprevisto';

@@ -8,14 +8,34 @@ class MonthOverview {
   final List<Expense> expenses;
 
   int spentInGroupCents(int groupId) => _sum(
-        expenses.where((expense) => expense.groupId == groupId),
+        expenses.where(
+          (expense) =>
+              expense.kind == ExpenseKind.group && expense.groupId == groupId,
+        ),
       );
 
-  List<Expense> get fixedExpenses =>
-      [for (final e in expenses) if (e.kind == ExpenseKind.fixed) e];
+  static int extensionCentsIn(List<Expense> expenses, int groupId) =>
+      expenses.fold(0, (sum, expense) {
+        final isGroupExtension =
+            expense.kind == ExpenseKind.budgetExtension &&
+            expense.groupId == groupId;
+        return isGroupExtension ? sum + expense.amountCents : sum;
+      });
 
-  List<Expense> get unexpectedExpenses =>
-      [for (final e in expenses) if (e.kind == ExpenseKind.unexpected) e];
+  int extensionCentsForGroup(int groupId) =>
+      extensionCentsIn(expenses, groupId);
+
+  List<Expense> get fixedExpenses => [
+        for (final expense in expenses)
+          if (expense.kind == ExpenseKind.fixed) expense,
+      ];
+
+  List<Expense> get unexpectedExpenses => [
+        for (final expense in expenses)
+          if (expense.kind == ExpenseKind.unexpected ||
+              expense.kind == ExpenseKind.budgetExtension)
+            expense,
+      ];
 
   int get fixedCents => _sum(fixedExpenses);
 

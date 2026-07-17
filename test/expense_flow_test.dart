@@ -68,6 +68,28 @@ void main() {
       );
       expect(find.text('${Strings.spentLabel}: Bs 200'), findsOneWidget);
       expect(find.text('${Strings.remainingLabel} Bs 0'), findsOneWidget);
+      expect(
+        find.text(Strings.budgetWithExtension('Bs 170', 'Bs 30')),
+        findsOneWidget,
+      );
+
+      await tester.scrollUntilVisible(
+        find.byType(UnexpectedCard),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.byType(UnexpectedCard));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(UnexpectedCard));
+      await tester.pumpAndSettle();
+
+      final extensionTile = find.text(Strings.extensionDescription('Gasolina'));
+      expect(extensionTile, findsOneWidget);
+      expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+
+      await tester.drag(extensionTile, const Offset(-500, 0));
+      await tester.pumpAndSettle();
+      expect(extensionTile, findsOneWidget);
 
       await disposeTestApp(tester);
     },

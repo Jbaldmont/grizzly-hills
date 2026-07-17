@@ -10,18 +10,21 @@ class GroupCard extends StatelessWidget {
     super.key,
     required this.group,
     this.spentCents = 0,
+    this.extensionCents = 0,
     this.onTap,
   });
 
   final BudgetGroup group;
   final int spentCents;
+  final int extensionCents;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final effectiveBudgetCents = group.budgetCents + extensionCents;
     final ratio =
-        group.budgetCents == 0 ? 0.0 : spentCents / group.budgetCents;
+        effectiveBudgetCents == 0 ? 0.0 : spentCents / effectiveBudgetCents;
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -39,7 +42,12 @@ class GroupCard extends StatelessWidget {
                         Text(group.name, style: theme.textTheme.titleMedium),
                   ),
                   Text(
-                    formatBs(group.budgetCents),
+                    extensionCents > 0
+                        ? Strings.budgetWithExtension(
+                            formatBs(group.budgetCents),
+                            formatBs(extensionCents),
+                          )
+                        : formatBs(group.budgetCents),
                     style: theme.textTheme.titleMedium,
                   ),
                 ],
@@ -64,9 +72,9 @@ class GroupCard extends StatelessWidget {
                   ),
                   Text(
                     '${Strings.remainingLabel} '
-                    '${formatBs(group.budgetCents - spentCents)}',
+                    '${formatBs(effectiveBudgetCents - spentCents)}',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: spentCents > group.budgetCents
+                      color: spentCents > effectiveBudgetCents
                           ? theme.colorScheme.error
                           : theme.colorScheme.onSurfaceVariant,
                     ),

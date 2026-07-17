@@ -247,11 +247,13 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
     );
     final excludedId = widget.expenseToEdit?.id;
     final spentOthers = expenses.fold<int>(0, (sum, expense) {
-      final sameGroup = expense.groupId == group.id;
+      final sameGroup =
+          expense.kind == ExpenseKind.group && expense.groupId == group.id;
       final isEditedExpense = excludedId != null && expense.id == excludedId;
       return sameGroup && !isEditedExpense ? sum + expense.amountCents : sum;
     });
-    final remainingCents = group.budgetCents - spentOthers;
+    final extensionCents = MonthOverview.extensionCentsIn(expenses, group.id);
+    final remainingCents = group.budgetCents + extensionCents - spentOthers;
     final shortfallCents = amountCents - remainingCents;
     if (shortfallCents <= 0) {
       return true;
@@ -345,10 +347,19 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
       ),
     );
     if (action == _InsufficientBudgetAction.requestExtension) {
-      await widget.monthRepository.transferFromGeneralToGroup(
+      await widget.expenseRepository.addExpense(
+        monthId: widget.monthId,
+        kind: ExpenseKind.budgetExtension,
         groupId: group.id,
+        description: Strings.extensionDescription(group.name),
         amountCents: shortfallCents,
+        date: dateOnly(DateTime.now()),
       );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(Strings.extensionAppliedMessage)),
+        );
+      }
       return true;
     }
     return action == _InsufficientBudgetAction.continueAnyway;
