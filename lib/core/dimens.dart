@@ -8,6 +8,7 @@ abstract final class Dimens {
   static const double colorDotSize = 20;
 
   static const double progressBarHeight = 8;
+  static const double progressMarkerWidth = 2;
   static const double radiusSm = 4;
   static const double amountFieldWidth = 120;
 }

@@ -61,7 +61,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openStartMonth() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => StartMonthScreen(repository: widget.monthRepository),
+        builder: (_) => StartMonthScreen(
+          repository: widget.monthRepository,
+          expenseRepository: widget.expenseRepository,
+        ),
       ),
     );
   }
@@ -71,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute<void>(
         builder: (_) => StartMonthScreen(
           repository: widget.monthRepository,
+          expenseRepository: widget.expenseRepository,
           monthToEdit: activeMonth,
         ),
       ),

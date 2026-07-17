@@ -79,6 +79,8 @@ abstract final class Strings {
   static const salaryLabel = 'Sueldo del mes';
   static const salaryRequiredError = 'Ingresa tu sueldo';
   static const invalidAmountError = 'Monto inválido';
+  static String budgetBelowSpentError(String spentAmount) =>
+      'Ya gastaste $spentAmount';
   static const groupsSectionTitle = 'Grupos de presupuesto';
   static const salaryRowLabel = 'Sueldo';
   static const assignedRowLabel = 'Asignado a grupos';

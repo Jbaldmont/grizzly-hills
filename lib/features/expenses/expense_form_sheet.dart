@@ -400,9 +400,11 @@ class _AmountRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: Dimens.spacingXs / 2),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: theme.textTheme.bodyMedium),
+          Expanded(
+            child: Text(label, style: theme.textTheme.bodyMedium),
+          ),
+          const SizedBox(width: Dimens.spacingSm),
           Text(
             formatBs(amountCents),
             style: theme.textTheme.bodyMedium?.copyWith(
