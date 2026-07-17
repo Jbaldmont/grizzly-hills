@@ -5,6 +5,7 @@ import 'package:grizzly_hills/core/db/app_database.dart';
 import 'package:grizzly_hills/core/strings.dart';
 import 'package:grizzly_hills/core/theme/theme_controller.dart';
 import 'package:grizzly_hills/features/expenses/expense_repository.dart';
+import 'package:grizzly_hills/features/loans/loan_repository.dart';
 import 'package:grizzly_hills/features/monthly_budget/month_repository.dart';
 import 'package:grizzly_hills/features/savings/savings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +18,7 @@ Future<GrizzlyApp> buildTestApp(AppDatabase db) async {
     monthRepository: MonthRepository(db),
     expenseRepository: ExpenseRepository(db),
     savingsRepository: SavingsRepository(db),
+    loanRepository: LoanRepository(db),
   );
 }
 

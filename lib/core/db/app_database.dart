@@ -71,6 +71,25 @@ class SavingsLocations extends Table {
   IntColumn get position => integer()();
 }
 
+class Loans extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get debtorName => text()();
+  IntColumn get principalCents => integer()();
+  DateTimeColumn get loanDate => dateTime()();
+  DateTimeColumn get interestStartDate => dateTime()();
+  DateTimeColumn get dueDate => dateTime()();
+  DateTimeColumn get closedAt => dateTime().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+class LoanPayments extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get loanId =>
+      integer().references(Loans, #id, onDelete: KeyAction.cascade)();
+  IntColumn get amountCents => integer()();
+  DateTimeColumn get date => dateTime()();
+}
+
 const List<(String, int)> _defaultTemplates = [
   ('Agua, Luz y Teléfonos', 50000),
   ('Gastos Míos', 50000),
@@ -93,6 +112,8 @@ const List<String> _defaultFixedTemplates = [
     Expenses,
     FixedExpenseTemplates,
     SavingsLocations,
+    Loans,
+    LoanPayments,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -101,7 +122,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -118,6 +139,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 3) {
         await migrator.createTable(savingsLocations);
+      }
+      if (from < 4) {
+        await migrator.createTable(loans);
+        await migrator.createTable(loanPayments);
       }
     },
     beforeOpen: (details) async {

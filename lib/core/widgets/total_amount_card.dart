@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/dimens.dart';
-import '../../../core/money.dart';
-import '../../../core/strings.dart';
+import '../dimens.dart';
+import '../money.dart';
 
-class SavingsTotalCard extends StatelessWidget {
-  const SavingsTotalCard({super.key, required this.totalCents});
+class TotalAmountCard extends StatelessWidget {
+  const TotalAmountCard({
+    super.key,
+    required this.label,
+    required this.totalCents,
+  });
 
+  final String label;
   final int totalCents;
 
   @override
@@ -19,7 +23,7 @@ class SavingsTotalCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              Strings.savingsTotalLabel,
+              label,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

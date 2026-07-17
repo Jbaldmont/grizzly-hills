@@ -4,6 +4,7 @@ import '../../core/db/app_database.dart';
 import '../../core/dimens.dart';
 import '../../core/strings.dart';
 import '../../core/widgets/error_state.dart';
+import '../../core/widgets/total_amount_card.dart';
 import '../expenses/expense_repository.dart';
 import '../monthly_budget/month_repository.dart';
 import 'location_name_dialog.dart';
@@ -11,7 +12,6 @@ import 'savings_movement_sheet.dart';
 import 'savings_repository.dart';
 import 'transfer_sheet.dart';
 import 'widgets/savings_location_card.dart';
-import 'widgets/savings_total_card.dart';
 
 class SavingsScreen extends StatefulWidget {
   const SavingsScreen({
@@ -69,7 +69,10 @@ class _SavingsScreenState extends State<SavingsScreen> {
         return ListView(
           padding: const EdgeInsets.all(Dimens.spacingMd),
           children: [
-            SavingsTotalCard(totalCents: totalCents),
+            TotalAmountCard(
+              label: Strings.savingsTotalLabel,
+              totalCents: totalCents,
+            ),
             const SizedBox(height: Dimens.spacingSm),
             Row(
               children: [

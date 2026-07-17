@@ -4,6 +4,7 @@ import '../../core/db/app_database.dart';
 import '../../core/dimens.dart';
 import '../../core/money.dart';
 import '../../core/strings.dart';
+import '../../core/widgets/date_field.dart';
 import '../monthly_budget/month_repository.dart';
 import 'expense_repository.dart';
 import 'month_overview.dart';
@@ -146,7 +147,8 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
               ),
             ),
             const SizedBox(height: Dimens.spacingSm),
-            _DateField(
+            DateField(
+              label: Strings.dateLabel,
               date: _date,
               onChanged: (value) {
                 setState(() => _date = value);
@@ -372,40 +374,6 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
       amountCents: amountCents,
       date: _date,
     );
-  }
-}
-
-class _DateField extends StatelessWidget {
-  const _DateField({required this.date, required this.onChanged});
-
-  final DateTime date;
-  final ValueChanged<DateTime> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.calendar_today_outlined),
-      title: const Text(Strings.dateLabel),
-      trailing: Text(
-        formatShortDate(date),
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
-      onTap: () => _pickDate(context),
-    );
-  }
-
-  Future<void> _pickDate(BuildContext context) async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: date,
-      firstDate: DateTime(now.year - 1),
-      lastDate: DateTime(now.year + 1),
-    );
-    if (picked != null) {
-      onChanged(dateOnly(picked));
-    }
   }
 }
 

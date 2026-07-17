@@ -3,6 +3,7 @@ import 'core/strings.dart';
 import 'core/theme/app_themes.dart';
 import 'core/theme/theme_controller.dart';
 import 'features/expenses/expense_repository.dart';
+import 'features/loans/loan_repository.dart';
 import 'features/monthly_budget/month_repository.dart';
 import 'features/savings/savings_repository.dart';
 import 'shell/app_shell.dart';
@@ -14,12 +15,14 @@ class GrizzlyApp extends StatelessWidget {
     required this.monthRepository,
     required this.expenseRepository,
     required this.savingsRepository,
+    required this.loanRepository,
   });
 
   final ThemeController themeController;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
   final SavingsRepository savingsRepository;
+  final LoanRepository loanRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +38,7 @@ class GrizzlyApp extends StatelessWidget {
           monthRepository: monthRepository,
           expenseRepository: expenseRepository,
           savingsRepository: savingsRepository,
+          loanRepository: loanRepository,
         ),
       ),
     );
