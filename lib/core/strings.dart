@@ -112,6 +112,38 @@ abstract final class Strings {
   static const transferDoneMessage = 'Transferencia realizada';
   static const groupAvailableLabel = 'Disponible';
 
+  static const loansEmptyTitle = 'No tienes préstamos activos';
+  static const loansEmptyBody =
+      'Registra a quién le prestaste y el interés correrá solo.';
+  static const newLoanCta = 'Nuevo préstamo';
+  static const loanHistoryCta = 'Historial';
+  static const loansTotalLabel = 'Total por cobrar hoy';
+  static const editLoanTitle = 'Editar préstamo';
+  static const debtorNameLabel = 'Deudor';
+  static const debtorNameRequiredError = 'Ingresa el nombre del deudor';
+  static const loanAmountLabel = 'Monto prestado';
+  static const loanDateLabel = 'Fecha del préstamo';
+  static const dueDateLabel = 'Devolución tentativa';
+  static const loanBaseRowLabel = 'Base actual';
+  static const loanInterestRowLabel = 'Interés acumulado';
+  static const loanTotalRowLabel = 'Total a la fecha';
+  static const weeklyInterestNote = 'Interés del 1% semanal, prorrateado por días';
+  static const overdueLabel = 'Vencido';
+  static const dueLabel = 'Vence';
+  static const registerPaymentCta = 'Registrar pago';
+  static const paymentsSectionTitle = 'Pagos';
+  static const noPaymentsYet = 'Aún no hay pagos';
+  static const paymentClosesLoanNote =
+      'Este pago cubre el total y cerrará el préstamo.';
+  static const paymentRegisteredMessage = 'Pago registrado';
+  static const loanClosedMessage = 'Préstamo cerrado';
+  static const deleteLoanTitle = '¿Eliminar préstamo?';
+  static const deleteLoanBody = 'Se borrará también su historial de pagos.';
+  static const loanHistoryTitle = 'Historial de préstamos';
+  static const loanHistoryEmptyTitle = 'Aún no hay préstamos cerrados';
+  static const lentOnLabel = 'Prestado el';
+  static const closedOnLabel = 'Cerrado el';
+
   static const monthNames = [
     'Enero',
     'Febrero',

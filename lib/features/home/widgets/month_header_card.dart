@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/dimens.dart';
-import '../../../core/money.dart';
 import '../../../core/strings.dart';
+import '../../../core/widgets/amount_row.dart';
 import '../../expenses/month_overview.dart';
 
 class MonthHeaderCard extends StatelessWidget {
@@ -40,68 +40,34 @@ class MonthHeaderCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: Dimens.spacingSm),
-            _AmountRow(
+            AmountRow(
               label: Strings.salaryRowLabel,
               amountCents: month.salaryCents,
             ),
-            _AmountRow(
+            AmountRow(
               label: Strings.assignedRowLabel,
               amountCents: overview.activeMonth.assignedCents,
             ),
-            _AmountRow(
+            AmountRow(
               label: Strings.generalBudgetRowLabel,
               amountCents: overview.activeMonth.generalBudgetCents,
             ),
-            _AmountRow(
+            AmountRow(
               label: Strings.fixedPaidRowLabel,
               amountCents: -overview.fixedCents,
             ),
-            _AmountRow(
+            AmountRow(
               label: Strings.unexpectedRowLabel,
               amountCents: -overview.unexpectedCents,
             ),
             const Divider(),
-            _AmountRow(
+            AmountRow(
               label: Strings.availableGeneralRowLabel,
               amountCents: overview.availableGeneralCents,
               emphasized: true,
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _AmountRow extends StatelessWidget {
-  const _AmountRow({
-    required this.label,
-    required this.amountCents,
-    this.emphasized = false,
-  });
-
-  final String label;
-  final int amountCents;
-  final bool emphasized;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = emphasized
-        ? theme.textTheme.titleMedium?.copyWith(
-            color: amountCents < 0
-                ? theme.colorScheme.error
-                : theme.colorScheme.primary,
-          )
-        : theme.textTheme.bodyMedium;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: Dimens.spacingXs / 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: style),
-          Text(formatBs(amountCents), style: style),
-        ],
       ),
     );
   }
