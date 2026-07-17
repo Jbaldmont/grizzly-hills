@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/db/app_database.dart';
 import '../../core/dimens.dart';
 import '../../core/strings.dart';
+import '../../core/widgets/error_state.dart';
 import '../expenses/expense_list_screen.dart';
 import '../expenses/expense_repository.dart';
 import '../expenses/month_overview.dart';
@@ -37,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: _activeMonth,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const _ErrorState();
+          return const ErrorState();
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -105,7 +106,7 @@ class _MonthContentState extends State<_MonthContent> {
       stream: _expenses,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const _ErrorState();
+          return const ErrorState();
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -221,29 +222,6 @@ class _EmptyState extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: Dimens.iconXl,
-            color: theme.colorScheme.error,
-          ),
-          const SizedBox(height: Dimens.spacingMd),
-          Text(Strings.errorGeneric, style: theme.textTheme.titleMedium),
-        ],
       ),
     );
   }

@@ -129,6 +129,28 @@ class MonthRepository {
     });
   }
 
+  Future<void> transferBetweenGroups({
+    required int sourceGroupId,
+    required int targetGroupId,
+    required int amountCents,
+  }) {
+    return _db.transaction(() async {
+      await _shiftGroupBudget(sourceGroupId, -amountCents);
+      await _shiftGroupBudget(targetGroupId, amountCents);
+    });
+  }
+
+  Future<void> _shiftGroupBudget(int groupId, int deltaCents) async {
+    final group = await (_db.select(
+      _db.budgetGroups,
+    )..where((budgetGroup) => budgetGroup.id.equals(groupId))).getSingle();
+    await (_db.update(
+      _db.budgetGroups,
+    )..where((budgetGroup) => budgetGroup.id.equals(groupId))).write(
+      BudgetGroupsCompanion(budgetCents: Value(group.budgetCents + deltaCents)),
+    );
+  }
+
   ActiveMonth? _mapRowsToActiveMonth(List<TypedResult> rows) {
     if (rows.isEmpty) {
       return null;
