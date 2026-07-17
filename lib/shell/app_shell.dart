@@ -8,6 +8,7 @@ import '../features/home/home_screen.dart';
 import '../features/loans/loans_screen.dart';
 import '../features/mom/mom_screen.dart';
 import '../features/monthly_budget/month_repository.dart';
+import '../features/savings/savings_repository.dart';
 import '../features/savings/savings_screen.dart';
 import '../features/settings/settings_screen.dart';
 
@@ -17,11 +18,13 @@ class AppShell extends StatefulWidget {
     required this.themeController,
     required this.monthRepository,
     required this.expenseRepository,
+    required this.savingsRepository,
   });
 
   final ThemeController themeController;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
+  final SavingsRepository savingsRepository;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -45,7 +48,11 @@ class _AppShellState extends State<AppShell> {
       expenseRepository: widget.expenseRepository,
     ),
     const LoansScreen(),
-    const SavingsScreen(),
+    SavingsScreen(
+      savingsRepository: widget.savingsRepository,
+      monthRepository: widget.monthRepository,
+      expenseRepository: widget.expenseRepository,
+    ),
     const BusinessScreen(),
     const MomScreen(),
   ];

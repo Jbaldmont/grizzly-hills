@@ -64,6 +64,13 @@ class FixedExpenseTemplates extends Table {
   IntColumn get position => integer()();
 }
 
+class SavingsLocations extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  IntColumn get balanceCents => integer().withDefault(const Constant(0))();
+  IntColumn get position => integer()();
+}
+
 const List<(String, int)> _defaultTemplates = [
   ('Agua, Luz y Teléfonos', 50000),
   ('Gastos Míos', 50000),
@@ -85,6 +92,7 @@ const List<String> _defaultFixedTemplates = [
     GroupTemplates,
     Expenses,
     FixedExpenseTemplates,
+    SavingsLocations,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -93,7 +101,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -107,6 +115,9 @@ class AppDatabase extends _$AppDatabase {
         await migrator.createTable(expenses);
         await migrator.createTable(fixedExpenseTemplates);
         await batch(_seedFixedTemplates);
+      }
+      if (from < 3) {
+        await migrator.createTable(savingsLocations);
       }
     },
     beforeOpen: (details) async {

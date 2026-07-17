@@ -1900,6 +1900,307 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
   }
 }
 
+class $SavingsLocationsTable extends SavingsLocations
+    with TableInfo<$SavingsLocationsTable, SavingsLocation> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SavingsLocationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _balanceCentsMeta = const VerificationMeta(
+    'balanceCents',
+  );
+  @override
+  late final GeneratedColumn<int> balanceCents = GeneratedColumn<int>(
+    'balance_cents',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, balanceCents, position];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'savings_locations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SavingsLocation> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('balance_cents')) {
+      context.handle(
+        _balanceCentsMeta,
+        balanceCents.isAcceptableOrUnknown(
+          data['balance_cents']!,
+          _balanceCentsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SavingsLocation map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SavingsLocation(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      balanceCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}balance_cents'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+    );
+  }
+
+  @override
+  $SavingsLocationsTable createAlias(String alias) {
+    return $SavingsLocationsTable(attachedDatabase, alias);
+  }
+}
+
+class SavingsLocation extends DataClass implements Insertable<SavingsLocation> {
+  final int id;
+  final String name;
+  final int balanceCents;
+  final int position;
+  const SavingsLocation({
+    required this.id,
+    required this.name,
+    required this.balanceCents,
+    required this.position,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['balance_cents'] = Variable<int>(balanceCents);
+    map['position'] = Variable<int>(position);
+    return map;
+  }
+
+  SavingsLocationsCompanion toCompanion(bool nullToAbsent) {
+    return SavingsLocationsCompanion(
+      id: Value(id),
+      name: Value(name),
+      balanceCents: Value(balanceCents),
+      position: Value(position),
+    );
+  }
+
+  factory SavingsLocation.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SavingsLocation(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      balanceCents: serializer.fromJson<int>(json['balanceCents']),
+      position: serializer.fromJson<int>(json['position']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'balanceCents': serializer.toJson<int>(balanceCents),
+      'position': serializer.toJson<int>(position),
+    };
+  }
+
+  SavingsLocation copyWith({
+    int? id,
+    String? name,
+    int? balanceCents,
+    int? position,
+  }) => SavingsLocation(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    balanceCents: balanceCents ?? this.balanceCents,
+    position: position ?? this.position,
+  );
+  SavingsLocation copyWithCompanion(SavingsLocationsCompanion data) {
+    return SavingsLocation(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      balanceCents: data.balanceCents.present
+          ? data.balanceCents.value
+          : this.balanceCents,
+      position: data.position.present ? data.position.value : this.position,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavingsLocation(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('balanceCents: $balanceCents, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, balanceCents, position);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SavingsLocation &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.balanceCents == this.balanceCents &&
+          other.position == this.position);
+}
+
+class SavingsLocationsCompanion extends UpdateCompanion<SavingsLocation> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int> balanceCents;
+  final Value<int> position;
+  const SavingsLocationsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.balanceCents = const Value.absent(),
+    this.position = const Value.absent(),
+  });
+  SavingsLocationsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.balanceCents = const Value.absent(),
+    required int position,
+  }) : name = Value(name),
+       position = Value(position);
+  static Insertable<SavingsLocation> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? balanceCents,
+    Expression<int>? position,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (balanceCents != null) 'balance_cents': balanceCents,
+      if (position != null) 'position': position,
+    });
+  }
+
+  SavingsLocationsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<int>? balanceCents,
+    Value<int>? position,
+  }) {
+    return SavingsLocationsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      balanceCents: balanceCents ?? this.balanceCents,
+      position: position ?? this.position,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (balanceCents.present) {
+      map['balance_cents'] = Variable<int>(balanceCents.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavingsLocationsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('balanceCents: $balanceCents, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1909,6 +2210,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $FixedExpenseTemplatesTable fixedExpenseTemplates =
       $FixedExpenseTemplatesTable(this);
   late final $ExpensesTable expenses = $ExpensesTable(this);
+  late final $SavingsLocationsTable savingsLocations = $SavingsLocationsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1919,6 +2223,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     groupTemplates,
     fixedExpenseTemplates,
     expenses,
+    savingsLocations,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -3796,6 +4101,189 @@ typedef $$ExpensesTableProcessedTableManager =
       Expense,
       PrefetchHooks Function({bool monthId, bool groupId, bool fixedTemplateId})
     >;
+typedef $$SavingsLocationsTableCreateCompanionBuilder =
+    SavingsLocationsCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<int> balanceCents,
+      required int position,
+    });
+typedef $$SavingsLocationsTableUpdateCompanionBuilder =
+    SavingsLocationsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<int> balanceCents,
+      Value<int> position,
+    });
+
+class $$SavingsLocationsTableFilterComposer
+    extends Composer<_$AppDatabase, $SavingsLocationsTable> {
+  $$SavingsLocationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get balanceCents => $composableBuilder(
+    column: $table.balanceCents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SavingsLocationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SavingsLocationsTable> {
+  $$SavingsLocationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get balanceCents => $composableBuilder(
+    column: $table.balanceCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SavingsLocationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SavingsLocationsTable> {
+  $$SavingsLocationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get balanceCents => $composableBuilder(
+    column: $table.balanceCents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+}
+
+class $$SavingsLocationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SavingsLocationsTable,
+          SavingsLocation,
+          $$SavingsLocationsTableFilterComposer,
+          $$SavingsLocationsTableOrderingComposer,
+          $$SavingsLocationsTableAnnotationComposer,
+          $$SavingsLocationsTableCreateCompanionBuilder,
+          $$SavingsLocationsTableUpdateCompanionBuilder,
+          (
+            SavingsLocation,
+            BaseReferences<
+              _$AppDatabase,
+              $SavingsLocationsTable,
+              SavingsLocation
+            >,
+          ),
+          SavingsLocation,
+          PrefetchHooks Function()
+        > {
+  $$SavingsLocationsTableTableManager(
+    _$AppDatabase db,
+    $SavingsLocationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SavingsLocationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SavingsLocationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SavingsLocationsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> balanceCents = const Value.absent(),
+                Value<int> position = const Value.absent(),
+              }) => SavingsLocationsCompanion(
+                id: id,
+                name: name,
+                balanceCents: balanceCents,
+                position: position,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<int> balanceCents = const Value.absent(),
+                required int position,
+              }) => SavingsLocationsCompanion.insert(
+                id: id,
+                name: name,
+                balanceCents: balanceCents,
+                position: position,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SavingsLocationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SavingsLocationsTable,
+      SavingsLocation,
+      $$SavingsLocationsTableFilterComposer,
+      $$SavingsLocationsTableOrderingComposer,
+      $$SavingsLocationsTableAnnotationComposer,
+      $$SavingsLocationsTableCreateCompanionBuilder,
+      $$SavingsLocationsTableUpdateCompanionBuilder,
+      (
+        SavingsLocation,
+        BaseReferences<_$AppDatabase, $SavingsLocationsTable, SavingsLocation>,
+      ),
+      SavingsLocation,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3810,4 +4298,6 @@ class $AppDatabaseManager {
       $$FixedExpenseTemplatesTableTableManager(_db, _db.fixedExpenseTemplates);
   $$ExpensesTableTableManager get expenses =>
       $$ExpensesTableTableManager(_db, _db.expenses);
+  $$SavingsLocationsTableTableManager get savingsLocations =>
+      $$SavingsLocationsTableTableManager(_db, _db.savingsLocations);
 }

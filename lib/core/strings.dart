@@ -83,6 +83,35 @@ abstract final class Strings {
   static const spentLabel = 'Gastado';
   static const errorGeneric = 'Algo salió mal';
 
+  static const savingsTotalLabel = 'Total ahorrado';
+  static const savingsLocationsSectionTitle = 'Ubicaciones';
+  static const savingsEmptyTitle = 'Todavía no registras tu ahorro';
+  static const savingsEmptyBody =
+      'Agrega dónde guardas tu dinero: bancos, caja roja, etc.';
+  static const addLocationCta = 'Agregar ubicación';
+  static const newLocationTitle = 'Nueva ubicación';
+  static const renameLocationTitle = 'Renombrar ubicación';
+  static const locationNameLabel = 'Nombre';
+  static const locationNameRequiredError = 'Ingresa un nombre';
+  static const deleteLocationTitle = '¿Eliminar ubicación?';
+  static const deleteLocationBody =
+      'Se perderá el registro de su saldo. Esta acción no se puede deshacer.';
+  static const rename = 'Renombrar';
+  static const add = 'Agregar';
+  static const deposit = 'Depositar';
+  static const withdraw = 'Retirar';
+  static const withdrawTooMuchError = 'No puedes retirar más de lo que hay';
+  static const transferCta = 'Transferir';
+  static const transferTitle = 'Transferir';
+  static const transferSourceLabel = 'Desde el grupo';
+  static const transferDestinationLabel = 'Hacia';
+  static const transferToSavingsDescription = 'Transferencia a ahorro';
+  static const transferSourceRequiredError = 'Elige un grupo de origen';
+  static const transferExceedsRemainingError =
+      'El grupo no tiene tanto disponible';
+  static const transferDoneMessage = 'Transferencia realizada';
+  static const groupAvailableLabel = 'Disponible';
+
   static const monthNames = [
     'Enero',
     'Febrero',
