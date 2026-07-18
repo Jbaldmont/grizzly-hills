@@ -52,6 +52,15 @@ abstract final class Strings {
       'Este gasto deja el grupo en negativo.';
   static const shortfallLabel = 'Te falta';
   static const requestExtension = 'Solicitar extensión';
+  static const request = 'Solicitar';
+  static const extensionExceedsGeneralError = 'Supera el disponible general';
+  static const returnExtension = 'Devolver extensión';
+  static const returnConfirm = 'Devolver';
+  static const returnableExtensionLabel = 'Disponible para devolver';
+  static const extensionReturnExceedsError =
+      'Supera lo disponible para devolver';
+  static const extensionReturnedMessage =
+      'Extensión devuelta al disponible general';
   static const extensionAppliedMessage = 'Extensión registrada en imprevistos';
   static String extensionDescription(String groupName) =>
       'Extensión: $groupName';

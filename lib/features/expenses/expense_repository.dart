@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 
 import '../../core/db/app_database.dart';
@@ -73,6 +75,47 @@ class ExpenseRepository {
 
   Future<void> deleteExpense(int id) {
     return (_db.delete(_db.expenses)..where((e) => e.id.equals(id))).go();
+  }
+
+  Future<void> returnExtension({
+    required int groupId,
+    required int amountCents,
+  }) {
+    return _db.transaction(() async {
+      final extensionRows =
+          await (_db.select(_db.expenses)
+                ..where(
+                  (expense) =>
+                      expense.groupId.equals(groupId) &
+                      expense.kind.equalsValue(ExpenseKind.budgetExtension),
+                )
+                ..orderBy([
+                  (expense) => OrderingTerm.desc(expense.date),
+                  (expense) => OrderingTerm.desc(expense.id),
+                ]))
+              .get();
+      var remainingCents = amountCents;
+      for (final extensionRow in extensionRows) {
+        if (remainingCents <= 0) {
+          break;
+        }
+        final reduceCents = min(extensionRow.amountCents, remainingCents);
+        if (reduceCents == extensionRow.amountCents) {
+          await (_db.delete(
+            _db.expenses,
+          )..where((expense) => expense.id.equals(extensionRow.id))).go();
+        } else {
+          await (_db.update(
+            _db.expenses,
+          )..where((expense) => expense.id.equals(extensionRow.id))).write(
+            ExpensesCompanion(
+              amountCents: Value(extensionRow.amountCents - reduceCents),
+            ),
+          );
+        }
+        remainingCents -= reduceCents;
+      }
+    });
   }
 
   Future<void> _rememberFixedAmount(int templateId, int amountCents) {

@@ -95,6 +95,87 @@ void main() {
     },
   );
 
+  testWidgets('solicitar extensión desde el detalle del grupo', (tester) async {
+    await tester.pumpWidget(await buildTestApp(db));
+    await tester.pumpAndSettle();
+    await openTestMonth(tester);
+
+    await tester.scrollUntilVisible(
+      find.text('Gasolina'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Gasolina'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(Strings.requestExtension));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField), '99999');
+    await tester.tap(find.text(Strings.request));
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.extensionExceedsGeneralError), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField), '100');
+    await tester.tap(find.text(Strings.request));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(Strings.budgetWithExtension('Bs 170', 'Bs 100')),
+      findsOneWidget,
+    );
+
+    await disposeTestApp(tester);
+  });
+
+  testWidgets('devolver la parte no gastada de una extensión', (tester) async {
+    await tester.pumpWidget(await buildTestApp(db));
+    await tester.pumpAndSettle();
+    await openTestMonth(tester);
+
+    await tester.scrollUntilVisible(
+      find.text('Gasolina'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Gasolina'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(Strings.requestExtension));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), '100');
+    await tester.tap(find.text(Strings.request));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(Strings.returnExtension));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField), '200');
+    await tester.tap(find.text(Strings.returnConfirm));
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.extensionReturnExceedsError), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField), '40');
+    await tester.tap(find.text(Strings.returnConfirm));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(Strings.budgetWithExtension('Bs 170', 'Bs 60')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text(Strings.returnExtension));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), '60');
+    await tester.tap(find.text(Strings.returnConfirm));
+    await tester.pumpAndSettle();
+
+    expect(find.text(Strings.returnExtension), findsNothing);
+    expect(find.text('Bs 170'), findsOneWidget);
+
+    await disposeTestApp(tester);
+  });
+
   testWidgets('pagar un fijo lo marca con su monto', (tester) async {
     await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();

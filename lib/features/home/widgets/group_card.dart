@@ -36,21 +36,36 @@ class GroupCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child:
                         Text(group.name, style: theme.textTheme.titleMedium),
                   ),
-                  Text(
-                    extensionCents > 0
-                        ? Strings.budgetWithExtension(
+                  if (extensionCents == 0)
+                    Text(
+                      formatBs(group.budgetCents),
+                      style: theme.textTheme.titleMedium,
+                    )
+                  else
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          formatBs(effectiveBudgetCents),
+                          style: theme.textTheme.titleMedium,
+                        ),
+                        Text(
+                          Strings.budgetWithExtension(
                             formatBs(group.budgetCents),
                             formatBs(extensionCents),
-                          )
-                        : formatBs(group.budgetCents),
-                    style: theme.textTheme.titleMedium,
-                  ),
+                          ),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
               const SizedBox(height: Dimens.spacingSm),

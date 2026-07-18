@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../core/dates.dart';
@@ -9,6 +11,7 @@ import '../home/widgets/group_card.dart';
 import '../monthly_budget/month_repository.dart';
 import 'expense_form_sheet.dart';
 import 'expense_repository.dart';
+import 'extension_request_dialog.dart';
 import 'month_overview.dart';
 
 class ExpenseListScreen extends StatefulWidget {
@@ -32,6 +35,8 @@ class ExpenseListScreen extends StatefulWidget {
 class _ExpenseListScreenState extends State<ExpenseListScreen> {
   late final Stream<List<Expense>> _expenses =
       widget.expenseRepository.watchExpenses(widget.monthId);
+  late final Stream<ActiveMonth?> _activeMonth =
+      widget.monthRepository.watchActiveMonth();
 
   ExpenseDestination get _destination => widget.group == null
       ? const ExpenseDestination.unexpected()
@@ -50,34 +55,72 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       ),
       body: StreamBuilder<List<Expense>>(
         stream: _expenses,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+        builder: (context, expensesSnapshot) {
+          if (expensesSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          return _buildList(snapshot.data ?? []);
+          final allExpenses = expensesSnapshot.data ?? [];
+          if (widget.group == null) {
+            return _buildList(allExpenses);
+          }
+          return StreamBuilder<ActiveMonth?>(
+            stream: _activeMonth,
+            builder: (context, monthSnapshot) {
+              final activeMonth = monthSnapshot.data;
+              final availableGeneralCents = activeMonth == null
+                  ? 0
+                  : MonthOverview(
+                      activeMonth: activeMonth,
+                      expenses: allExpenses,
+                    ).availableGeneralCents;
+              return _buildList(
+                allExpenses,
+                availableGeneralCents: availableGeneralCents,
+              );
+            },
+          );
         },
       ),
     );
   }
 
-  Widget _buildList(List<Expense> allExpenses) {
+  Widget _buildList(List<Expense> allExpenses, {int availableGeneralCents = 0}) {
     final group = widget.group;
     final expenses = _filter(allExpenses);
     final totalCents =
         expenses.fold(0, (sum, expense) => sum + expense.amountCents);
+    final extensionCents = group == null
+        ? 0
+        : MonthOverview.extensionCentsIn(allExpenses, group.id);
+    final returnableCents = group == null
+        ? 0
+        : max<int>(0, extensionCents - max<int>(0, totalCents - group.budgetCents));
     return ListView(
       padding: const EdgeInsets.all(Dimens.spacingMd),
       children: [
-        if (group != null)
+        if (group != null) ...[
           GroupCard(
             group: group,
             spentCents: totalCents,
-            extensionCents: MonthOverview.extensionCentsIn(
-              allExpenses,
-              group.id,
+            extensionCents: extensionCents,
+          ),
+          const SizedBox(height: Dimens.spacingSm),
+          OutlinedButton.icon(
+            onPressed: availableGeneralCents > 0
+                ? () => _requestExtension(group, availableGeneralCents)
+                : null,
+            icon: const Icon(Icons.add),
+            label: const Text(Strings.requestExtension),
+          ),
+          if (extensionCents > 0)
+            OutlinedButton.icon(
+              onPressed: returnableCents > 0
+                  ? () => _returnExtension(group, returnableCents)
+                  : null,
+              icon: const Icon(Icons.undo),
+              label: const Text(Strings.returnExtension),
             ),
-          )
-        else
+        ] else
           _UnexpectedTotalCard(totalCents: totalCents),
         const SizedBox(height: Dimens.spacingSm),
         if (expenses.isEmpty)
@@ -107,6 +150,66 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                 expense.kind == ExpenseKind.budgetExtension)
           expense,
     ];
+  }
+
+  Future<void> _requestExtension(
+    BudgetGroup group,
+    int availableGeneralCents,
+  ) async {
+    final amountCents = await showDialog<int>(
+      context: context,
+      builder: (_) => ExtensionAmountDialog(
+        title: Strings.requestExtension,
+        limitLabel: Strings.availableGeneralRowLabel,
+        limitCents: availableGeneralCents,
+        confirmLabel: Strings.request,
+        exceedsLimitError: Strings.extensionExceedsGeneralError,
+      ),
+    );
+    if (amountCents == null) {
+      return;
+    }
+    await widget.expenseRepository.addExpense(
+      monthId: widget.monthId,
+      kind: ExpenseKind.budgetExtension,
+      groupId: group.id,
+      description: Strings.extensionDescription(group.name),
+      amountCents: amountCents,
+      date: dateOnly(DateTime.now()),
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(Strings.extensionAppliedMessage)),
+      );
+    }
+  }
+
+  Future<void> _returnExtension(
+    BudgetGroup group,
+    int returnableCents,
+  ) async {
+    final amountCents = await showDialog<int>(
+      context: context,
+      builder: (_) => ExtensionAmountDialog(
+        title: Strings.returnExtension,
+        limitLabel: Strings.returnableExtensionLabel,
+        limitCents: returnableCents,
+        confirmLabel: Strings.returnConfirm,
+        exceedsLimitError: Strings.extensionReturnExceedsError,
+      ),
+    );
+    if (amountCents == null) {
+      return;
+    }
+    await widget.expenseRepository.returnExtension(
+      groupId: group.id,
+      amountCents: amountCents,
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(Strings.extensionReturnedMessage)),
+      );
+    }
   }
 
   void _openForm({Expense? expenseToEdit}) {

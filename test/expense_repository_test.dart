@@ -111,6 +111,39 @@ void main() {
     expect(updated.lastAmountCents, 3500);
   });
 
+  test('devolver extensión reduce las más recientes y borra las vacías', () async {
+    final month = await openMonth();
+    final casa = month.groups.first;
+
+    await expenses.addExpense(
+      monthId: month.month.id,
+      kind: ExpenseKind.budgetExtension,
+      groupId: casa.id,
+      description: 'Extensión: Casa',
+      amountCents: 3000,
+      date: DateTime(2026, 7, 10),
+    );
+    await expenses.addExpense(
+      monthId: month.month.id,
+      kind: ExpenseKind.budgetExtension,
+      groupId: casa.id,
+      description: 'Extensión: Casa',
+      amountCents: 2000,
+      date: DateTime(2026, 7, 12),
+    );
+
+    await expenses.returnExtension(groupId: casa.id, amountCents: 4000);
+
+    final remaining = await expenses.watchExpenses(month.month.id).first;
+    expect(remaining.length, 1);
+    expect(remaining.single.amountCents, 1000);
+    expect(remaining.single.date, DateTime(2026, 7, 10));
+
+    final overview = MonthOverview(activeMonth: month, expenses: remaining);
+    expect(overview.extensionCentsForGroup(casa.id), 1000);
+    expect(overview.unexpectedCents, 1000);
+  });
+
   test('editar y borrar un gasto', () async {
     final month = await openMonth();
     await expenses.addExpense(
