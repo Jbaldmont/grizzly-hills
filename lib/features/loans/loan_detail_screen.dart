@@ -76,43 +76,46 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(Dimens.spacingMd),
-        children: [
-          _LoanSummaryCard(loan: loan),
-          const SizedBox(height: Dimens.spacingMd),
-          if (!isClosed)
-            FilledButton.icon(
-              onPressed: () => showLoanPaymentSheet(
-                context,
-                loan: loan,
-                loanRepository: widget.loanRepository,
+      body: SafeArea(
+        top: false,
+        child: ListView(
+          padding: const EdgeInsets.all(Dimens.spacingMd),
+          children: [
+            _LoanSummaryCard(loan: loan),
+            const SizedBox(height: Dimens.spacingMd),
+            if (!isClosed)
+              FilledButton.icon(
+                onPressed: () => showLoanPaymentSheet(
+                  context,
+                  loan: loan,
+                  loanRepository: widget.loanRepository,
+                ),
+                icon: const Icon(Icons.payments_outlined),
+                label: const Text(Strings.registerPaymentCta),
               ),
-              icon: const Icon(Icons.payments_outlined),
-              label: const Text(Strings.registerPaymentCta),
-            ),
-          const SizedBox(height: Dimens.spacingMd),
-          Text(
-            Strings.paymentsSectionTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: Dimens.spacingSm),
-          if (payments.isEmpty)
+            const SizedBox(height: Dimens.spacingMd),
             Text(
-              Strings.noPaymentsYet,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              Strings.paymentsSectionTitle,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-          for (final payment in payments)
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.payments_outlined),
-                title: Text(formatBs(payment.amountCents)),
-                trailing: Text(formatShortDate(payment.date)),
+            const SizedBox(height: Dimens.spacingSm),
+            if (payments.isEmpty)
+              Text(
+                Strings.noPaymentsYet,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-        ],
+            for (final payment in payments)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.payments_outlined),
+                  title: Text(formatBs(payment.amountCents)),
+                  trailing: Text(formatShortDate(payment.date)),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -189,7 +192,9 @@ class _LoanSummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: Dimens.spacingXs),
             Text(
-              Strings.weeklyInterestNote,
+              Strings.weeklyInterestNote(
+                formatPercent(loan.weeklyRatePercent),
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

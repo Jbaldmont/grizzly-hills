@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/dates.dart';
 import '../../core/db/app_database.dart';
 
 class SavingsRepository {
@@ -68,10 +69,10 @@ class SavingsRepository {
             ExpensesCompanion.insert(
               monthId: monthId,
               groupId: Value(groupId),
-              kind: ExpenseKind.group,
+              kind: ExpenseKind.savingsTransfer,
               description: description,
               amountCents: amountCents,
-              date: DateTime.now(),
+              date: dateOnly(DateTime.now()),
             ),
           );
       await adjustBalance(id: locationId, deltaCents: amountCents);

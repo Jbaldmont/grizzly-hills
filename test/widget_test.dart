@@ -161,6 +161,25 @@ void main() {
     await disposeTestApp(tester);
   });
 
+  testWidgets('el botón atrás vuelve a Inicio en vez de cerrar la app', (
+    tester,
+  ) async {
+    await tester.pumpWidget(await buildTestApp(db));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(Strings.tabSavings));
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.tabSavings), findsNWidgets(2));
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text(Strings.tabHome), findsNWidgets(2));
+    expect(find.text(Strings.homeEmptyTitle), findsOneWidget);
+
+    await disposeTestApp(tester);
+  });
+
   testWidgets('abre Ajustes y cambia el tema de color', (tester) async {
     await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();

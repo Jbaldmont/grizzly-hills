@@ -86,7 +86,7 @@ void main() {
 
       final expense = (await expenses.loadExpenses(month.month.id)).single;
       expect(expense.groupId, casa.id);
-      expect(expense.kind, ExpenseKind.group);
+      expect(expense.kind, ExpenseKind.savingsTransfer);
       expect(expense.amountCents, 10000);
 
       final updatedMonth = (await months.watchActiveMonth().first)!;

@@ -110,9 +110,12 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
           _isEditing ? Strings.editMonthTitle : Strings.startMonthTitle,
         ),
       ),
-      body: rows == null
-          ? const Center(child: CircularProgressIndicator())
-          : _buildForm(rows),
+      body: SafeArea(
+        top: false,
+        child: rows == null
+            ? const Center(child: CircularProgressIndicator())
+            : _buildForm(rows),
+      ),
     );
   }
 

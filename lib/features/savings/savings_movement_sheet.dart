@@ -4,6 +4,7 @@ import '../../core/db/app_database.dart';
 import '../../core/dimens.dart';
 import '../../core/money.dart';
 import '../../core/strings.dart';
+import '../../core/widgets/sheet_padding.dart';
 import 'savings_repository.dart';
 
 enum _MovementKind { deposit, withdraw }
@@ -52,13 +53,7 @@ class _SavingsMovementSheetState extends State<SavingsMovementSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.only(
-        left: Dimens.spacingMd,
-        right: Dimens.spacingMd,
-        top: Dimens.spacingMd,
-        bottom: MediaQuery.of(context).viewInsets.bottom + Dimens.spacingMd,
-      ),
+    return SheetPadding(
       child: Form(
         key: _formKey,
         child: Column(

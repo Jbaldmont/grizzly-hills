@@ -5,6 +5,7 @@ import '../../core/dimens.dart';
 import '../../core/money.dart';
 import '../../core/strings.dart';
 import '../../core/widgets/date_field.dart';
+import '../../core/widgets/sheet_padding.dart';
 import '../monthly_budget/month_repository.dart';
 import 'expense_repository.dart';
 import 'month_overview.dart';
@@ -102,13 +103,7 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.only(
-        left: Dimens.spacingMd,
-        right: Dimens.spacingMd,
-        top: Dimens.spacingMd,
-        bottom: MediaQuery.of(context).viewInsets.bottom + Dimens.spacingMd,
-      ),
+    return SheetPadding(
       child: Form(
         key: _formKey,
         child: Column(
@@ -247,8 +242,8 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
     );
     final excludedId = widget.expenseToEdit?.id;
     final spentOthers = expenses.fold<int>(0, (sum, expense) {
-      final sameGroup =
-          expense.kind == ExpenseKind.group && expense.groupId == group.id;
+      final sameGroup = MonthOverview.countsAsGroupSpending(expense) &&
+          expense.groupId == group.id;
       final isEditedExpense = excludedId != null && expense.id == excludedId;
       return sameGroup && !isEditedExpense ? sum + expense.amountCents : sum;
     });

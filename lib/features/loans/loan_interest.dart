@@ -2,17 +2,25 @@ import '../../core/dates.dart';
 import '../../core/db/app_database.dart';
 
 const int _daysPerWeek = 7;
-const int _weeklyRatePercent = 1;
+const double defaultWeeklyRatePercent = 1;
 
 int interestDays(DateTime from, DateTime to) {
   return dateOnly(to).difference(dateOnly(from)).inDays;
 }
 
-int interestCents({required int principalCents, required int days}) {
+int chargedWeeks(int days) {
   if (days <= 0) {
     return 0;
   }
-  return (principalCents * _weeklyRatePercent * days / (100 * _daysPerWeek))
+  return (days / _daysPerWeek).ceil();
+}
+
+int interestCents({
+  required int principalCents,
+  required int days,
+  double weeklyRatePercent = defaultWeeklyRatePercent,
+}) {
+  return (principalCents * weeklyRatePercent * chargedWeeks(days) / 100)
       .round();
 }
 
@@ -20,6 +28,7 @@ int accruedInterestCents(Loan loan, DateTime onDate) {
   return interestCents(
     principalCents: loan.principalCents,
     days: interestDays(loan.interestStartDate, onDate),
+    weeklyRatePercent: loan.weeklyRatePercent,
   );
 }
 

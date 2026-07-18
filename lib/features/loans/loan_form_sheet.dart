@@ -6,6 +6,8 @@ import '../../core/dimens.dart';
 import '../../core/money.dart';
 import '../../core/strings.dart';
 import '../../core/widgets/date_field.dart';
+import '../../core/widgets/sheet_padding.dart';
+import 'loan_interest.dart';
 import 'loan_repository.dart';
 
 const int _defaultLoanTermDays = 14;
@@ -47,6 +49,7 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _debtorController;
   late final TextEditingController _amountController;
+  late final TextEditingController _rateController;
   late DateTime _loanDate;
   late DateTime _dueDate;
   bool _saving = false;
@@ -63,6 +66,11 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
     _amountController = TextEditingController(
       text: loan == null ? '' : centsToEditableText(loan.principalCents),
     );
+    _rateController = TextEditingController(
+      text: formatPercent(
+        loan?.weeklyRatePercent ?? defaultWeeklyRatePercent,
+      ).replaceAll('%', ''),
+    );
     _loanDate = dateOnly(loan?.loanDate ?? DateTime.now());
     _dueDate = dateOnly(
       loan?.dueDate ??
@@ -74,19 +82,14 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
   void dispose() {
     _debtorController.dispose();
     _amountController.dispose();
+    _rateController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.only(
-        left: Dimens.spacingMd,
-        right: Dimens.spacingMd,
-        top: Dimens.spacingMd,
-        bottom: MediaQuery.of(context).viewInsets.bottom + Dimens.spacingMd,
-      ),
+    return SheetPadding(
       child: Form(
         key: _formKey,
         child: Column(
@@ -122,6 +125,18 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
               ),
               validator: _validateAmount,
             ),
+            const SizedBox(height: Dimens.spacingMd),
+            TextFormField(
+              controller: _rateController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: Strings.interestRateLabel,
+                border: OutlineInputBorder(),
+              ),
+              validator: _validateRate,
+            ),
             const SizedBox(height: Dimens.spacingSm),
             if (!_principalLocked)
               DateField(
@@ -137,7 +152,7 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
             ),
             const SizedBox(height: Dimens.spacingXs),
             Text(
-              Strings.weeklyInterestNote,
+              Strings.startedWeekNote,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -171,6 +186,14 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
     return null;
   }
 
+  String? _validateRate(String? value) {
+    final percent = parsePercent(value ?? '');
+    if (percent == null || percent <= 0 || percent > 100) {
+      return Strings.invalidInterestRateError;
+    }
+    return null;
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -193,6 +216,7 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
 
   Future<void> _persist() {
     final debtorName = _debtorController.text.trim();
+    final weeklyRatePercent = parsePercent(_rateController.text)!;
     final loan = widget.loanToEdit;
     if (loan == null) {
       return widget.loanRepository.addLoan(
@@ -200,6 +224,7 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
         principalCents: parseBsToCents(_amountController.text)!,
         loanDate: _loanDate,
         dueDate: _dueDate,
+        weeklyRatePercent: weeklyRatePercent,
       );
     }
     return widget.loanRepository.updateLoan(
@@ -210,6 +235,7 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
           ? null
           : parseBsToCents(_amountController.text)!,
       loanDate: _principalLocked ? null : _loanDate,
+      weeklyRatePercent: weeklyRatePercent,
     );
   }
 }

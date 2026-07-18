@@ -64,12 +64,14 @@ class LoanRepository {
     required int principalCents,
     required DateTime loanDate,
     required DateTime dueDate,
+    double weeklyRatePercent = defaultWeeklyRatePercent,
   }) {
     final normalizedLoanDate = dateOnly(loanDate);
     return _db.into(_db.loans).insert(
           LoansCompanion.insert(
             debtorName: debtorName,
             principalCents: principalCents,
+            weeklyRatePercent: Value(weeklyRatePercent),
             loanDate: normalizedLoanDate,
             interestStartDate: normalizedLoanDate,
             dueDate: dateOnly(dueDate),
@@ -83,6 +85,7 @@ class LoanRepository {
     required DateTime dueDate,
     int? principalCents,
     DateTime? loanDate,
+    double? weeklyRatePercent,
   }) {
     return (_db.update(_db.loans)..where((loan) => loan.id.equals(id))).write(
       LoansCompanion(
@@ -94,6 +97,9 @@ class LoanRepository {
             loanDate == null ? const Value.absent() : Value(dateOnly(loanDate)),
         interestStartDate:
             loanDate == null ? const Value.absent() : Value(dateOnly(loanDate)),
+        weeklyRatePercent: weeklyRatePercent == null
+            ? const Value.absent()
+            : Value(weeklyRatePercent),
       ),
     );
   }

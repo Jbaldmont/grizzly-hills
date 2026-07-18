@@ -64,6 +64,20 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    return PopScope(
+      canPop: _selectedIndex == 0,
+      onPopInvokedWithResult: _handlePop,
+      child: _buildScaffold(),
+    );
+  }
+
+  void _handlePop(bool didPop, Object? result) {
+    if (!didPop) {
+      setState(() => _selectedIndex = 0);
+    }
+  }
+
+  Widget _buildScaffold() {
     return Scaffold(
       appBar: AppBar(
         title: Text(_titles[_selectedIndex]),

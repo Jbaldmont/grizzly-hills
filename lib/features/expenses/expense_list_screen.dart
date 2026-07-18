@@ -53,33 +53,36 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
         onPressed: () => _openForm(),
         child: const Icon(Icons.add),
       ),
-      body: StreamBuilder<List<Expense>>(
-        stream: _expenses,
-        builder: (context, expensesSnapshot) {
-          if (expensesSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final allExpenses = expensesSnapshot.data ?? [];
-          if (widget.group == null) {
-            return _buildList(allExpenses);
-          }
-          return StreamBuilder<ActiveMonth?>(
-            stream: _activeMonth,
-            builder: (context, monthSnapshot) {
-              final activeMonth = monthSnapshot.data;
-              final availableGeneralCents = activeMonth == null
-                  ? 0
-                  : MonthOverview(
-                      activeMonth: activeMonth,
-                      expenses: allExpenses,
-                    ).availableGeneralCents;
-              return _buildList(
-                allExpenses,
-                availableGeneralCents: availableGeneralCents,
-              );
-            },
-          );
-        },
+      body: SafeArea(
+        top: false,
+        child: StreamBuilder<List<Expense>>(
+          stream: _expenses,
+          builder: (context, expensesSnapshot) {
+            if (expensesSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final allExpenses = expensesSnapshot.data ?? [];
+            if (widget.group == null) {
+              return _buildList(allExpenses);
+            }
+            return StreamBuilder<ActiveMonth?>(
+              stream: _activeMonth,
+              builder: (context, monthSnapshot) {
+                final activeMonth = monthSnapshot.data;
+                final availableGeneralCents = activeMonth == null
+                    ? 0
+                    : MonthOverview(
+                        activeMonth: activeMonth,
+                        expenses: allExpenses,
+                      ).availableGeneralCents;
+                return _buildList(
+                  allExpenses,
+                  availableGeneralCents: availableGeneralCents,
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -127,7 +130,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           const _EmptyList()
         else
           for (final expense in expenses)
-            if (expense.kind == ExpenseKind.budgetExtension)
+            if (_isLocked(expense))
               _ExpenseTile(expense: expense)
             else
               _ExpenseTile(
@@ -145,12 +148,17 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     return [
       for (final expense in expenses)
         if (group != null
-            ? expense.kind == ExpenseKind.group && expense.groupId == group.id
+            ? MonthOverview.countsAsGroupSpending(expense) &&
+                expense.groupId == group.id
             : expense.kind == ExpenseKind.unexpected ||
                 expense.kind == ExpenseKind.budgetExtension)
           expense,
     ];
   }
+
+  bool _isLocked(Expense expense) =>
+      expense.kind == ExpenseKind.budgetExtension ||
+      expense.kind == ExpenseKind.savingsTransfer;
 
   Future<void> _requestExtension(
     BudgetGroup group,

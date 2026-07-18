@@ -7,10 +7,14 @@ class MonthOverview {
   final ActiveMonth activeMonth;
   final List<Expense> expenses;
 
+  static bool countsAsGroupSpending(Expense expense) =>
+      expense.kind == ExpenseKind.group ||
+      expense.kind == ExpenseKind.savingsTransfer;
+
   int spentInGroupCents(int groupId) => _sum(
         expenses.where(
           (expense) =>
-              expense.kind == ExpenseKind.group && expense.groupId == groupId,
+              countsAsGroupSpending(expense) && expense.groupId == groupId,
         ),
       );
 

@@ -6,6 +6,7 @@ import '../../core/dimens.dart';
 import '../../core/money.dart';
 import '../../core/strings.dart';
 import '../../core/widgets/date_field.dart';
+import '../../core/widgets/sheet_padding.dart';
 import 'loan_interest.dart';
 import 'loan_repository.dart';
 
@@ -54,13 +55,7 @@ class _LoanPaymentSheetState extends State<LoanPaymentSheet> {
     final theme = Theme.of(context);
     final amountCents = parseBsToCents(_amountController.text);
     final closesLoan = amountCents != null && amountCents >= _owedAtDateCents;
-    return Padding(
-      padding: EdgeInsets.only(
-        left: Dimens.spacingMd,
-        right: Dimens.spacingMd,
-        top: Dimens.spacingMd,
-        bottom: MediaQuery.of(context).viewInsets.bottom + Dimens.spacingMd,
-      ),
+    return SheetPadding(
       child: Form(
         key: _formKey,
         child: Column(

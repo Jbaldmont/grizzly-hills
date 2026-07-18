@@ -24,3 +24,19 @@ int? parseBsToCents(String input) {
   }
   return (value * 100).round();
 }
+
+String formatPercent(double percent) {
+  final isWhole = percent == percent.roundToDouble();
+  final text = isWhole
+      ? percent.round().toString()
+      : percent.toStringAsFixed(2).replaceAll(RegExp(r'0+$'), '').replaceAll('.', ',');
+  return '$text%';
+}
+
+double? parsePercent(String input) {
+  final normalized = input.trim().replaceAll(',', '.');
+  if (normalized.isEmpty) {
+    return null;
+  }
+  return double.tryParse(normalized);
+}

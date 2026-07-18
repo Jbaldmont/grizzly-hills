@@ -142,7 +142,11 @@ abstract final class Strings {
   static const loanBaseRowLabel = 'Base actual';
   static const loanInterestRowLabel = 'Interés acumulado';
   static const loanTotalRowLabel = 'Total a la fecha';
-  static const weeklyInterestNote = 'Interés del 1% semanal, prorrateado por días';
+  static String weeklyInterestNote(String percent) =>
+      'Interés del $percent semanal — la semana iniciada se cobra completa';
+  static const interestRateLabel = 'Interés semanal (%)';
+  static const invalidInterestRateError = 'Interés inválido';
+  static const startedWeekNote = 'La semana iniciada se cobra completa';
   static const overdueLabel = 'Vencido';
   static const dueLabel = 'Vence';
   static const registerPaymentCta = 'Registrar pago';

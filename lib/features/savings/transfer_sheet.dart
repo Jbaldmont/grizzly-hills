@@ -4,6 +4,7 @@ import '../../core/db/app_database.dart';
 import '../../core/dimens.dart';
 import '../../core/money.dart';
 import '../../core/strings.dart';
+import '../../core/widgets/sheet_padding.dart';
 import '../expenses/expense_repository.dart';
 import '../monthly_budget/month_repository.dart';
 import 'savings_repository.dart';
@@ -98,13 +99,7 @@ class _TransferSheetState extends State<TransferSheet> {
 
   Widget _buildForm(BuildContext context, List<Expense> expenses) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.only(
-        left: Dimens.spacingMd,
-        right: Dimens.spacingMd,
-        top: Dimens.spacingMd,
-        bottom: MediaQuery.of(context).viewInsets.bottom + Dimens.spacingMd,
-      ),
+    return SheetPadding(
       child: Form(
         key: _formKey,
         child: Column(

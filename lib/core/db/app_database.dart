@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 part 'app_database.g.dart';
 
-enum ExpenseKind { group, fixed, unexpected, budgetExtension }
+enum ExpenseKind { group, fixed, unexpected, budgetExtension, savingsTransfer }
 
 class Months extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -75,6 +75,7 @@ class Loans extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get debtorName => text()();
   IntColumn get principalCents => integer()();
+  RealColumn get weeklyRatePercent => real().withDefault(const Constant(1))();
   DateTimeColumn get loanDate => dateTime()();
   DateTimeColumn get interestStartDate => dateTime()();
   DateTimeColumn get dueDate => dateTime()();
@@ -122,7 +123,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -143,6 +144,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await migrator.createTable(loans);
         await migrator.createTable(loanPayments);
+      }
+      if (from < 5) {
+        await migrator.addColumn(loans, loans.weeklyRatePercent);
       }
     },
     beforeOpen: (details) async {

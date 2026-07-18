@@ -14,20 +14,23 @@ class SettingsScreen extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(title: const Text(Strings.settingsTitle)),
-      body: ListenableBuilder(
-        listenable: themeController,
-        builder: (context, _) => ListView(
-          padding: const EdgeInsets.all(Dimens.spacingMd),
-          children: [
-            Text(Strings.settingsThemeMode, style: textTheme.titleMedium),
-            const SizedBox(height: Dimens.spacingSm),
-            _ThemeModeSelector(controller: themeController),
-            const SizedBox(height: Dimens.spacingLg),
-            Text(Strings.settingsThemeScheme, style: textTheme.titleMedium),
-            const SizedBox(height: Dimens.spacingSm),
-            for (final option in availableThemes)
-              _ThemeOptionTile(option: option, controller: themeController),
-          ],
+      body: SafeArea(
+        top: false,
+        child: ListenableBuilder(
+          listenable: themeController,
+          builder: (context, _) => ListView(
+            padding: const EdgeInsets.all(Dimens.spacingMd),
+            children: [
+              Text(Strings.settingsThemeMode, style: textTheme.titleMedium),
+              const SizedBox(height: Dimens.spacingSm),
+              _ThemeModeSelector(controller: themeController),
+              const SizedBox(height: Dimens.spacingLg),
+              Text(Strings.settingsThemeScheme, style: textTheme.titleMedium),
+              const SizedBox(height: Dimens.spacingSm),
+              for (final option in availableThemes)
+                _ThemeOptionTile(option: option, controller: themeController),
+            ],
+          ),
         ),
       ),
     );
