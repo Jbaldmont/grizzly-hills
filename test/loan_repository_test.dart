@@ -43,7 +43,7 @@ void main() {
     expect(updated.dueDate, DateTime(2026, 7, 22));
     expect(updated.principalCents, 10000);
 
-    await loans.deleteLoan(loan.id);
+    expect(await loans.deleteLoan(loan.id), isTrue);
     expect(await loans.watchActiveLoans().first, isEmpty);
   });
 
@@ -94,7 +94,7 @@ void main() {
     expect(closedLoan.closedAt, DateTime(2026, 7, 15));
   });
 
-  test('eliminar un préstamo borra sus pagos en cascada', () async {
+  test('no permite eliminar un préstamo con pagos', () async {
     final loan = await createLoan();
     await loans.registerPayment(
       loanId: loan.id,
@@ -102,10 +102,11 @@ void main() {
       date: DateTime(2026, 7, 8),
     );
 
-    await loans.deleteLoan(loan.id);
+    final deleted = await loans.deleteLoan(loan.id);
 
-    expect(await loans.watchPayments(loan.id).first, isEmpty);
-    expect(await loans.watchTotalPaidByLoan().first, isEmpty);
+    expect(deleted, isFalse);
+    expect((await loans.watchActiveLoans().first).single.id, loan.id);
+    expect((await loans.watchPayments(loan.id).first).length, 1);
   });
 
   test('el total pagado por préstamo suma sus pagos', () async {

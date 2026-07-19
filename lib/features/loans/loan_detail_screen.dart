@@ -45,14 +45,22 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
           stream: _payments,
           builder: (context, paymentsSnapshot) {
             final payments = paymentsSnapshot.data ?? [];
-            return _buildScaffold(loan, payments);
+            return _buildScaffold(
+              loan,
+              payments,
+              paymentsLoaded: paymentsSnapshot.hasData,
+            );
           },
         );
       },
     );
   }
 
-  Widget _buildScaffold(Loan loan, List<LoanPayment> payments) {
+  Widget _buildScaffold(
+    Loan loan,
+    List<LoanPayment> payments, {
+    required bool paymentsLoaded,
+  }) {
     final isClosed = loan.closedAt != null;
     return Scaffold(
       appBar: AppBar(
@@ -69,11 +77,12 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                 hasPayments: payments.isNotEmpty,
               ),
             ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: Strings.delete,
-            onPressed: () => _confirmDelete(loan),
-          ),
+          if (paymentsLoaded && payments.isEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: Strings.delete,
+              onPressed: () => _confirmDelete(loan),
+            ),
         ],
       ),
       body: SafeArea(
@@ -139,10 +148,17 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
       ),
     );
     if ((confirmed ?? false) && mounted) {
-      await widget.loanRepository.deleteLoan(loan.id);
-      if (mounted) {
-        Navigator.of(context).pop();
+      final deleted = await widget.loanRepository.deleteLoan(loan.id);
+      if (!mounted) {
+        return;
       }
+      if (!deleted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(Strings.loanHasPaymentsMessage)),
+        );
+        return;
+      }
+      Navigator.of(context).pop();
     }
   }
 }

@@ -34,14 +34,26 @@ class DateField extends StatelessWidget {
 
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
+    final rangeStart = firstDate ?? DateTime(now.year - 1);
+    final rangeEnd = lastDate ?? DateTime(now.year + 1);
     final picked = await showDatePicker(
       context: context,
-      initialDate: date,
-      firstDate: firstDate ?? DateTime(now.year - 1),
-      lastDate: lastDate ?? DateTime(now.year + 1),
+      initialDate: _clamp(date, rangeStart, rangeEnd),
+      firstDate: rangeStart,
+      lastDate: rangeEnd,
     );
     if (picked != null) {
       onChanged(dateOnly(picked));
     }
+  }
+
+  DateTime _clamp(DateTime value, DateTime rangeStart, DateTime rangeEnd) {
+    if (value.isBefore(rangeStart)) {
+      return rangeStart;
+    }
+    if (value.isAfter(rangeEnd)) {
+      return rangeEnd;
+    }
+    return value;
   }
 }

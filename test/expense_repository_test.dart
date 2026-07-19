@@ -144,6 +144,65 @@ void main() {
     expect(overview.unexpectedCents, 1000);
   });
 
+  test('un gasto con extensión registra ambas filas en una sola operación',
+      () async {
+    final month = await openMonth();
+    final casa = month.groups.first;
+
+    await expenses.addExpense(
+      monthId: month.month.id,
+      kind: ExpenseKind.group,
+      groupId: casa.id,
+      description: 'Mercado grande',
+      amountCents: 56000,
+      date: DateTime(2026, 7, 12),
+      extensionRequest: const ExtensionRequest(
+        amountCents: 6000,
+        description: 'Extensión: Casa',
+      ),
+    );
+
+    final rows = await expenses.loadExpenses(month.month.id);
+    expect(rows.length, 2);
+    final overview = MonthOverview(activeMonth: month, expenses: rows);
+    expect(overview.spentInGroupCents(casa.id), 56000);
+    expect(overview.extensionCentsForGroup(casa.id), 6000);
+    expect(overview.unexpectedCents, 6000);
+  });
+
+  test('editar un gasto puede otorgar la extensión en la misma operación',
+      () async {
+    final month = await openMonth();
+    final casa = month.groups.first;
+    await expenses.addExpense(
+      monthId: month.month.id,
+      kind: ExpenseKind.group,
+      groupId: casa.id,
+      description: 'Mercado',
+      amountCents: 40000,
+      date: DateTime(2026, 7, 12),
+    );
+    final created =
+        (await expenses.loadExpenses(month.month.id)).single;
+
+    await expenses.updateExpense(
+      id: created.id,
+      description: 'Mercado',
+      amountCents: 56000,
+      date: DateTime(2026, 7, 13),
+      extensionRequest: const ExtensionRequest(
+        amountCents: 6000,
+        description: 'Extensión: Casa',
+      ),
+    );
+
+    final rows = await expenses.loadExpenses(month.month.id);
+    expect(rows.length, 2);
+    final overview = MonthOverview(activeMonth: month, expenses: rows);
+    expect(overview.spentInGroupCents(casa.id), 56000);
+    expect(overview.extensionCentsForGroup(casa.id), 6000);
+  });
+
   test('editar y borrar un gasto', () async {
     final month = await openMonth();
     await expenses.addExpense(

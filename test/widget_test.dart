@@ -161,6 +161,45 @@ void main() {
     await disposeTestApp(tester);
   });
 
+  testWidgets(
+    'avisa si el nuevo sueldo deja el general por debajo de lo gastado',
+    (tester) async {
+      await tester.pumpWidget(await buildTestApp(db));
+      await tester.pumpAndSettle();
+
+      await openTestMonth(tester);
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).first, '150');
+      await tester.tap(
+        find.widgetWithText(ChoiceChip, Strings.unexpectedLabel),
+      );
+      await tester.pump();
+      await tester.tap(find.text(Strings.save));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.edit_outlined));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).first, '1900');
+      await tester.scrollUntilVisible(
+        find.text(Strings.saveChanges),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.tap(find.text(Strings.saveChanges));
+      await tester.pumpAndSettle();
+
+      expect(find.text(Strings.generalBelowSpentTitle), findsOneWidget);
+
+      await tester.tap(find.text(Strings.cancel));
+      await tester.pumpAndSettle();
+      expect(find.text(Strings.editMonthTitle), findsOneWidget);
+
+      await disposeTestApp(tester);
+    },
+  );
+
   testWidgets('el botón atrás vuelve a Inicio en vez de cerrar la app', (
     tester,
   ) async {

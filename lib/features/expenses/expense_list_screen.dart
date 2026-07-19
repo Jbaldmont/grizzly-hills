@@ -17,13 +17,13 @@ import 'month_overview.dart';
 class ExpenseListScreen extends StatefulWidget {
   const ExpenseListScreen({
     super.key,
-    required this.monthId,
+    required this.month,
     required this.monthRepository,
     required this.expenseRepository,
     this.group,
   });
 
-  final int monthId;
+  final Month month;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
   final BudgetGroup? group;
@@ -34,7 +34,7 @@ class ExpenseListScreen extends StatefulWidget {
 
 class _ExpenseListScreenState extends State<ExpenseListScreen> {
   late final Stream<List<Expense>> _expenses =
-      widget.expenseRepository.watchExpenses(widget.monthId);
+      widget.expenseRepository.watchExpenses(widget.month.id);
   late final Stream<ActiveMonth?> _activeMonth =
       widget.monthRepository.watchActiveMonth();
 
@@ -178,7 +178,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       return;
     }
     await widget.expenseRepository.addExpense(
-      monthId: widget.monthId,
+      monthId: widget.month.id,
       kind: ExpenseKind.budgetExtension,
       groupId: group.id,
       description: Strings.extensionDescription(group.name),
@@ -225,7 +225,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       context: context,
       isScrollControlled: true,
       builder: (_) => ExpenseFormSheet(
-        monthId: widget.monthId,
+        month: widget.month,
         expenseRepository: widget.expenseRepository,
         monthRepository: widget.monthRepository,
         lockedDestination: _destination,

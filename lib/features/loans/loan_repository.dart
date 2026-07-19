@@ -85,7 +85,6 @@ class LoanRepository {
     required DateTime dueDate,
     int? principalCents,
     DateTime? loanDate,
-    double? weeklyRatePercent,
   }) {
     return (_db.update(_db.loans)..where((loan) => loan.id.equals(id))).write(
       LoansCompanion(
@@ -97,15 +96,18 @@ class LoanRepository {
             loanDate == null ? const Value.absent() : Value(dateOnly(loanDate)),
         interestStartDate:
             loanDate == null ? const Value.absent() : Value(dateOnly(loanDate)),
-        weeklyRatePercent: weeklyRatePercent == null
-            ? const Value.absent()
-            : Value(weeklyRatePercent),
       ),
     );
   }
 
-  Future<void> deleteLoan(int id) {
-    return (_db.delete(_db.loans)..where((loan) => loan.id.equals(id))).go();
+  Future<bool> deleteLoan(int id) {
+    return _db.transaction(() async {
+      if (await hasPayments(id)) {
+        return false;
+      }
+      await (_db.delete(_db.loans)..where((loan) => loan.id.equals(id))).go();
+      return true;
+    });
   }
 
   Future<bool> registerPayment({

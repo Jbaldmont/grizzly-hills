@@ -36,10 +36,19 @@ class SavingsRepository {
         .write(SavingsLocationsCompanion(name: Value(name)));
   }
 
-  Future<void> deleteLocation(int id) {
-    return (_db.delete(_db.savingsLocations)
-          ..where((location) => location.id.equals(id)))
-        .go();
+  Future<bool> deleteLocation(int id) {
+    return _db.transaction(() async {
+      final location = await (_db.select(_db.savingsLocations)
+            ..where((row) => row.id.equals(id)))
+          .getSingle();
+      if (location.balanceCents != 0) {
+        return false;
+      }
+      await (_db.delete(_db.savingsLocations)
+            ..where((row) => row.id.equals(id)))
+          .go();
+      return true;
+    });
   }
 
   Future<void> adjustBalance({required int id, required int deltaCents}) {

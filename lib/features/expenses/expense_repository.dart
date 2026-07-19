@@ -2,7 +2,15 @@ import 'dart:math';
 
 import 'package:drift/drift.dart';
 
+import '../../core/dates.dart';
 import '../../core/db/app_database.dart';
+
+class ExtensionRequest {
+  const ExtensionRequest({required this.amountCents, required this.description});
+
+  final int amountCents;
+  final String description;
+}
 
 class ExpenseRepository {
   ExpenseRepository(this._db);
@@ -39,8 +47,12 @@ class ExpenseRepository {
     required DateTime date,
     int? groupId,
     int? fixedTemplateId,
+    ExtensionRequest? extensionRequest,
   }) {
     return _db.transaction(() async {
+      if (extensionRequest != null && groupId != null) {
+        await _insertExtension(monthId, groupId, extensionRequest);
+      }
       await _db.into(_db.expenses).insert(
             ExpensesCompanion.insert(
               monthId: monthId,
@@ -63,14 +75,26 @@ class ExpenseRepository {
     required String description,
     required int amountCents,
     required DateTime date,
+    ExtensionRequest? extensionRequest,
   }) {
-    return (_db.update(_db.expenses)..where((e) => e.id.equals(id))).write(
-      ExpensesCompanion(
-        description: Value(description),
-        amountCents: Value(amountCents),
-        date: Value(date),
-      ),
-    );
+    return _db.transaction(() async {
+      if (extensionRequest != null) {
+        final expense = await (_db.select(
+          _db.expenses,
+        )..where((row) => row.id.equals(id))).getSingle();
+        final groupId = expense.groupId;
+        if (groupId != null) {
+          await _insertExtension(expense.monthId, groupId, extensionRequest);
+        }
+      }
+      await (_db.update(_db.expenses)..where((e) => e.id.equals(id))).write(
+        ExpensesCompanion(
+          description: Value(description),
+          amountCents: Value(amountCents),
+          date: Value(date),
+        ),
+      );
+    });
   }
 
   Future<void> deleteExpense(int id) {
@@ -116,6 +140,23 @@ class ExpenseRepository {
         remainingCents -= reduceCents;
       }
     });
+  }
+
+  Future<void> _insertExtension(
+    int monthId,
+    int groupId,
+    ExtensionRequest extensionRequest,
+  ) {
+    return _db.into(_db.expenses).insert(
+          ExpensesCompanion.insert(
+            monthId: monthId,
+            groupId: Value(groupId),
+            kind: ExpenseKind.budgetExtension,
+            description: extensionRequest.description,
+            amountCents: extensionRequest.amountCents,
+            date: dateOnly(DateTime.now()),
+          ),
+        );
   }
 
   Future<void> _rememberFixedAmount(int templateId, int amountCents) {

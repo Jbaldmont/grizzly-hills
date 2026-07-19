@@ -37,6 +37,9 @@ void main() {
     await tester.enterText(find.byType(TextFormField), amount);
     await tester.tap(find.text(Strings.save));
     await tester.pumpAndSettle();
+    expect(find.text(Strings.confirmPaymentTitle), findsOneWidget);
+    await tester.tap(find.text(Strings.confirm));
+    await tester.pumpAndSettle();
   }
 
   testWidgets('crear un préstamo desde el estado vacío', (tester) async {

@@ -165,6 +165,12 @@ class _SavingsScreenState extends State<SavingsScreen> {
   }
 
   Future<void> _deleteLocation(SavingsLocation location) async {
+    if (location.balanceCents != 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(Strings.deleteLocationHasBalanceMessage)),
+      );
+      return;
+    }
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -183,7 +189,16 @@ class _SavingsScreenState extends State<SavingsScreen> {
       ),
     );
     if (confirmed ?? false) {
-      await widget.savingsRepository.deleteLocation(location.id);
+      final deleted = await widget.savingsRepository.deleteLocation(
+        location.id,
+      );
+      if (!deleted && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(Strings.deleteLocationHasBalanceMessage),
+          ),
+        );
+      }
     }
   }
 }

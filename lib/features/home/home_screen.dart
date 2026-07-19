@@ -180,7 +180,7 @@ class _MonthSummary extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ExpenseListScreen(
-          monthId: overview.activeMonth.month.id,
+          month: overview.activeMonth.month,
           monthRepository: monthRepository,
           expenseRepository: expenseRepository,
           group: group,

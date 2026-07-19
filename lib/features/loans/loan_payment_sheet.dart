@@ -125,11 +125,15 @@ class _LoanPaymentSheetState extends State<LoanPaymentSheet> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    final amountCents = parseBsToCents(_amountController.text)!;
+    if (!await _confirmPayment(amountCents) || !mounted) {
+      return;
+    }
     setState(() => _saving = true);
     try {
       final closed = await widget.loanRepository.registerPayment(
         loanId: widget.loan.id,
-        amountCents: parseBsToCents(_amountController.text)!,
+        amountCents: amountCents,
         date: _date,
       );
       if (!mounted) {
@@ -151,5 +155,48 @@ class _LoanPaymentSheetState extends State<LoanPaymentSheet> {
         ).showSnackBar(const SnackBar(content: Text(Strings.errorGeneric)));
       }
     }
+  }
+
+  Future<bool> _confirmPayment(int amountCents) async {
+    final owedCents = _owedAtDateCents;
+    final closesLoan = amountCents >= owedCents;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text(Strings.confirmPaymentTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${Strings.amountLabel}: ${formatBs(amountCents)}'),
+            const SizedBox(height: Dimens.spacingXs),
+            Text(
+              closesLoan
+                  ? Strings.paymentClosesLoanNote
+                  : '${Strings.remainingDebtLabel}: '
+                      '${formatBs(owedCents - amountCents)}',
+            ),
+            const SizedBox(height: Dimens.spacingSm),
+            Text(
+              Strings.paymentIrreversibleNote,
+              style: Theme.of(dialogContext).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(dialogContext).colorScheme.error,
+                  ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text(Strings.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text(Strings.confirm),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
   }
 }

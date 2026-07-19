@@ -39,6 +39,8 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
 
   List<_GroupRow>? _rows;
   Map<int, int> _minBudgetByGroupId = const {};
+  int _generalSpentCents = 0;
+  bool _minimaLoaded = false;
   bool _saving = false;
 
   bool get _isEditing => widget.monthToEdit != null;
@@ -89,6 +91,8 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
                 overview.extensionCentsForGroup(group.id),
           ),
       };
+      _generalSpentCents = overview.fixedCents + overview.unexpectedCents;
+      _minimaLoaded = true;
     });
   }
 
@@ -152,10 +156,13 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
           _TotalsSummary(
             salaryController: _salaryController,
             groupControllers: [for (final row in rows) row.controller],
+            generalSpentCents: _generalSpentCents,
           ),
           const SizedBox(height: Dimens.spacingLg),
           FilledButton(
-            onPressed: _saving ? null : _save,
+            onPressed: _saving || (_isEditing && !_minimaLoaded)
+                ? null
+                : _save,
             child: Text(
               _isEditing ? Strings.saveChanges : Strings.startMonthConfirm,
             ),
@@ -204,7 +211,13 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
       0,
       (sum, row) => sum + parseBsToCents(row.controller.text)!,
     );
-    if (assignedCents > salaryCents && !await _confirmOverAssigned()) {
+    if (assignedCents > salaryCents) {
+      if (!await _confirmOverAssigned()) {
+        return;
+      }
+    } else if (_isEditing &&
+        salaryCents - assignedCents < _generalSpentCents &&
+        !await _confirmGeneralBelowSpent(salaryCents - assignedCents)) {
       return;
     }
     if (!mounted) {
@@ -251,12 +264,32 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
     );
   }
 
-  Future<bool> _confirmOverAssigned() async {
+  Future<bool> _confirmOverAssigned() {
+    return _confirmDialog(
+      title: Strings.overAssignedDialogTitle,
+      body: Strings.overAssignedDialogBody,
+    );
+  }
+
+  Future<bool> _confirmGeneralBelowSpent(int generalCents) {
+    return _confirmDialog(
+      title: Strings.generalBelowSpentTitle,
+      body: Strings.generalBelowSpentBody(
+        formatBs(_generalSpentCents),
+        formatBs(generalCents),
+      ),
+    );
+  }
+
+  Future<bool> _confirmDialog({
+    required String title,
+    required String body,
+  }) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text(Strings.overAssignedDialogTitle),
-        content: const Text(Strings.overAssignedDialogBody),
+        title: Text(title),
+        content: Text(body),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -329,10 +362,12 @@ class _TotalsSummary extends StatelessWidget {
   const _TotalsSummary({
     required this.salaryController,
     required this.groupControllers,
+    this.generalSpentCents = 0,
   });
 
   final TextEditingController salaryController;
   final List<TextEditingController> groupControllers;
+  final int generalSpentCents;
 
   @override
   Widget build(BuildContext context) {
@@ -345,6 +380,7 @@ class _TotalsSummary extends StatelessWidget {
           (sum, controller) => sum + (parseBsToCents(controller.text) ?? 0),
         );
         final generalCents = salaryCents - assignedCents;
+        final warning = _warningFor(generalCents);
         final theme = Theme.of(context);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -359,10 +395,10 @@ class _TotalsSummary extends StatelessWidget {
               amountCents: generalCents,
               emphasized: true,
             ),
-            if (generalCents < 0) ...[
+            if (warning != null) ...[
               const SizedBox(height: Dimens.spacingXs),
               Text(
-                Strings.overAssignedWarning,
+                warning,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.error,
                 ),
@@ -372,6 +408,16 @@ class _TotalsSummary extends StatelessWidget {
         );
       },
     );
+  }
+
+  String? _warningFor(int generalCents) {
+    if (generalCents < 0) {
+      return Strings.overAssignedWarning;
+    }
+    if (generalCents < generalSpentCents) {
+      return Strings.generalBelowSpentWarning(formatBs(generalSpentCents));
+    }
+    return null;
   }
 }
 

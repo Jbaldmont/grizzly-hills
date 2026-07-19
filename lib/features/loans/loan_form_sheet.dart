@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/dates.dart';
 import '../../core/db/app_database.dart';
@@ -128,9 +129,9 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
             const SizedBox(height: Dimens.spacingMd),
             TextFormField(
               controller: _rateController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
+              enabled: !_isEditing,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: const InputDecoration(
                 labelText: Strings.interestRateLabel,
                 border: OutlineInputBorder(),
@@ -187,7 +188,10 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
   }
 
   String? _validateRate(String? value) {
-    final percent = parsePercent(value ?? '');
+    if (_isEditing) {
+      return null;
+    }
+    final percent = parseWholePercent(value ?? '');
     if (percent == null || percent <= 0 || percent > 100) {
       return Strings.invalidInterestRateError;
     }
@@ -216,7 +220,6 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
 
   Future<void> _persist() {
     final debtorName = _debtorController.text.trim();
-    final weeklyRatePercent = parsePercent(_rateController.text)!;
     final loan = widget.loanToEdit;
     if (loan == null) {
       return widget.loanRepository.addLoan(
@@ -224,7 +227,7 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
         principalCents: parseBsToCents(_amountController.text)!,
         loanDate: _loanDate,
         dueDate: _dueDate,
-        weeklyRatePercent: weeklyRatePercent,
+        weeklyRatePercent: parseWholePercent(_rateController.text)!.toDouble(),
       );
     }
     return widget.loanRepository.updateLoan(
@@ -235,7 +238,6 @@ class _LoanFormSheetState extends State<LoanFormSheet> {
           ? null
           : parseBsToCents(_amountController.text)!,
       loanDate: _principalLocked ? null : _loanDate,
-      weeklyRatePercent: weeklyRatePercent,
     );
   }
 }

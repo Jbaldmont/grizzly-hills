@@ -12,6 +12,8 @@ import 'month_overview.dart';
 
 enum _InsufficientBudgetAction { cancel, requestExtension, continueAnyway }
 
+typedef _BudgetDecision = ({bool proceed, ExtensionRequest? extensionRequest});
+
 class ExpenseDestination {
   const ExpenseDestination.group(BudgetGroup this.group);
 
@@ -35,7 +37,7 @@ void showQuickExpenseSheet(
     context: context,
     isScrollControlled: true,
     builder: (_) => ExpenseFormSheet(
-      monthId: activeMonth.month.id,
+      month: activeMonth.month,
       expenseRepository: expenseRepository,
       monthRepository: monthRepository,
       destinations: [
@@ -49,7 +51,7 @@ void showQuickExpenseSheet(
 class ExpenseFormSheet extends StatefulWidget {
   const ExpenseFormSheet({
     super.key,
-    required this.monthId,
+    required this.month,
     required this.expenseRepository,
     required this.monthRepository,
     this.destinations = const [],
@@ -57,7 +59,7 @@ class ExpenseFormSheet extends StatefulWidget {
     this.expenseToEdit,
   });
 
-  final int monthId;
+  final Month month;
   final ExpenseRepository expenseRepository;
   final MonthRepository monthRepository;
   final List<ExpenseDestination> destinations;
@@ -78,6 +80,11 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
   bool _destinationMissing = false;
 
   bool get _isEditing => widget.expenseToEdit != null;
+
+  DateTime get _firstAllowedDate =>
+      DateTime(widget.month.year, widget.month.month, 1);
+
+  DateTime get _lastAllowedDate => dateOnly(DateTime.now());
 
   @override
   void initState() {
@@ -145,6 +152,8 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
             DateField(
               label: Strings.dateLabel,
               date: _date,
+              firstDate: _firstAllowedDate,
+              lastDate: _lastAllowedDate,
               onChanged: (value) {
                 setState(() => _date = value);
               },
@@ -212,18 +221,25 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
     if (!amountValid) {
       return;
     }
+    ExtensionRequest? extensionRequest;
     final group = destination.group;
     if (group != null) {
       final amountCents = parseBsToCents(_amountController.text)!;
-      final proceed = await _ensureGroupBudget(group, amountCents);
-      if (!proceed || !mounted) {
+      final decision = await _ensureGroupBudget(group, amountCents);
+      if (!decision.proceed || !mounted) {
         return;
       }
+      extensionRequest = decision.extensionRequest;
     }
     setState(() => _saving = true);
     try {
-      await _persist(destination);
+      await _persist(destination, extensionRequest);
       if (mounted) {
+        if (extensionRequest != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text(Strings.extensionAppliedMessage)),
+          );
+        }
         Navigator.of(context).pop();
       }
     } on Exception {
@@ -236,9 +252,14 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
     }
   }
 
-  Future<bool> _ensureGroupBudget(BudgetGroup group, int amountCents) async {
+  Future<_BudgetDecision> _ensureGroupBudget(
+    BudgetGroup group,
+    int amountCents,
+  ) async {
+    const cancelDecision = (proceed: false, extensionRequest: null);
+    const plainDecision = (proceed: true, extensionRequest: null);
     final expenses = await widget.expenseRepository.loadExpenses(
-      widget.monthId,
+      widget.month.id,
     );
     final excludedId = widget.expenseToEdit?.id;
     final spentOthers = expenses.fold<int>(0, (sum, expense) {
@@ -251,33 +272,48 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
     final remainingCents = group.budgetCents + extensionCents - spentOthers;
     final shortfallCents = amountCents - remainingCents;
     if (shortfallCents <= 0) {
-      return true;
+      return plainDecision;
     }
     if (!mounted) {
-      return false;
+      return cancelDecision;
     }
     final activeMonth = await widget.monthRepository.loadActiveMonth(
-      widget.monthId,
+      widget.month.id,
     );
     if (activeMonth == null) {
-      return true;
+      return plainDecision;
     }
     final overview = MonthOverview(
       activeMonth: activeMonth,
       expenses: expenses,
     );
     if (!mounted) {
-      return false;
+      return cancelDecision;
     }
-    return _resolveInsufficientBudget(
+    final action = await _resolveInsufficientBudget(
       group: group,
       remainingCents: remainingCents,
       shortfallCents: shortfallCents,
       availableGeneralCents: overview.availableGeneralCents,
     );
+    switch (action) {
+      case _InsufficientBudgetAction.requestExtension:
+        return (
+          proceed: true,
+          extensionRequest: ExtensionRequest(
+            amountCents: shortfallCents,
+            description: Strings.extensionDescription(group.name),
+          ),
+        );
+      case _InsufficientBudgetAction.continueAnyway:
+        return plainDecision;
+      case _InsufficientBudgetAction.cancel:
+      case null:
+        return cancelDecision;
+    }
   }
 
-  Future<bool> _resolveInsufficientBudget({
+  Future<_InsufficientBudgetAction?> _resolveInsufficientBudget({
     required BudgetGroup group,
     required int remainingCents,
     required int shortfallCents,
@@ -341,26 +377,13 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
         ],
       ),
     );
-    if (action == _InsufficientBudgetAction.requestExtension) {
-      await widget.expenseRepository.addExpense(
-        monthId: widget.monthId,
-        kind: ExpenseKind.budgetExtension,
-        groupId: group.id,
-        description: Strings.extensionDescription(group.name),
-        amountCents: shortfallCents,
-        date: dateOnly(DateTime.now()),
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(Strings.extensionAppliedMessage)),
-        );
-      }
-      return true;
-    }
-    return action == _InsufficientBudgetAction.continueAnyway;
+    return action;
   }
 
-  Future<void> _persist(ExpenseDestination destination) {
+  Future<void> _persist(
+    ExpenseDestination destination,
+    ExtensionRequest? extensionRequest,
+  ) {
     final amountCents = parseBsToCents(_amountController.text)!;
     final description = _descriptionController.text.trim();
     final expense = widget.expenseToEdit;
@@ -370,15 +393,17 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
         description: description,
         amountCents: amountCents,
         date: _date,
+        extensionRequest: extensionRequest,
       );
     }
     return widget.expenseRepository.addExpense(
-      monthId: widget.monthId,
+      monthId: widget.month.id,
       kind: destination.kind,
       groupId: destination.group?.id,
       description: description,
       amountCents: amountCents,
       date: _date,
+      extensionRequest: extensionRequest,
     );
   }
 }
