@@ -4,7 +4,9 @@ import '../../core/db/app_database.dart';
 import '../../core/dimens.dart';
 import '../../core/money.dart';
 import '../../core/strings.dart';
+import '../../core/widgets/sheet_padding.dart';
 import '../expenses/expense_repository.dart';
+import '../expenses/month_overview.dart';
 import '../monthly_budget/month_repository.dart';
 import 'savings_repository.dart';
 
@@ -98,13 +100,7 @@ class _TransferSheetState extends State<TransferSheet> {
 
   Widget _buildForm(BuildContext context, List<Expense> expenses) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.only(
-        left: Dimens.spacingMd,
-        right: Dimens.spacingMd,
-        top: Dimens.spacingMd,
-        bottom: MediaQuery.of(context).viewInsets.bottom + Dimens.spacingMd,
-      ),
+    return SheetPadding(
       child: Form(
         key: _formKey,
         child: Column(
@@ -240,9 +236,12 @@ class _TransferSheetState extends State<TransferSheet> {
 
   int _remainingCents(BudgetGroup group, List<Expense> expenses) {
     final spentCents = expenses.fold<int>(0, (sum, expense) {
-      return expense.groupId == group.id ? sum + expense.amountCents : sum;
+      final countsForGroup = MonthOverview.countsAsGroupSpending(expense) &&
+          expense.groupId == group.id;
+      return countsForGroup ? sum + expense.amountCents : sum;
     });
-    return group.budgetCents - spentCents;
+    final extensionCents = MonthOverview.extensionCentsIn(expenses, group.id);
+    return group.budgetCents + extensionCents - spentCents;
   }
 
   String? _validateAmount(String? value) {

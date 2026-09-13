@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../core/dates.dart';
@@ -9,17 +11,19 @@ import '../home/widgets/group_card.dart';
 import '../monthly_budget/month_repository.dart';
 import 'expense_form_sheet.dart';
 import 'expense_repository.dart';
+import 'extension_request_dialog.dart';
+import 'month_overview.dart';
 
 class ExpenseListScreen extends StatefulWidget {
   const ExpenseListScreen({
     super.key,
-    required this.monthId,
+    required this.month,
     required this.monthRepository,
     required this.expenseRepository,
     this.group,
   });
 
-  final int monthId;
+  final Month month;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
   final BudgetGroup? group;
@@ -30,7 +34,9 @@ class ExpenseListScreen extends StatefulWidget {
 
 class _ExpenseListScreenState extends State<ExpenseListScreen> {
   late final Stream<List<Expense>> _expenses =
-      widget.expenseRepository.watchExpenses(widget.monthId);
+      widget.expenseRepository.watchExpenses(widget.month.id);
+  late final Stream<ActiveMonth?> _activeMonth =
+      widget.monthRepository.watchActiveMonth();
 
   ExpenseDestination get _destination => widget.group == null
       ? const ExpenseDestination.unexpected()
@@ -47,41 +53,92 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
         onPressed: () => _openForm(),
         child: const Icon(Icons.add),
       ),
-      body: StreamBuilder<List<Expense>>(
-        stream: _expenses,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final expenses = _filter(snapshot.data ?? []);
-          return _buildList(expenses);
-        },
+      body: SafeArea(
+        top: false,
+        child: StreamBuilder<List<Expense>>(
+          stream: _expenses,
+          builder: (context, expensesSnapshot) {
+            if (expensesSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final allExpenses = expensesSnapshot.data ?? [];
+            if (widget.group == null) {
+              return _buildList(allExpenses);
+            }
+            return StreamBuilder<ActiveMonth?>(
+              stream: _activeMonth,
+              builder: (context, monthSnapshot) {
+                final activeMonth = monthSnapshot.data;
+                final availableGeneralCents = activeMonth == null
+                    ? 0
+                    : MonthOverview(
+                        activeMonth: activeMonth,
+                        expenses: allExpenses,
+                      ).availableGeneralCents;
+                return _buildList(
+                  allExpenses,
+                  availableGeneralCents: availableGeneralCents,
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildList(List<Expense> expenses) {
+  Widget _buildList(List<Expense> allExpenses, {int availableGeneralCents = 0}) {
     final group = widget.group;
+    final expenses = _filter(allExpenses);
     final totalCents =
         expenses.fold(0, (sum, expense) => sum + expense.amountCents);
+    final extensionCents = group == null
+        ? 0
+        : MonthOverview.extensionCentsIn(allExpenses, group.id);
+    final returnableCents = group == null
+        ? 0
+        : max<int>(0, extensionCents - max<int>(0, totalCents - group.budgetCents));
     return ListView(
       padding: const EdgeInsets.all(Dimens.spacingMd),
       children: [
-        if (group != null)
-          GroupCard(group: group, spentCents: totalCents)
-        else
+        if (group != null) ...[
+          GroupCard(
+            group: group,
+            spentCents: totalCents,
+            extensionCents: extensionCents,
+          ),
+          const SizedBox(height: Dimens.spacingSm),
+          OutlinedButton.icon(
+            onPressed: availableGeneralCents > 0
+                ? () => _requestExtension(group, availableGeneralCents)
+                : null,
+            icon: const Icon(Icons.add),
+            label: const Text(Strings.requestExtension),
+          ),
+          if (extensionCents > 0)
+            OutlinedButton.icon(
+              onPressed: returnableCents > 0
+                  ? () => _returnExtension(group, returnableCents)
+                  : null,
+              icon: const Icon(Icons.undo),
+              label: const Text(Strings.returnExtension),
+            ),
+        ] else
           _UnexpectedTotalCard(totalCents: totalCents),
         const SizedBox(height: Dimens.spacingSm),
         if (expenses.isEmpty)
           const _EmptyList()
         else
           for (final expense in expenses)
-            _ExpenseTile(
-              expense: expense,
-              onTap: () => _openForm(expenseToEdit: expense),
-              onConfirmDelete: () =>
-                  widget.expenseRepository.deleteExpense(expense.id),
-            ),
+            if (_isLocked(expense))
+              _ExpenseTile(expense: expense)
+            else
+              _ExpenseTile(
+                expense: expense,
+                onTap: () => _openForm(expenseToEdit: expense),
+                onConfirmDelete: () =>
+                    widget.expenseRepository.deleteExpense(expense.id),
+              ),
       ],
     );
   }
@@ -91,10 +148,76 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     return [
       for (final expense in expenses)
         if (group != null
-            ? expense.groupId == group.id
-            : expense.kind == ExpenseKind.unexpected)
+            ? MonthOverview.countsAsGroupSpending(expense) &&
+                expense.groupId == group.id
+            : expense.kind == ExpenseKind.unexpected ||
+                expense.kind == ExpenseKind.budgetExtension)
           expense,
     ];
+  }
+
+  bool _isLocked(Expense expense) =>
+      expense.kind == ExpenseKind.budgetExtension ||
+      expense.kind == ExpenseKind.savingsTransfer;
+
+  Future<void> _requestExtension(
+    BudgetGroup group,
+    int availableGeneralCents,
+  ) async {
+    final amountCents = await showDialog<int>(
+      context: context,
+      builder: (_) => ExtensionAmountDialog(
+        title: Strings.requestExtension,
+        limitLabel: Strings.availableGeneralRowLabel,
+        limitCents: availableGeneralCents,
+        confirmLabel: Strings.request,
+        exceedsLimitError: Strings.extensionExceedsGeneralError,
+      ),
+    );
+    if (amountCents == null) {
+      return;
+    }
+    await widget.expenseRepository.addExpense(
+      monthId: widget.month.id,
+      kind: ExpenseKind.budgetExtension,
+      groupId: group.id,
+      description: Strings.extensionDescription(group.name),
+      amountCents: amountCents,
+      date: dateOnly(DateTime.now()),
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(Strings.extensionAppliedMessage)),
+      );
+    }
+  }
+
+  Future<void> _returnExtension(
+    BudgetGroup group,
+    int returnableCents,
+  ) async {
+    final amountCents = await showDialog<int>(
+      context: context,
+      builder: (_) => ExtensionAmountDialog(
+        title: Strings.returnExtension,
+        limitLabel: Strings.returnableExtensionLabel,
+        limitCents: returnableCents,
+        confirmLabel: Strings.returnConfirm,
+        exceedsLimitError: Strings.extensionReturnExceedsError,
+      ),
+    );
+    if (amountCents == null) {
+      return;
+    }
+    await widget.expenseRepository.returnExtension(
+      groupId: group.id,
+      amountCents: amountCents,
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(Strings.extensionReturnedMessage)),
+      );
+    }
   }
 
   void _openForm({Expense? expenseToEdit}) {
@@ -102,7 +225,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       context: context,
       isScrollControlled: true,
       builder: (_) => ExpenseFormSheet(
-        monthId: widget.monthId,
+        month: widget.month,
         expenseRepository: widget.expenseRepository,
         monthRepository: widget.monthRepository,
         lockedDestination: _destination,
@@ -115,17 +238,38 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
 class _ExpenseTile extends StatelessWidget {
   const _ExpenseTile({
     required this.expense,
-    required this.onTap,
-    required this.onConfirmDelete,
+    this.onTap,
+    this.onConfirmDelete,
   });
 
   final Expense expense;
-  final VoidCallback onTap;
-  final Future<void> Function() onConfirmDelete;
+  final VoidCallback? onTap;
+  final Future<void> Function()? onConfirmDelete;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final onConfirmDelete = this.onConfirmDelete;
+    final tile = ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: onTap == null && onConfirmDelete == null
+          ? const Icon(Icons.lock_outline)
+          : null,
+      title: Text(
+        expense.description.isEmpty
+            ? Strings.noDescription
+            : expense.description,
+      ),
+      subtitle: Text(formatShortDate(expense.date)),
+      trailing: Text(
+        formatBs(expense.amountCents),
+        style: theme.textTheme.titleMedium,
+      ),
+      onTap: onTap,
+    );
+    if (onConfirmDelete == null) {
+      return tile;
+    }
     return Dismissible(
       key: ValueKey(expense.id),
       direction: DismissDirection.endToStart,
@@ -138,20 +282,7 @@ class _ExpenseTile extends StatelessWidget {
       ),
       confirmDismiss: (_) => _confirmDelete(context),
       onDismissed: (_) => onConfirmDelete(),
-      child: ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(
-          expense.description.isEmpty
-              ? Strings.noDescription
-              : expense.description,
-        ),
-        subtitle: Text(formatShortDate(expense.date)),
-        trailing: Text(
-          formatBs(expense.amountCents),
-          style: theme.textTheme.titleMedium,
-        ),
-        onTap: onTap,
-      ),
+      child: tile,
     );
   }
 

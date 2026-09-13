@@ -28,50 +28,53 @@ class _LoanHistoryScreenState extends State<LoanHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text(Strings.loanHistoryTitle)),
-      body: StreamBuilder<List<Loan>>(
-        stream: _closedLoans,
-        builder: (context, loansSnapshot) {
-          if (loansSnapshot.hasError) {
-            return const ErrorState();
-          }
-          if (loansSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final loans = loansSnapshot.data ?? [];
-          if (loans.isEmpty) {
-            return const _EmptyHistory();
-          }
-          return StreamBuilder<Map<int, int>>(
-            stream: _totalPaid,
-            builder: (context, totalsSnapshot) {
-              final totals = totalsSnapshot.data ?? {};
-              return ListView(
-                padding: const EdgeInsets.all(Dimens.spacingMd),
-                children: [
-                  for (final loan in loans)
-                    Card(
-                      clipBehavior: Clip.antiAlias,
-                      child: ListTile(
-                        onTap: () => _openDetail(loan),
-                        leading: const Icon(Icons.task_alt),
-                        title: Text(loan.debtorName),
-                        subtitle: Text(
-                          '${Strings.lentOnLabel} '
-                          '${formatShortDate(loan.loanDate)} · '
-                          '${Strings.closedOnLabel} '
-                          '${formatShortDate(loan.closedAt!)}',
-                        ),
-                        trailing: Text(
-                          formatBs(totals[loan.id] ?? 0),
-                          style: Theme.of(context).textTheme.titleMedium,
+      body: SafeArea(
+        top: false,
+        child: StreamBuilder<List<Loan>>(
+          stream: _closedLoans,
+          builder: (context, loansSnapshot) {
+            if (loansSnapshot.hasError) {
+              return const ErrorState();
+            }
+            if (loansSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final loans = loansSnapshot.data ?? [];
+            if (loans.isEmpty) {
+              return const _EmptyHistory();
+            }
+            return StreamBuilder<Map<int, int>>(
+              stream: _totalPaid,
+              builder: (context, totalsSnapshot) {
+                final totals = totalsSnapshot.data ?? {};
+                return ListView(
+                  padding: const EdgeInsets.all(Dimens.spacingMd),
+                  children: [
+                    for (final loan in loans)
+                      Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: ListTile(
+                          onTap: () => _openDetail(loan),
+                          leading: const Icon(Icons.task_alt),
+                          title: Text(loan.debtorName),
+                          subtitle: Text(
+                            '${Strings.lentOnLabel} '
+                            '${formatShortDate(loan.loanDate)} · '
+                            '${Strings.closedOnLabel} '
+                            '${formatShortDate(loan.closedAt!)}',
+                          ),
+                          trailing: Text(
+                            formatBs(totals[loan.id] ?? 0),
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
                         ),
                       ),
-                    ),
-                ],
-              );
-            },
-          );
-        },
+                  ],
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

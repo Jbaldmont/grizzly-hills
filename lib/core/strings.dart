@@ -52,7 +52,20 @@ abstract final class Strings {
       'Este gasto deja el grupo en negativo.';
   static const shortfallLabel = 'Te falta';
   static const requestExtension = 'Solicitar extensión';
-  static const extensionAppliedMessage = 'Extensión aplicada al grupo';
+  static const request = 'Solicitar';
+  static const extensionExceedsGeneralError = 'Supera el disponible general';
+  static const returnExtension = 'Devolver extensión';
+  static const returnConfirm = 'Devolver';
+  static const returnableExtensionLabel = 'Disponible para devolver';
+  static const extensionReturnExceedsError =
+      'Supera lo disponible para devolver';
+  static const extensionReturnedMessage =
+      'Extensión devuelta al disponible general';
+  static const extensionAppliedMessage = 'Extensión registrada en imprevistos';
+  static String extensionDescription(String groupName) =>
+      'Extensión: $groupName';
+  static String budgetWithExtension(String baseAmount, String extensionAmount) =>
+      '$baseAmount + $extensionAmount ext.';
   static const generalBudgetAlsoInsufficient =
       'El presupuesto general tampoco alcanza para cubrir la diferencia.';
   static const unexpectedLabel = 'Imprevisto';
@@ -75,11 +88,23 @@ abstract final class Strings {
   static const salaryLabel = 'Sueldo del mes';
   static const salaryRequiredError = 'Ingresa tu sueldo';
   static const invalidAmountError = 'Monto inválido';
+  static String budgetBelowSpentError(String spentAmount) =>
+      'Ya gastaste $spentAmount';
   static const groupsSectionTitle = 'Grupos de presupuesto';
   static const salaryRowLabel = 'Sueldo';
   static const assignedRowLabel = 'Asignado a grupos';
   static const generalBudgetRowLabel = 'Presupuesto general';
   static const overAssignedWarning = 'Asignaste más que tu sueldo';
+  static const generalBelowSpentTitle = 'Presupuesto general insuficiente';
+  static String generalBelowSpentBody(
+    String spentAmount,
+    String generalAmount,
+  ) =>
+      'Entre fijos, imprevistos y extensiones ya gastaste $spentAmount del '
+      'presupuesto general, y con estos cambios quedaría en $generalAmount. '
+      '¿Quieres continuar?';
+  static String generalBelowSpentWarning(String spentAmount) =>
+      'El general queda por debajo de lo ya gastado ($spentAmount)';
   static const spentLabel = 'Gastado';
   static const errorGeneric = 'Algo salió mal';
 
@@ -94,8 +119,10 @@ abstract final class Strings {
   static const locationNameLabel = 'Nombre';
   static const locationNameRequiredError = 'Ingresa un nombre';
   static const deleteLocationTitle = '¿Eliminar ubicación?';
-  static const deleteLocationBody =
-      'Se perderá el registro de su saldo. Esta acción no se puede deshacer.';
+  static const deleteLocationBody = 'Esta acción no se puede deshacer.';
+  static const deleteLocationHasBalanceMessage =
+      'Solo puedes eliminar una ubicación vacía. Retira o transfiere '
+      'su saldo primero.';
   static const rename = 'Renombrar';
   static const add = 'Agregar';
   static const deposit = 'Depositar';
@@ -127,7 +154,12 @@ abstract final class Strings {
   static const loanBaseRowLabel = 'Base actual';
   static const loanInterestRowLabel = 'Interés acumulado';
   static const loanTotalRowLabel = 'Total a la fecha';
-  static const weeklyInterestNote = 'Interés del 1% semanal, prorrateado por días';
+  static String weeklyInterestNote(String percent) =>
+      'Interés del $percent semanal — la semana iniciada se cobra completa';
+  static const interestRateLabel = 'Interés semanal (%)';
+  static const invalidInterestRateError =
+      'Ingresa un interés entero entre 1 y 100';
+  static const startedWeekNote = 'La semana iniciada se cobra completa';
   static const overdueLabel = 'Vencido';
   static const dueLabel = 'Vence';
   static const registerPaymentCta = 'Registrar pago';
@@ -137,8 +169,15 @@ abstract final class Strings {
       'Este pago cubre el total y cerrará el préstamo.';
   static const paymentRegisteredMessage = 'Pago registrado';
   static const loanClosedMessage = 'Préstamo cerrado';
+  static const confirmPaymentTitle = '¿Registrar pago?';
+  static const paymentIrreversibleNote =
+      'Un pago registrado no se puede editar ni eliminar.';
+  static const remainingDebtLabel = 'Deuda restante';
+  static const confirm = 'Confirmar';
   static const deleteLoanTitle = '¿Eliminar préstamo?';
-  static const deleteLoanBody = 'Se borrará también su historial de pagos.';
+  static const deleteLoanBody = 'Esta acción no se puede deshacer.';
+  static const loanHasPaymentsMessage =
+      'No se puede eliminar un préstamo con pagos registrados';
   static const loanHistoryTitle = 'Historial de préstamos';
   static const loanHistoryEmptyTitle = 'Aún no hay préstamos cerrados';
   static const lentOnLabel = 'Prestado el';

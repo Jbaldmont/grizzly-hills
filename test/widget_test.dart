@@ -121,6 +121,104 @@ void main() {
     await disposeTestApp(tester);
   });
 
+  testWidgets('no permite reducir un grupo por debajo de lo gastado', (
+    tester,
+  ) async {
+    await tester.pumpWidget(await buildTestApp(db));
+    await tester.pumpAndSettle();
+
+    await openTestMonth(tester);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).first, '50');
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Gasolina'));
+    await tester.pump();
+    await tester.tap(find.text(Strings.save));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.edit_outlined));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.widgetWithText(TextFormField, '170'), '30');
+    await tester.scrollUntilVisible(
+      find.text(Strings.saveChanges),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text(Strings.saveChanges));
+    await tester.pumpAndSettle();
+
+    expect(find.text(Strings.budgetBelowSpentError('Bs 50')), findsOneWidget);
+    expect(find.text(Strings.editMonthTitle), findsOneWidget);
+
+    await tester.enterText(find.widgetWithText(TextFormField, '30'), '60');
+    await tester.tap(find.text(Strings.saveChanges));
+    await tester.pumpAndSettle();
+
+    expect(find.text(Strings.editMonthTitle), findsNothing);
+
+    await disposeTestApp(tester);
+  });
+
+  testWidgets(
+    'avisa si el nuevo sueldo deja el general por debajo de lo gastado',
+    (tester) async {
+      await tester.pumpWidget(await buildTestApp(db));
+      await tester.pumpAndSettle();
+
+      await openTestMonth(tester);
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).first, '150');
+      await tester.tap(
+        find.widgetWithText(ChoiceChip, Strings.unexpectedLabel),
+      );
+      await tester.pump();
+      await tester.tap(find.text(Strings.save));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.edit_outlined));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).first, '1900');
+      await tester.scrollUntilVisible(
+        find.text(Strings.saveChanges),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.tap(find.text(Strings.saveChanges));
+      await tester.pumpAndSettle();
+
+      expect(find.text(Strings.generalBelowSpentTitle), findsOneWidget);
+
+      await tester.tap(find.text(Strings.cancel));
+      await tester.pumpAndSettle();
+      expect(find.text(Strings.editMonthTitle), findsOneWidget);
+
+      await disposeTestApp(tester);
+    },
+  );
+
+  testWidgets('el botón atrás vuelve a Inicio en vez de cerrar la app', (
+    tester,
+  ) async {
+    await tester.pumpWidget(await buildTestApp(db));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(Strings.tabSavings));
+    await tester.pumpAndSettle();
+    expect(find.text(Strings.tabSavings), findsNWidgets(2));
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text(Strings.tabHome), findsNWidgets(2));
+    expect(find.text(Strings.homeEmptyTitle), findsOneWidget);
+
+    await disposeTestApp(tester);
+  });
+
   testWidgets('abre Ajustes y cambia el tema de color', (tester) async {
     await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();

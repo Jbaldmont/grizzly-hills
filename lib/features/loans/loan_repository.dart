@@ -64,12 +64,14 @@ class LoanRepository {
     required int principalCents,
     required DateTime loanDate,
     required DateTime dueDate,
+    double weeklyRatePercent = defaultWeeklyRatePercent,
   }) {
     final normalizedLoanDate = dateOnly(loanDate);
     return _db.into(_db.loans).insert(
           LoansCompanion.insert(
             debtorName: debtorName,
             principalCents: principalCents,
+            weeklyRatePercent: Value(weeklyRatePercent),
             loanDate: normalizedLoanDate,
             interestStartDate: normalizedLoanDate,
             dueDate: dateOnly(dueDate),
@@ -98,8 +100,14 @@ class LoanRepository {
     );
   }
 
-  Future<void> deleteLoan(int id) {
-    return (_db.delete(_db.loans)..where((loan) => loan.id.equals(id))).go();
+  Future<bool> deleteLoan(int id) {
+    return _db.transaction(() async {
+      if (await hasPayments(id)) {
+        return false;
+      }
+      await (_db.delete(_db.loans)..where((loan) => loan.id.equals(id))).go();
+      return true;
+    });
   }
 
   Future<bool> registerPayment({

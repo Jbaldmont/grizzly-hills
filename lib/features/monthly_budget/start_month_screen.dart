@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import '../../core/dimens.dart';
 import '../../core/money.dart';
 import '../../core/strings.dart';
+import '../expenses/expense_repository.dart';
+import '../expenses/month_overview.dart';
 import 'month_repository.dart';
 
 class _GroupRow {
@@ -17,10 +21,12 @@ class StartMonthScreen extends StatefulWidget {
   const StartMonthScreen({
     super.key,
     required this.repository,
+    required this.expenseRepository,
     this.monthToEdit,
   });
 
   final MonthRepository repository;
+  final ExpenseRepository expenseRepository;
   final ActiveMonth? monthToEdit;
 
   @override
@@ -32,6 +38,9 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
   late final TextEditingController _salaryController;
 
   List<_GroupRow>? _rows;
+  Map<int, int> _minBudgetByGroupId = const {};
+  int _generalSpentCents = 0;
+  bool _minimaLoaded = false;
   bool _saving = false;
 
   bool get _isEditing => widget.monthToEdit != null;
@@ -58,7 +67,33 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
             ),
           ),
       ];
+      _loadMinBudgets(monthToEdit);
     }
+  }
+
+  Future<void> _loadMinBudgets(ActiveMonth monthToEdit) async {
+    final expenses = await widget.expenseRepository.loadExpenses(
+      monthToEdit.month.id,
+    );
+    if (!mounted) {
+      return;
+    }
+    final overview = MonthOverview(
+      activeMonth: monthToEdit,
+      expenses: expenses,
+    );
+    setState(() {
+      _minBudgetByGroupId = {
+        for (final group in monthToEdit.groups)
+          group.id: max(
+            0,
+            overview.spentInGroupCents(group.id) -
+                overview.extensionCentsForGroup(group.id),
+          ),
+      };
+      _generalSpentCents = overview.fixedCents + overview.unexpectedCents;
+      _minimaLoaded = true;
+    });
   }
 
   @override
@@ -79,9 +114,12 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
           _isEditing ? Strings.editMonthTitle : Strings.startMonthTitle,
         ),
       ),
-      body: rows == null
-          ? const Center(child: CircularProgressIndicator())
-          : _buildForm(rows),
+      body: SafeArea(
+        top: false,
+        child: rows == null
+            ? const Center(child: CircularProgressIndicator())
+            : _buildForm(rows),
+      ),
     );
   }
 
@@ -109,15 +147,22 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
           ),
           const SizedBox(height: Dimens.spacingSm),
           for (final row in rows)
-            _GroupAmountField(name: row.name, controller: row.controller),
+            _GroupAmountField(
+              name: row.name,
+              controller: row.controller,
+              minCents: _minBudgetByGroupId[row.groupId] ?? 0,
+            ),
           const SizedBox(height: Dimens.spacingMd),
           _TotalsSummary(
             salaryController: _salaryController,
             groupControllers: [for (final row in rows) row.controller],
+            generalSpentCents: _generalSpentCents,
           ),
           const SizedBox(height: Dimens.spacingLg),
           FilledButton(
-            onPressed: _saving ? null : _save,
+            onPressed: _saving || (_isEditing && !_minimaLoaded)
+                ? null
+                : _save,
             child: Text(
               _isEditing ? Strings.saveChanges : Strings.startMonthConfirm,
             ),
@@ -166,7 +211,13 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
       0,
       (sum, row) => sum + parseBsToCents(row.controller.text)!,
     );
-    if (assignedCents > salaryCents && !await _confirmOverAssigned()) {
+    if (assignedCents > salaryCents) {
+      if (!await _confirmOverAssigned()) {
+        return;
+      }
+    } else if (_isEditing &&
+        salaryCents - assignedCents < _generalSpentCents &&
+        !await _confirmGeneralBelowSpent(salaryCents - assignedCents)) {
       return;
     }
     if (!mounted) {
@@ -213,12 +264,32 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
     );
   }
 
-  Future<bool> _confirmOverAssigned() async {
+  Future<bool> _confirmOverAssigned() {
+    return _confirmDialog(
+      title: Strings.overAssignedDialogTitle,
+      body: Strings.overAssignedDialogBody,
+    );
+  }
+
+  Future<bool> _confirmGeneralBelowSpent(int generalCents) {
+    return _confirmDialog(
+      title: Strings.generalBelowSpentTitle,
+      body: Strings.generalBelowSpentBody(
+        formatBs(_generalSpentCents),
+        formatBs(generalCents),
+      ),
+    );
+  }
+
+  Future<bool> _confirmDialog({
+    required String title,
+    required String body,
+  }) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text(Strings.overAssignedDialogTitle),
-        content: const Text(Strings.overAssignedDialogBody),
+        title: Text(title),
+        content: Text(body),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -236,10 +307,15 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
 }
 
 class _GroupAmountField extends StatelessWidget {
-  const _GroupAmountField({required this.name, required this.controller});
+  const _GroupAmountField({
+    required this.name,
+    required this.controller,
+    this.minCents = 0,
+  });
 
   final String name;
   final TextEditingController controller;
+  final int minCents;
 
   @override
   Widget build(BuildContext context) {
@@ -260,15 +336,25 @@ class _GroupAmountField extends StatelessWidget {
                 prefixText: '${Strings.currency} ',
                 border: OutlineInputBorder(),
                 isDense: true,
+                errorMaxLines: 2,
               ),
-              validator: (value) => parseBsToCents(value ?? '') == null
-                  ? Strings.invalidAmountError
-                  : null,
+              validator: _validateAmount,
             ),
           ),
         ],
       ),
     );
+  }
+
+  String? _validateAmount(String? value) {
+    final cents = parseBsToCents(value ?? '');
+    if (cents == null) {
+      return Strings.invalidAmountError;
+    }
+    if (cents < minCents) {
+      return Strings.budgetBelowSpentError(formatBs(minCents));
+    }
+    return null;
   }
 }
 
@@ -276,10 +362,12 @@ class _TotalsSummary extends StatelessWidget {
   const _TotalsSummary({
     required this.salaryController,
     required this.groupControllers,
+    this.generalSpentCents = 0,
   });
 
   final TextEditingController salaryController;
   final List<TextEditingController> groupControllers;
+  final int generalSpentCents;
 
   @override
   Widget build(BuildContext context) {
@@ -292,6 +380,7 @@ class _TotalsSummary extends StatelessWidget {
           (sum, controller) => sum + (parseBsToCents(controller.text) ?? 0),
         );
         final generalCents = salaryCents - assignedCents;
+        final warning = _warningFor(generalCents);
         final theme = Theme.of(context);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -306,10 +395,10 @@ class _TotalsSummary extends StatelessWidget {
               amountCents: generalCents,
               emphasized: true,
             ),
-            if (generalCents < 0) ...[
+            if (warning != null) ...[
               const SizedBox(height: Dimens.spacingXs),
               Text(
-                Strings.overAssignedWarning,
+                warning,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.error,
                 ),
@@ -319,6 +408,16 @@ class _TotalsSummary extends StatelessWidget {
         );
       },
     );
+  }
+
+  String? _warningFor(int generalCents) {
+    if (generalCents < 0) {
+      return Strings.overAssignedWarning;
+    }
+    if (generalCents < generalSpentCents) {
+      return Strings.generalBelowSpentWarning(formatBs(generalSpentCents));
+    }
+    return null;
   }
 }
 

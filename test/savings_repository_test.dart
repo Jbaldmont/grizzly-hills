@@ -54,6 +54,19 @@ void main() {
     expect(locations.map((location) => location.name), ['Caja roja']);
   });
 
+  test('no permite eliminar una ubicación con saldo', () async {
+    await savings.addLocation('Caja roja');
+    final location = (await savings.loadLocations()).single;
+    await savings.adjustBalance(id: location.id, deltaCents: 5000);
+
+    expect(await savings.deleteLocation(location.id), isFalse);
+    expect((await savings.loadLocations()).length, 1);
+
+    await savings.adjustBalance(id: location.id, deltaCents: -5000);
+    expect(await savings.deleteLocation(location.id), isTrue);
+    expect(await savings.loadLocations(), isEmpty);
+  });
+
   test('depositar y retirar ajustan el saldo', () async {
     await savings.addLocation('Caja roja');
     final location = (await savings.loadLocations()).single;
@@ -86,7 +99,7 @@ void main() {
 
       final expense = (await expenses.loadExpenses(month.month.id)).single;
       expect(expense.groupId, casa.id);
-      expect(expense.kind, ExpenseKind.group);
+      expect(expense.kind, ExpenseKind.savingsTransfer);
       expect(expense.amountCents, 10000);
 
       final updatedMonth = (await months.watchActiveMonth().first)!;

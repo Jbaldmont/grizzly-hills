@@ -61,7 +61,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openStartMonth() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => StartMonthScreen(repository: widget.monthRepository),
+        builder: (_) => StartMonthScreen(
+          repository: widget.monthRepository,
+          expenseRepository: widget.expenseRepository,
+        ),
       ),
     );
   }
@@ -71,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute<void>(
         builder: (_) => StartMonthScreen(
           repository: widget.monthRepository,
+          expenseRepository: widget.expenseRepository,
           monthToEdit: activeMonth,
         ),
       ),
@@ -155,6 +159,7 @@ class _MonthSummary extends StatelessWidget {
           GroupCard(
             group: group,
             spentCents: overview.spentInGroupCents(group.id),
+            extensionCents: overview.extensionCentsForGroup(group.id),
             onTap: () => _openExpenseList(context, group: group),
           ),
         const SizedBox(height: Dimens.spacingMd),
@@ -175,7 +180,7 @@ class _MonthSummary extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ExpenseListScreen(
-          monthId: overview.activeMonth.month.id,
+          month: overview.activeMonth.month,
           monthRepository: monthRepository,
           expenseRepository: expenseRepository,
           group: group,

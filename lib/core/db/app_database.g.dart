@@ -2241,6 +2241,19 @@ class $LoansTable extends Loans with TableInfo<$LoansTable, Loan> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _weeklyRatePercentMeta = const VerificationMeta(
+    'weeklyRatePercent',
+  );
+  @override
+  late final GeneratedColumn<double> weeklyRatePercent =
+      GeneratedColumn<double>(
+        'weekly_rate_percent',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(1),
+      );
   static const VerificationMeta _loanDateMeta = const VerificationMeta(
     'loanDate',
   );
@@ -2303,6 +2316,7 @@ class $LoansTable extends Loans with TableInfo<$LoansTable, Loan> {
     id,
     debtorName,
     principalCents,
+    weeklyRatePercent,
     loanDate,
     interestStartDate,
     dueDate,
@@ -2342,6 +2356,15 @@ class $LoansTable extends Loans with TableInfo<$LoansTable, Loan> {
       );
     } else if (isInserting) {
       context.missing(_principalCentsMeta);
+    }
+    if (data.containsKey('weekly_rate_percent')) {
+      context.handle(
+        _weeklyRatePercentMeta,
+        weeklyRatePercent.isAcceptableOrUnknown(
+          data['weekly_rate_percent']!,
+          _weeklyRatePercentMeta,
+        ),
+      );
     }
     if (data.containsKey('loan_date')) {
       context.handle(
@@ -2403,6 +2426,10 @@ class $LoansTable extends Loans with TableInfo<$LoansTable, Loan> {
         DriftSqlType.int,
         data['${effectivePrefix}principal_cents'],
       )!,
+      weeklyRatePercent: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}weekly_rate_percent'],
+      )!,
       loanDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}loan_date'],
@@ -2436,6 +2463,7 @@ class Loan extends DataClass implements Insertable<Loan> {
   final int id;
   final String debtorName;
   final int principalCents;
+  final double weeklyRatePercent;
   final DateTime loanDate;
   final DateTime interestStartDate;
   final DateTime dueDate;
@@ -2445,6 +2473,7 @@ class Loan extends DataClass implements Insertable<Loan> {
     required this.id,
     required this.debtorName,
     required this.principalCents,
+    required this.weeklyRatePercent,
     required this.loanDate,
     required this.interestStartDate,
     required this.dueDate,
@@ -2457,6 +2486,7 @@ class Loan extends DataClass implements Insertable<Loan> {
     map['id'] = Variable<int>(id);
     map['debtor_name'] = Variable<String>(debtorName);
     map['principal_cents'] = Variable<int>(principalCents);
+    map['weekly_rate_percent'] = Variable<double>(weeklyRatePercent);
     map['loan_date'] = Variable<DateTime>(loanDate);
     map['interest_start_date'] = Variable<DateTime>(interestStartDate);
     map['due_date'] = Variable<DateTime>(dueDate);
@@ -2472,6 +2502,7 @@ class Loan extends DataClass implements Insertable<Loan> {
       id: Value(id),
       debtorName: Value(debtorName),
       principalCents: Value(principalCents),
+      weeklyRatePercent: Value(weeklyRatePercent),
       loanDate: Value(loanDate),
       interestStartDate: Value(interestStartDate),
       dueDate: Value(dueDate),
@@ -2491,6 +2522,7 @@ class Loan extends DataClass implements Insertable<Loan> {
       id: serializer.fromJson<int>(json['id']),
       debtorName: serializer.fromJson<String>(json['debtorName']),
       principalCents: serializer.fromJson<int>(json['principalCents']),
+      weeklyRatePercent: serializer.fromJson<double>(json['weeklyRatePercent']),
       loanDate: serializer.fromJson<DateTime>(json['loanDate']),
       interestStartDate: serializer.fromJson<DateTime>(
         json['interestStartDate'],
@@ -2507,6 +2539,7 @@ class Loan extends DataClass implements Insertable<Loan> {
       'id': serializer.toJson<int>(id),
       'debtorName': serializer.toJson<String>(debtorName),
       'principalCents': serializer.toJson<int>(principalCents),
+      'weeklyRatePercent': serializer.toJson<double>(weeklyRatePercent),
       'loanDate': serializer.toJson<DateTime>(loanDate),
       'interestStartDate': serializer.toJson<DateTime>(interestStartDate),
       'dueDate': serializer.toJson<DateTime>(dueDate),
@@ -2519,6 +2552,7 @@ class Loan extends DataClass implements Insertable<Loan> {
     int? id,
     String? debtorName,
     int? principalCents,
+    double? weeklyRatePercent,
     DateTime? loanDate,
     DateTime? interestStartDate,
     DateTime? dueDate,
@@ -2528,6 +2562,7 @@ class Loan extends DataClass implements Insertable<Loan> {
     id: id ?? this.id,
     debtorName: debtorName ?? this.debtorName,
     principalCents: principalCents ?? this.principalCents,
+    weeklyRatePercent: weeklyRatePercent ?? this.weeklyRatePercent,
     loanDate: loanDate ?? this.loanDate,
     interestStartDate: interestStartDate ?? this.interestStartDate,
     dueDate: dueDate ?? this.dueDate,
@@ -2543,6 +2578,9 @@ class Loan extends DataClass implements Insertable<Loan> {
       principalCents: data.principalCents.present
           ? data.principalCents.value
           : this.principalCents,
+      weeklyRatePercent: data.weeklyRatePercent.present
+          ? data.weeklyRatePercent.value
+          : this.weeklyRatePercent,
       loanDate: data.loanDate.present ? data.loanDate.value : this.loanDate,
       interestStartDate: data.interestStartDate.present
           ? data.interestStartDate.value
@@ -2559,6 +2597,7 @@ class Loan extends DataClass implements Insertable<Loan> {
           ..write('id: $id, ')
           ..write('debtorName: $debtorName, ')
           ..write('principalCents: $principalCents, ')
+          ..write('weeklyRatePercent: $weeklyRatePercent, ')
           ..write('loanDate: $loanDate, ')
           ..write('interestStartDate: $interestStartDate, ')
           ..write('dueDate: $dueDate, ')
@@ -2573,6 +2612,7 @@ class Loan extends DataClass implements Insertable<Loan> {
     id,
     debtorName,
     principalCents,
+    weeklyRatePercent,
     loanDate,
     interestStartDate,
     dueDate,
@@ -2586,6 +2626,7 @@ class Loan extends DataClass implements Insertable<Loan> {
           other.id == this.id &&
           other.debtorName == this.debtorName &&
           other.principalCents == this.principalCents &&
+          other.weeklyRatePercent == this.weeklyRatePercent &&
           other.loanDate == this.loanDate &&
           other.interestStartDate == this.interestStartDate &&
           other.dueDate == this.dueDate &&
@@ -2597,6 +2638,7 @@ class LoansCompanion extends UpdateCompanion<Loan> {
   final Value<int> id;
   final Value<String> debtorName;
   final Value<int> principalCents;
+  final Value<double> weeklyRatePercent;
   final Value<DateTime> loanDate;
   final Value<DateTime> interestStartDate;
   final Value<DateTime> dueDate;
@@ -2606,6 +2648,7 @@ class LoansCompanion extends UpdateCompanion<Loan> {
     this.id = const Value.absent(),
     this.debtorName = const Value.absent(),
     this.principalCents = const Value.absent(),
+    this.weeklyRatePercent = const Value.absent(),
     this.loanDate = const Value.absent(),
     this.interestStartDate = const Value.absent(),
     this.dueDate = const Value.absent(),
@@ -2616,6 +2659,7 @@ class LoansCompanion extends UpdateCompanion<Loan> {
     this.id = const Value.absent(),
     required String debtorName,
     required int principalCents,
+    this.weeklyRatePercent = const Value.absent(),
     required DateTime loanDate,
     required DateTime interestStartDate,
     required DateTime dueDate,
@@ -2630,6 +2674,7 @@ class LoansCompanion extends UpdateCompanion<Loan> {
     Expression<int>? id,
     Expression<String>? debtorName,
     Expression<int>? principalCents,
+    Expression<double>? weeklyRatePercent,
     Expression<DateTime>? loanDate,
     Expression<DateTime>? interestStartDate,
     Expression<DateTime>? dueDate,
@@ -2640,6 +2685,7 @@ class LoansCompanion extends UpdateCompanion<Loan> {
       if (id != null) 'id': id,
       if (debtorName != null) 'debtor_name': debtorName,
       if (principalCents != null) 'principal_cents': principalCents,
+      if (weeklyRatePercent != null) 'weekly_rate_percent': weeklyRatePercent,
       if (loanDate != null) 'loan_date': loanDate,
       if (interestStartDate != null) 'interest_start_date': interestStartDate,
       if (dueDate != null) 'due_date': dueDate,
@@ -2652,6 +2698,7 @@ class LoansCompanion extends UpdateCompanion<Loan> {
     Value<int>? id,
     Value<String>? debtorName,
     Value<int>? principalCents,
+    Value<double>? weeklyRatePercent,
     Value<DateTime>? loanDate,
     Value<DateTime>? interestStartDate,
     Value<DateTime>? dueDate,
@@ -2662,6 +2709,7 @@ class LoansCompanion extends UpdateCompanion<Loan> {
       id: id ?? this.id,
       debtorName: debtorName ?? this.debtorName,
       principalCents: principalCents ?? this.principalCents,
+      weeklyRatePercent: weeklyRatePercent ?? this.weeklyRatePercent,
       loanDate: loanDate ?? this.loanDate,
       interestStartDate: interestStartDate ?? this.interestStartDate,
       dueDate: dueDate ?? this.dueDate,
@@ -2681,6 +2729,9 @@ class LoansCompanion extends UpdateCompanion<Loan> {
     }
     if (principalCents.present) {
       map['principal_cents'] = Variable<int>(principalCents.value);
+    }
+    if (weeklyRatePercent.present) {
+      map['weekly_rate_percent'] = Variable<double>(weeklyRatePercent.value);
     }
     if (loanDate.present) {
       map['loan_date'] = Variable<DateTime>(loanDate.value);
@@ -2706,6 +2757,7 @@ class LoansCompanion extends UpdateCompanion<Loan> {
           ..write('id: $id, ')
           ..write('debtorName: $debtorName, ')
           ..write('principalCents: $principalCents, ')
+          ..write('weeklyRatePercent: $weeklyRatePercent, ')
           ..write('loanDate: $loanDate, ')
           ..write('interestStartDate: $interestStartDate, ')
           ..write('dueDate: $dueDate, ')
@@ -5119,6 +5171,7 @@ typedef $$LoansTableCreateCompanionBuilder =
       Value<int> id,
       required String debtorName,
       required int principalCents,
+      Value<double> weeklyRatePercent,
       required DateTime loanDate,
       required DateTime interestStartDate,
       required DateTime dueDate,
@@ -5130,6 +5183,7 @@ typedef $$LoansTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> debtorName,
       Value<int> principalCents,
+      Value<double> weeklyRatePercent,
       Value<DateTime> loanDate,
       Value<DateTime> interestStartDate,
       Value<DateTime> dueDate,
@@ -5180,6 +5234,11 @@ class $$LoansTableFilterComposer extends Composer<_$AppDatabase, $LoansTable> {
 
   ColumnFilters<int> get principalCents => $composableBuilder(
     column: $table.principalCents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get weeklyRatePercent => $composableBuilder(
+    column: $table.weeklyRatePercent,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5258,6 +5317,11 @@ class $$LoansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get weeklyRatePercent => $composableBuilder(
+    column: $table.weeklyRatePercent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get loanDate => $composableBuilder(
     column: $table.loanDate,
     builder: (column) => ColumnOrderings(column),
@@ -5303,6 +5367,11 @@ class $$LoansTableAnnotationComposer
 
   GeneratedColumn<int> get principalCents => $composableBuilder(
     column: $table.principalCents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get weeklyRatePercent => $composableBuilder(
+    column: $table.weeklyRatePercent,
     builder: (column) => column,
   );
 
@@ -5380,6 +5449,7 @@ class $$LoansTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> debtorName = const Value.absent(),
                 Value<int> principalCents = const Value.absent(),
+                Value<double> weeklyRatePercent = const Value.absent(),
                 Value<DateTime> loanDate = const Value.absent(),
                 Value<DateTime> interestStartDate = const Value.absent(),
                 Value<DateTime> dueDate = const Value.absent(),
@@ -5389,6 +5459,7 @@ class $$LoansTableTableManager
                 id: id,
                 debtorName: debtorName,
                 principalCents: principalCents,
+                weeklyRatePercent: weeklyRatePercent,
                 loanDate: loanDate,
                 interestStartDate: interestStartDate,
                 dueDate: dueDate,
@@ -5400,6 +5471,7 @@ class $$LoansTableTableManager
                 Value<int> id = const Value.absent(),
                 required String debtorName,
                 required int principalCents,
+                Value<double> weeklyRatePercent = const Value.absent(),
                 required DateTime loanDate,
                 required DateTime interestStartDate,
                 required DateTime dueDate,
@@ -5409,6 +5481,7 @@ class $$LoansTableTableManager
                 id: id,
                 debtorName: debtorName,
                 principalCents: principalCents,
+                weeklyRatePercent: weeklyRatePercent,
                 loanDate: loanDate,
                 interestStartDate: interestStartDate,
                 dueDate: dueDate,

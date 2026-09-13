@@ -2,11 +2,31 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grizzly_hills/features/loans/loan_interest.dart';
 
 void main() {
-  test('el interés es 1% semanal prorrateado por días', () {
+  test('la semana iniciada se cobra completa', () {
+    expect(chargedWeeks(1), 1);
+    expect(chargedWeeks(2), 1);
+    expect(chargedWeeks(7), 1);
+    expect(chargedWeeks(8), 2);
+    expect(chargedWeeks(14), 2);
+    expect(chargedWeeks(15), 3);
+  });
+
+  test('el interés cobra 1% por semana iniciada por defecto', () {
+    expect(interestCents(principalCents: 100000, days: 2), 1000);
     expect(interestCents(principalCents: 10000, days: 7), 100);
+    expect(interestCents(principalCents: 10000, days: 8), 200);
     expect(interestCents(principalCents: 10000, days: 14), 200);
-    expect(interestCents(principalCents: 10000, days: 1), 14);
-    expect(interestCents(principalCents: 10000, days: 3), 43);
+  });
+
+  test('la tasa semanal es configurable', () {
+    expect(
+      interestCents(principalCents: 10000, days: 3, weeklyRatePercent: 2.5),
+      250,
+    );
+    expect(
+      interestCents(principalCents: 10000, days: 10, weeklyRatePercent: 0.5),
+      100,
+    );
   });
 
   test('sin días transcurridos no hay interés', () {

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/dates.dart';
 import '../../core/db/app_database.dart';
 
 class SavingsRepository {
@@ -35,10 +36,19 @@ class SavingsRepository {
         .write(SavingsLocationsCompanion(name: Value(name)));
   }
 
-  Future<void> deleteLocation(int id) {
-    return (_db.delete(_db.savingsLocations)
-          ..where((location) => location.id.equals(id)))
-        .go();
+  Future<bool> deleteLocation(int id) {
+    return _db.transaction(() async {
+      final location = await (_db.select(_db.savingsLocations)
+            ..where((row) => row.id.equals(id)))
+          .getSingle();
+      if (location.balanceCents != 0) {
+        return false;
+      }
+      await (_db.delete(_db.savingsLocations)
+            ..where((row) => row.id.equals(id)))
+          .go();
+      return true;
+    });
   }
 
   Future<void> adjustBalance({required int id, required int deltaCents}) {
@@ -68,10 +78,10 @@ class SavingsRepository {
             ExpensesCompanion.insert(
               monthId: monthId,
               groupId: Value(groupId),
-              kind: ExpenseKind.group,
+              kind: ExpenseKind.savingsTransfer,
               description: description,
               amountCents: amountCents,
-              date: DateTime.now(),
+              date: dateOnly(DateTime.now()),
             ),
           );
       await adjustBalance(id: locationId, deltaCents: amountCents);

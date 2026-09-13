@@ -45,14 +45,22 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
           stream: _payments,
           builder: (context, paymentsSnapshot) {
             final payments = paymentsSnapshot.data ?? [];
-            return _buildScaffold(loan, payments);
+            return _buildScaffold(
+              loan,
+              payments,
+              paymentsLoaded: paymentsSnapshot.hasData,
+            );
           },
         );
       },
     );
   }
 
-  Widget _buildScaffold(Loan loan, List<LoanPayment> payments) {
+  Widget _buildScaffold(
+    Loan loan,
+    List<LoanPayment> payments, {
+    required bool paymentsLoaded,
+  }) {
     final isClosed = loan.closedAt != null;
     return Scaffold(
       appBar: AppBar(
@@ -69,50 +77,54 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
                 hasPayments: payments.isNotEmpty,
               ),
             ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: Strings.delete,
-            onPressed: () => _confirmDelete(loan),
-          ),
+          if (paymentsLoaded && payments.isEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: Strings.delete,
+              onPressed: () => _confirmDelete(loan),
+            ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(Dimens.spacingMd),
-        children: [
-          _LoanSummaryCard(loan: loan),
-          const SizedBox(height: Dimens.spacingMd),
-          if (!isClosed)
-            FilledButton.icon(
-              onPressed: () => showLoanPaymentSheet(
-                context,
-                loan: loan,
-                loanRepository: widget.loanRepository,
+      body: SafeArea(
+        top: false,
+        child: ListView(
+          padding: const EdgeInsets.all(Dimens.spacingMd),
+          children: [
+            _LoanSummaryCard(loan: loan),
+            const SizedBox(height: Dimens.spacingMd),
+            if (!isClosed)
+              FilledButton.icon(
+                onPressed: () => showLoanPaymentSheet(
+                  context,
+                  loan: loan,
+                  loanRepository: widget.loanRepository,
+                ),
+                icon: const Icon(Icons.payments_outlined),
+                label: const Text(Strings.registerPaymentCta),
               ),
-              icon: const Icon(Icons.payments_outlined),
-              label: const Text(Strings.registerPaymentCta),
-            ),
-          const SizedBox(height: Dimens.spacingMd),
-          Text(
-            Strings.paymentsSectionTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: Dimens.spacingSm),
-          if (payments.isEmpty)
+            const SizedBox(height: Dimens.spacingMd),
             Text(
-              Strings.noPaymentsYet,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              Strings.paymentsSectionTitle,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-          for (final payment in payments)
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.payments_outlined),
-                title: Text(formatBs(payment.amountCents)),
-                trailing: Text(formatShortDate(payment.date)),
+            const SizedBox(height: Dimens.spacingSm),
+            if (payments.isEmpty)
+              Text(
+                Strings.noPaymentsYet,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-        ],
+            for (final payment in payments)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.payments_outlined),
+                  title: Text(formatBs(payment.amountCents)),
+                  trailing: Text(formatShortDate(payment.date)),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -136,10 +148,17 @@ class _LoanDetailScreenState extends State<LoanDetailScreen> {
       ),
     );
     if ((confirmed ?? false) && mounted) {
-      await widget.loanRepository.deleteLoan(loan.id);
-      if (mounted) {
-        Navigator.of(context).pop();
+      final deleted = await widget.loanRepository.deleteLoan(loan.id);
+      if (!mounted) {
+        return;
       }
+      if (!deleted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(Strings.loanHasPaymentsMessage)),
+        );
+        return;
+      }
+      Navigator.of(context).pop();
     }
   }
 }
@@ -189,7 +208,9 @@ class _LoanSummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: Dimens.spacingXs),
             Text(
-              Strings.weeklyInterestNote,
+              Strings.weeklyInterestNote(
+                formatPercent(loan.weeklyRatePercent),
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

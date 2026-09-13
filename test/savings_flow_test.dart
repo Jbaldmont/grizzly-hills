@@ -103,6 +103,23 @@ void main() {
     expect(find.text(Strings.transferDoneMessage), findsOneWidget);
     expect(find.text('Bs 50'), findsNWidgets(2));
 
+    await tester.tap(find.text(Strings.tabHome));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Gasolina'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Gasolina'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+    expect(find.text('${Strings.spentLabel}: Bs 50'), findsOneWidget);
+
+    await tester.drag(find.byIcon(Icons.lock_outline), const Offset(-500, 0));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+
     await tester.pump(const Duration(seconds: 5));
     await disposeTestApp(tester);
   });
