@@ -11,6 +11,12 @@ class Months extends Table {
   IntColumn get salaryCents => integer()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get closedAt => dateTime().nullable()();
+  IntColumn get closingTransferCents => integer().nullable()();
+  IntColumn get closingSavingsLocationId => integer().nullable().references(
+    SavingsLocations,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
 
   @override
   List<Set<Column>> get uniqueKeys => [
@@ -123,7 +129,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -147,6 +153,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 5) {
         await migrator.addColumn(loans, loans.weeklyRatePercent);
+      }
+      if (from < 6) {
+        await migrator.addColumn(months, months.closingTransferCents);
+        await migrator.addColumn(months, months.closingSavingsLocationId);
       }
     },
     beforeOpen: (details) async {
