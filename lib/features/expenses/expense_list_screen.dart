@@ -21,12 +21,14 @@ class ExpenseListScreen extends StatefulWidget {
     required this.monthRepository,
     required this.expenseRepository,
     this.group,
+    this.readOnly = false,
   });
 
   final Month month;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
   final BudgetGroup? group;
+  final bool readOnly;
 
   @override
   State<ExpenseListScreen> createState() => _ExpenseListScreenState();
@@ -48,11 +50,13 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       appBar: AppBar(
         title: Text(widget.group?.name ?? Strings.unexpectedSectionTitle),
       ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: Strings.quickExpenseTooltip,
-        onPressed: () => _openForm(),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: widget.readOnly
+          ? null
+          : FloatingActionButton(
+              tooltip: Strings.quickExpenseTooltip,
+              onPressed: () => _openForm(),
+              child: const Icon(Icons.add),
+            ),
       body: SafeArea(
         top: false,
         child: StreamBuilder<List<Expense>>(
@@ -62,7 +66,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             final allExpenses = expensesSnapshot.data ?? [];
-            if (widget.group == null) {
+            if (widget.group == null || widget.readOnly) {
               return _buildList(allExpenses);
             }
             return StreamBuilder<ActiveMonth?>(
@@ -107,22 +111,24 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             spentCents: totalCents,
             extensionCents: extensionCents,
           ),
-          const SizedBox(height: Dimens.spacingSm),
-          OutlinedButton.icon(
-            onPressed: availableGeneralCents > 0
-                ? () => _requestExtension(group, availableGeneralCents)
-                : null,
-            icon: const Icon(Icons.add),
-            label: const Text(Strings.requestExtension),
-          ),
-          if (extensionCents > 0)
+          if (!widget.readOnly) ...[
+            const SizedBox(height: Dimens.spacingSm),
             OutlinedButton.icon(
-              onPressed: returnableCents > 0
-                  ? () => _returnExtension(group, returnableCents)
+              onPressed: availableGeneralCents > 0
+                  ? () => _requestExtension(group, availableGeneralCents)
                   : null,
-              icon: const Icon(Icons.undo),
-              label: const Text(Strings.returnExtension),
+              icon: const Icon(Icons.add),
+              label: const Text(Strings.requestExtension),
             ),
+            if (extensionCents > 0)
+              OutlinedButton.icon(
+                onPressed: returnableCents > 0
+                    ? () => _returnExtension(group, returnableCents)
+                    : null,
+                icon: const Icon(Icons.undo),
+                label: const Text(Strings.returnExtension),
+              ),
+          ],
         ] else
           _UnexpectedTotalCard(totalCents: totalCents),
         const SizedBox(height: Dimens.spacingSm),
@@ -130,7 +136,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           const _EmptyList()
         else
           for (final expense in expenses)
-            if (_isLocked(expense))
+            if (widget.readOnly || _isLocked(expense))
               _ExpenseTile(expense: expense)
             else
               _ExpenseTile(

@@ -8,6 +8,7 @@ import '../features/home/home_screen.dart';
 import '../features/loans/loan_repository.dart';
 import '../features/loans/loans_screen.dart';
 import '../features/mom/mom_screen.dart';
+import '../features/monthly_budget/month_history_screen.dart';
 import '../features/monthly_budget/month_repository.dart';
 import '../features/savings/savings_repository.dart';
 import '../features/savings/savings_screen.dart';
@@ -83,6 +84,12 @@ class _AppShellState extends State<AppShell> {
       appBar: AppBar(
         title: Text(_titles[_selectedIndex]),
         actions: [
+          if (_selectedIndex == 0)
+            IconButton(
+              icon: const Icon(Icons.history),
+              tooltip: Strings.monthHistoryTooltip,
+              onPressed: _openMonthHistory,
+            ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: Strings.settingsTitle,
@@ -150,6 +157,18 @@ class _AppShellState extends State<AppShell> {
       activeMonth: activeMonth,
       expenseRepository: widget.expenseRepository,
       monthRepository: widget.monthRepository,
+    );
+  }
+
+  void _openMonthHistory() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => MonthHistoryScreen(
+          monthRepository: widget.monthRepository,
+          expenseRepository: widget.expenseRepository,
+          savingsRepository: widget.savingsRepository,
+        ),
+      ),
     );
   }
 

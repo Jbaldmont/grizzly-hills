@@ -42,6 +42,13 @@ class MonthRepository {
     return query.watch().map(_mapRowsToActiveMonth);
   }
 
+  Stream<List<Month>> watchClosedMonths() {
+    final query = _db.select(_db.months)
+      ..where((month) => month.closedAt.isNotNull())
+      ..orderBy([(month) => OrderingTerm.desc(month.closedAt)]);
+    return query.watch();
+  }
+
   Future<List<GroupTemplate>> loadTemplates() {
     final query = _db.select(_db.groupTemplates)
       ..orderBy([(template) => OrderingTerm.asc(template.position)]);

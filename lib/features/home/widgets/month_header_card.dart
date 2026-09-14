@@ -9,11 +9,11 @@ class MonthHeaderCard extends StatelessWidget {
   const MonthHeaderCard({
     super.key,
     required this.overview,
-    required this.onEdit,
+    this.onEdit,
   });
 
   final MonthOverview overview;
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +32,12 @@ class MonthHeaderCard extends StatelessWidget {
                   Strings.monthLabel(month.year, month.month),
                   style: theme.textTheme.titleLarge,
                 ),
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  tooltip: Strings.editMonthTooltip,
-                  onPressed: onEdit,
-                ),
+                if (onEdit != null)
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    tooltip: Strings.editMonthTooltip,
+                    onPressed: onEdit,
+                  ),
               ],
             ),
             const SizedBox(height: Dimens.spacingSm),
