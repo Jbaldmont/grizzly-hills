@@ -229,4 +229,68 @@ void main() {
     await expenses.deleteExpense(updated.id);
     expect(await expenses.watchExpenses(month.month.id).first, isEmpty);
   });
+
+  test(
+    'closingSurplusCents sin gastos es el sueldo completo',
+    () async {
+      final month = await openMonth();
+
+      final overview = MonthOverview(activeMonth: month, expenses: const []);
+      expect(overview.closingSurplusCents, 300000);
+    },
+  );
+
+  test(
+    'closingSurplusCents descuenta gastos de grupo, fijos e imprevistos',
+    () async {
+      final month = await openMonth();
+      final casa = month.groups.first;
+
+      await expenses.addExpense(
+        monthId: month.month.id,
+        kind: ExpenseKind.group,
+        groupId: casa.id,
+        description: 'Mercado',
+        amountCents: 12000,
+        date: DateTime(2026, 7, 12),
+      );
+      await expenses.addExpense(
+        monthId: month.month.id,
+        kind: ExpenseKind.unexpected,
+        description: 'Llanta pinchada',
+        amountCents: 8000,
+        date: DateTime(2026, 7, 12),
+      );
+
+      final overview = MonthOverview(
+        activeMonth: month,
+        expenses: await expenses.loadExpenses(month.month.id),
+      );
+      expect(overview.closingSurplusCents, 300000 - 12000 - 8000);
+    },
+  );
+
+  test(
+    'closingSurplusCents neteos un grupo en negativo contra el resto',
+    () async {
+      final month = await openMonth();
+      final casa = month.groups.first;
+
+      await expenses.addExpense(
+        monthId: month.month.id,
+        kind: ExpenseKind.group,
+        groupId: casa.id,
+        description: 'Mercado grande',
+        amountCents: 60000,
+        date: DateTime(2026, 7, 12),
+      );
+
+      final overview = MonthOverview(
+        activeMonth: month,
+        expenses: await expenses.loadExpenses(month.month.id),
+      );
+      expect(overview.remainingInGroupCents(casa.id), -10000);
+      expect(overview.closingSurplusCents, 300000 - 60000);
+    },
+  );
 }
