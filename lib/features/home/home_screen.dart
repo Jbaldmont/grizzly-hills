@@ -7,8 +7,10 @@ import '../../core/widgets/error_state.dart';
 import '../expenses/expense_list_screen.dart';
 import '../expenses/expense_repository.dart';
 import '../expenses/month_overview.dart';
+import '../monthly_budget/close_month_sheet.dart';
 import '../monthly_budget/month_repository.dart';
 import '../monthly_budget/start_month_screen.dart';
+import '../savings/savings_repository.dart';
 import 'widgets/fixed_expenses_card.dart';
 import 'widgets/group_card.dart';
 import 'widgets/month_header_card.dart';
@@ -19,10 +21,12 @@ class HomeScreen extends StatefulWidget {
     super.key,
     required this.monthRepository,
     required this.expenseRepository,
+    required this.savingsRepository,
   });
 
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
+  final SavingsRepository savingsRepository;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -52,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
           activeMonth: activeMonth,
           monthRepository: widget.monthRepository,
           expenseRepository: widget.expenseRepository,
+          savingsRepository: widget.savingsRepository,
           onEdit: () => _openEditMonth(activeMonth),
         );
       },
@@ -88,12 +93,14 @@ class _MonthContent extends StatefulWidget {
     required this.activeMonth,
     required this.monthRepository,
     required this.expenseRepository,
+    required this.savingsRepository,
     required this.onEdit,
   });
 
   final ActiveMonth activeMonth;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
+  final SavingsRepository savingsRepository;
   final VoidCallback onEdit;
 
   @override
@@ -123,6 +130,7 @@ class _MonthContentState extends State<_MonthContent> {
           overview: overview,
           monthRepository: widget.monthRepository,
           expenseRepository: widget.expenseRepository,
+          savingsRepository: widget.savingsRepository,
           onEdit: widget.onEdit,
         );
       },
@@ -135,20 +143,44 @@ class _MonthSummary extends StatelessWidget {
     required this.overview,
     required this.monthRepository,
     required this.expenseRepository,
+    required this.savingsRepository,
     required this.onEdit,
   });
 
   final MonthOverview overview;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
+  final SavingsRepository savingsRepository;
   final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
+    final month = overview.activeMonth.month;
+    final now = DateTime.now();
+    final monthStillOpen = now.year != month.year || now.month != month.month;
     return ListView(
       padding: const EdgeInsets.all(Dimens.spacingMd),
       children: [
         MonthHeaderCard(overview: overview, onEdit: onEdit),
+        const SizedBox(height: Dimens.spacingSm),
+        if (monthStillOpen) ...[
+          _StillOpenBanner(
+            message: Strings.monthStillOpenWarning(
+              Strings.monthLabel(now.year, now.month),
+            ),
+          ),
+          const SizedBox(height: Dimens.spacingSm),
+        ],
+        OutlinedButton.icon(
+          onPressed: () => handleCloseMonth(
+            context,
+            overview: overview,
+            monthRepository: monthRepository,
+            savingsRepository: savingsRepository,
+          ),
+          icon: const Icon(Icons.event_available_outlined),
+          label: const Text(Strings.closeMonthCta),
+        ),
         const SizedBox(height: Dimens.spacingMd),
         Text(
           Strings.groupsSectionTitle,
@@ -184,6 +216,38 @@ class _MonthSummary extends StatelessWidget {
           monthRepository: monthRepository,
           expenseRepository: expenseRepository,
           group: group,
+        ),
+      ),
+    );
+  }
+}
+
+class _StillOpenBanner extends StatelessWidget {
+  const _StillOpenBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
+      color: colorScheme.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(Dimens.spacingMd),
+        child: Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              color: colorScheme.onTertiaryContainer,
+            ),
+            const SizedBox(width: Dimens.spacingSm),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(color: colorScheme.onTertiaryContainer),
+              ),
+            ),
+          ],
         ),
       ),
     );

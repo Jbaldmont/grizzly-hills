@@ -112,7 +112,7 @@ abstract final class Strings {
   static const savingsLocationsSectionTitle = 'Ubicaciones';
   static const savingsEmptyTitle = 'Todavía no registras tu ahorro';
   static const savingsEmptyBody =
-      'Agrega dónde guardas tu dinero: bancos, caja roja, etc.';
+      'Agrega dónde guardas tu dinero: bancos, efectivo, etc.';
   static const addLocationCta = 'Agregar ubicación';
   static const newLocationTitle = 'Nueva ubicación';
   static const renameLocationTitle = 'Renombrar ubicación';
@@ -182,6 +182,30 @@ abstract final class Strings {
   static const loanHistoryEmptyTitle = 'Aún no hay préstamos cerrados';
   static const lentOnLabel = 'Prestado el';
   static const closedOnLabel = 'Cerrado el';
+
+  static const closeMonthCta = 'Cerrar mes';
+  static const closeMonthTitle = 'Cerrar mes';
+  static const closeMonthSurplusLabel = 'Sobrante a transferir';
+  static const closeMonthLocationLabel = 'Depositar en';
+  static const closeMonthNoLocationsMessage =
+      'Agrega una ubicación de ahorro en la pestaña Ahorro antes de '
+      'cerrar el mes.';
+  static String closeMonthDeficitBody(String deficitAmount) =>
+      'Este mes queda en déficit de $deficitAmount. Se cerrará sin '
+      'transferir nada al ahorro.';
+  static const closeMonthZeroSurplusBody =
+      'Este mes no dejó sobrante. Se cerrará sin transferir nada al ahorro.';
+  static const closeMonthDoneMessage = 'Mes cerrado';
+  static String monthStillOpenWarning(String currentMonthLabel) =>
+      'Ya es $currentMonthLabel pero este mes sigue abierto.';
+
+  static const monthHistoryTitle = 'Historial de meses';
+  static const monthHistoryTooltip = 'Historial de meses';
+  static const monthHistoryEmptyTitle = 'Aún no cerraste ningún mes';
+  static String closingTransferredTo(String locationName) =>
+      'Transferido a $locationName';
+  static const closingNoSurplusLabel = 'Sin sobrante';
+  static String closingDeficitLabel(String amount) => 'Déficit de $amount';
 
   static const monthNames = [
     'Enero',

@@ -42,6 +42,13 @@ class MonthRepository {
     return query.watch().map(_mapRowsToActiveMonth);
   }
 
+  Stream<List<Month>> watchClosedMonths() {
+    final query = _db.select(_db.months)
+      ..where((month) => month.closedAt.isNotNull())
+      ..orderBy([(month) => OrderingTerm.desc(month.closedAt)]);
+    return query.watch();
+  }
+
   Future<List<GroupTemplate>> loadTemplates() {
     final query = _db.select(_db.groupTemplates)
       ..orderBy([(template) => OrderingTerm.asc(template.position)]);
@@ -119,6 +126,35 @@ class MonthRepository {
     return _db.transaction(() async {
       await _shiftGroupBudget(sourceGroupId, -amountCents);
       await _shiftGroupBudget(targetGroupId, amountCents);
+    });
+  }
+
+  Future<void> closeMonth({
+    required int monthId,
+    required int surplusCents,
+    int? savingsLocationId,
+  }) {
+    final depositLocationId = surplusCents > 0 ? savingsLocationId : null;
+    return _db.transaction(() async {
+      if (depositLocationId != null) {
+        final location = await (_db.select(_db.savingsLocations)
+              ..where((row) => row.id.equals(depositLocationId)))
+            .getSingle();
+        await (_db.update(_db.savingsLocations)
+              ..where((row) => row.id.equals(depositLocationId)))
+            .write(
+          SavingsLocationsCompanion(
+            balanceCents: Value(location.balanceCents + surplusCents),
+          ),
+        );
+      }
+      await (_db.update(_db.months)..where((m) => m.id.equals(monthId))).write(
+        MonthsCompanion(
+          closedAt: Value(DateTime.now()),
+          closingTransferCents: Value(surplusCents),
+          closingSavingsLocationId: Value(depositLocationId),
+        ),
+      );
     });
   }
 

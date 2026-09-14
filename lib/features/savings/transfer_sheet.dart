@@ -235,13 +235,11 @@ class _TransferSheetState extends State<TransferSheet> {
   }
 
   int _remainingCents(BudgetGroup group, List<Expense> expenses) {
-    final spentCents = expenses.fold<int>(0, (sum, expense) {
-      final countsForGroup = MonthOverview.countsAsGroupSpending(expense) &&
-          expense.groupId == group.id;
-      return countsForGroup ? sum + expense.amountCents : sum;
-    });
-    final extensionCents = MonthOverview.extensionCentsIn(expenses, group.id);
-    return group.budgetCents + extensionCents - spentCents;
+    final overview = MonthOverview(
+      activeMonth: widget.activeMonth,
+      expenses: expenses,
+    );
+    return overview.remainingInGroupCents(group.id);
   }
 
   String? _validateAmount(String? value) {

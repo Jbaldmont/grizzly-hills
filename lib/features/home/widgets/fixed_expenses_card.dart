@@ -13,10 +13,12 @@ class FixedExpensesCard extends StatefulWidget {
     super.key,
     required this.overview,
     required this.expenseRepository,
+    this.readOnly = false,
   });
 
   final MonthOverview overview;
   final ExpenseRepository expenseRepository;
+  final bool readOnly;
 
   @override
   State<FixedExpensesCard> createState() => _FixedExpensesCardState();
@@ -58,8 +60,12 @@ class _FixedExpensesCardState extends State<FixedExpensesCard> {
                   _FixedTile(
                     template: template,
                     paidExpense: _paidExpenseFor(template),
-                    onPay: () => _showPayDialog(template),
-                    onUnmark: (expense) => _confirmUnmark(expense),
+                    onPay: widget.readOnly
+                        ? null
+                        : () => _showPayDialog(template),
+                    onUnmark: widget.readOnly
+                        ? null
+                        : (expense) => _confirmUnmark(expense),
                   ),
               ],
             );
@@ -124,20 +130,21 @@ class _FixedTile extends StatelessWidget {
   const _FixedTile({
     required this.template,
     required this.paidExpense,
-    required this.onPay,
-    required this.onUnmark,
+    this.onPay,
+    this.onUnmark,
   });
 
   final FixedExpenseTemplate template;
   final Expense? paidExpense;
-  final VoidCallback onPay;
-  final ValueChanged<Expense> onUnmark;
+  final VoidCallback? onPay;
+  final ValueChanged<Expense>? onUnmark;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final expense = paidExpense;
     final isPaid = expense != null;
+    final onUnmark = this.onUnmark;
     return ListTile(
       dense: true,
       leading: Icon(
@@ -157,7 +164,9 @@ class _FixedTile extends StatelessWidget {
             : theme.textTheme.bodySmall
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
       ),
-      onTap: isPaid ? () => onUnmark(expense) : onPay,
+      onTap: isPaid
+          ? (onUnmark == null ? null : () => onUnmark(expense))
+          : onPay,
     );
   }
 }

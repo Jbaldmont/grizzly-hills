@@ -2,14 +2,17 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grizzly_hills/core/db/app_database.dart';
 import 'package:grizzly_hills/features/monthly_budget/month_repository.dart';
+import 'package:grizzly_hills/features/savings/savings_repository.dart';
 
 void main() {
   late AppDatabase db;
   late MonthRepository repository;
+  late SavingsRepository savings;
 
   setUp(() {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     repository = MonthRepository(db);
+    savings = SavingsRepository(db);
   });
 
   tearDown(() async {
@@ -93,4 +96,57 @@ void main() {
       throwsException,
     );
   });
+
+  test(
+    'closeMonth con sobrante lo deposita en la ubicación elegida y cierra el mes',
+    () async {
+      await repository.startMonth(
+        date: DateTime(2026, 7, 1),
+        salaryCents: 100000,
+        groups: const [],
+      );
+      final active = (await repository.watchActiveMonth().first)!;
+      await savings.addLocation('Caja roja');
+      final location = (await savings.loadLocations()).single;
+
+      await repository.closeMonth(
+        monthId: active.month.id,
+        surplusCents: 100000,
+        savingsLocationId: location.id,
+      );
+
+      expect(await repository.watchActiveMonth().first, isNull);
+      final closed = await repository.loadActiveMonth(active.month.id);
+      expect(closed!.month.closedAt, isNotNull);
+      expect(closed.month.closingTransferCents, 100000);
+      expect(closed.month.closingSavingsLocationId, location.id);
+      final updatedLocation = (await savings.loadLocations()).single;
+      expect(updatedLocation.balanceCents, 100000);
+    },
+  );
+
+  test(
+    'closeMonth sin sobrante cierra el mes sin depositar nada',
+    () async {
+      await repository.startMonth(
+        date: DateTime(2026, 7, 1),
+        salaryCents: 100000,
+        groups: const [],
+      );
+      final active = (await repository.watchActiveMonth().first)!;
+      await savings.addLocation('Caja roja');
+
+      await repository.closeMonth(
+        monthId: active.month.id,
+        surplusCents: -5000,
+      );
+
+      final closed = await repository.loadActiveMonth(active.month.id);
+      expect(closed!.month.closedAt, isNotNull);
+      expect(closed.month.closingTransferCents, -5000);
+      expect(closed.month.closingSavingsLocationId, isNull);
+      final location = (await savings.loadLocations()).single;
+      expect(location.balanceCents, 0);
+    },
+  );
 }
