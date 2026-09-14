@@ -122,6 +122,35 @@ class MonthRepository {
     });
   }
 
+  Future<void> closeMonth({
+    required int monthId,
+    required int surplusCents,
+    int? savingsLocationId,
+  }) {
+    final depositLocationId = surplusCents > 0 ? savingsLocationId : null;
+    return _db.transaction(() async {
+      if (depositLocationId != null) {
+        final location = await (_db.select(_db.savingsLocations)
+              ..where((row) => row.id.equals(depositLocationId)))
+            .getSingle();
+        await (_db.update(_db.savingsLocations)
+              ..where((row) => row.id.equals(depositLocationId)))
+            .write(
+          SavingsLocationsCompanion(
+            balanceCents: Value(location.balanceCents + surplusCents),
+          ),
+        );
+      }
+      await (_db.update(_db.months)..where((m) => m.id.equals(monthId))).write(
+        MonthsCompanion(
+          closedAt: Value(DateTime.now()),
+          closingTransferCents: Value(surplusCents),
+          closingSavingsLocationId: Value(depositLocationId),
+        ),
+      );
+    });
+  }
+
   Future<void> _shiftGroupBudget(int groupId, int deltaCents) async {
     final group = await (_db.select(
       _db.budgetGroups,

@@ -49,6 +49,7 @@ class _AppShellState extends State<AppShell> {
     HomeScreen(
       monthRepository: widget.monthRepository,
       expenseRepository: widget.expenseRepository,
+      savingsRepository: widget.savingsRepository,
     ),
     LoansScreen(loanRepository: widget.loanRepository),
     SavingsScreen(

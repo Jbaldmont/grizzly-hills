@@ -102,6 +102,7 @@ void main() {
 
     expect(find.text(Strings.transferDoneMessage), findsOneWidget);
     expect(find.text('Bs 50'), findsNWidgets(2));
+    await tester.pump(const Duration(seconds: 5));
 
     await tester.tap(find.text(Strings.tabHome));
     await tester.pumpAndSettle();

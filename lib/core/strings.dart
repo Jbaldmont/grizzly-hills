@@ -183,6 +183,22 @@ abstract final class Strings {
   static const lentOnLabel = 'Prestado el';
   static const closedOnLabel = 'Cerrado el';
 
+  static const closeMonthCta = 'Cerrar mes';
+  static const closeMonthTitle = 'Cerrar mes';
+  static const closeMonthSurplusLabel = 'Sobrante a transferir';
+  static const closeMonthLocationLabel = 'Depositar en';
+  static const closeMonthNoLocationsMessage =
+      'Agrega una ubicación de ahorro en la pestaña Ahorro antes de '
+      'cerrar el mes.';
+  static String closeMonthDeficitBody(String deficitAmount) =>
+      'Este mes queda en déficit de $deficitAmount. Se cerrará sin '
+      'transferir nada al ahorro.';
+  static const closeMonthZeroSurplusBody =
+      'Este mes no dejó sobrante. Se cerrará sin transferir nada al ahorro.';
+  static const closeMonthDoneMessage = 'Mes cerrado';
+  static String monthStillOpenWarning(String currentMonthLabel) =>
+      'Ya es $currentMonthLabel pero este mes sigue abierto.';
+
   static const monthNames = [
     'Enero',
     'Febrero',
