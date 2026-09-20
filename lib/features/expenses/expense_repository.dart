@@ -4,6 +4,10 @@ import 'package:drift/drift.dart';
 
 import '../../core/dates.dart';
 import '../../core/db/app_database.dart';
+import '../../core/notifications/notification_scheduler.dart';
+import 'month_overview.dart';
+
+typedef _GroupUsage = ({String groupName, int budgetCents, int spentCents});
 
 class ExtensionRequest {
   const ExtensionRequest({required this.amountCents, required this.description});
@@ -13,9 +17,11 @@ class ExtensionRequest {
 }
 
 class ExpenseRepository {
-  ExpenseRepository(this._db);
+  ExpenseRepository(this._db, [NotificationScheduler? notifications])
+    : _notifications = notifications ?? const NoopNotificationScheduler();
 
   final AppDatabase _db;
+  final NotificationScheduler _notifications;
 
   Stream<List<Expense>> watchExpenses(int monthId) {
     final query = _db.select(_db.expenses)
@@ -48,8 +54,10 @@ class ExpenseRepository {
     int? groupId,
     int? fixedTemplateId,
     ExtensionRequest? extensionRequest,
-  }) {
-    return _db.transaction(() async {
+  }) async {
+    final usageBefore = groupId == null ? null : await _loadGroupUsage(groupId);
+
+    await _db.transaction(() async {
       if (extensionRequest != null && groupId != null) {
         await _insertExtension(monthId, groupId, extensionRequest);
       }
@@ -68,6 +76,10 @@ class ExpenseRepository {
         await _rememberFixedAmount(fixedTemplateId, amountCents);
       }
     });
+
+    if (groupId != null && usageBefore != null) {
+      await _notifyIfThresholdCrossed(groupId, usageBefore);
+    }
   }
 
   Future<void> updateExpense({
@@ -76,16 +88,16 @@ class ExpenseRepository {
     required int amountCents,
     required DateTime date,
     ExtensionRequest? extensionRequest,
-  }) {
-    return _db.transaction(() async {
-      if (extensionRequest != null) {
-        final expense = await (_db.select(
-          _db.expenses,
-        )..where((row) => row.id.equals(id))).getSingle();
-        final groupId = expense.groupId;
-        if (groupId != null) {
-          await _insertExtension(expense.monthId, groupId, extensionRequest);
-        }
+  }) async {
+    final expense = await (_db.select(
+      _db.expenses,
+    )..where((row) => row.id.equals(id))).getSingle();
+    final groupId = expense.groupId;
+    final usageBefore = groupId == null ? null : await _loadGroupUsage(groupId);
+
+    await _db.transaction(() async {
+      if (extensionRequest != null && groupId != null) {
+        await _insertExtension(expense.monthId, groupId, extensionRequest);
       }
       await (_db.update(_db.expenses)..where((e) => e.id.equals(id))).write(
         ExpensesCompanion(
@@ -95,6 +107,10 @@ class ExpenseRepository {
         ),
       );
     });
+
+    if (groupId != null && usageBefore != null) {
+      await _notifyIfThresholdCrossed(groupId, usageBefore);
+    }
   }
 
   Future<void> deleteExpense(int id) {
@@ -165,5 +181,53 @@ class ExpenseRepository {
         .write(
       FixedExpenseTemplatesCompanion(lastAmountCents: Value(amountCents)),
     );
+  }
+
+  Future<_GroupUsage> _loadGroupUsage(int groupId) async {
+    final group = await (_db.select(
+      _db.budgetGroups,
+    )..where((row) => row.id.equals(groupId))).getSingle();
+    final groupExpenses = await (_db.select(
+      _db.expenses,
+    )..where((row) => row.groupId.equals(groupId))).get();
+    return (
+      groupName: group.name,
+      budgetCents:
+          group.budgetCents +
+          MonthOverview.extensionCentsIn(groupExpenses, groupId),
+      spentCents: MonthOverview.spentCentsIn(groupExpenses, groupId),
+    );
+  }
+
+  Future<void> _notifyIfThresholdCrossed(
+    int groupId,
+    _GroupUsage usageBefore,
+  ) async {
+    final usageAfter = await _loadGroupUsage(groupId);
+    for (final thresholdPercent in const [90, 75]) {
+      if (_crossedThreshold(thresholdPercent, usageBefore, usageAfter)) {
+        await _notifications.notifyGroupThreshold(
+          groupId: groupId,
+          groupName: usageAfter.groupName,
+          thresholdPercent: thresholdPercent,
+        );
+        return;
+      }
+    }
+  }
+
+  bool _crossedThreshold(
+    int thresholdPercent,
+    _GroupUsage before,
+    _GroupUsage after,
+  ) {
+    if (before.budgetCents <= 0 || after.budgetCents <= 0) {
+      return false;
+    }
+    final wasBelow =
+        before.spentCents * 100 < thresholdPercent * before.budgetCents;
+    final isAtOrAbove =
+        after.spentCents * 100 >= thresholdPercent * after.budgetCents;
+    return wasBelow && isAtOrAbove;
   }
 }

@@ -4,6 +4,8 @@ import 'package:grizzly_hills/core/db/app_database.dart';
 import 'package:grizzly_hills/features/loans/loan_interest.dart';
 import 'package:grizzly_hills/features/loans/loan_repository.dart';
 
+import 'fake_notification_scheduler.dart';
+
 void main() {
   late AppDatabase db;
   late LoanRepository loans;
@@ -124,5 +126,100 @@ void main() {
 
     final totals = await loans.watchTotalPaidByLoan().first;
     expect(totals[loan.id], 5000);
+  });
+
+  test('loadActiveLoans devuelve los préstamos abiertos sin usar un stream', () async {
+    final loan = await createLoan();
+
+    final active = await loans.loadActiveLoans();
+
+    expect(active.single.id, loan.id);
+  });
+
+  test(
+    'agenda un recordatorio al crear el préstamo y lo cancela al cerrarlo',
+    () async {
+      final notifications = FakeNotificationScheduler();
+      final loansWithNotifications = LoanRepository(db, notifications);
+      await loansWithNotifications.addLoan(
+        debtorName: 'Carlos',
+        principalCents: 10000,
+        loanDate: DateTime(2026, 7, 1),
+        dueDate: DateTime(2026, 7, 15),
+      );
+      final loan =
+          (await loansWithNotifications.watchActiveLoans().first).single;
+      expect(notifications.scheduledLoanReminderIds, [loan.id]);
+
+      final closed = await loansWithNotifications.registerPayment(
+        loanId: loan.id,
+        amountCents: 10200,
+        date: DateTime(2026, 7, 15),
+      );
+
+      expect(closed, isTrue);
+      expect(notifications.cancelledLoanReminderIds, [loan.id]);
+    },
+  );
+
+  test('un pago parcial no cancela el recordatorio del préstamo', () async {
+    final notifications = FakeNotificationScheduler();
+    final loansWithNotifications = LoanRepository(db, notifications);
+    await loansWithNotifications.addLoan(
+      debtorName: 'Carlos',
+      principalCents: 10000,
+      loanDate: DateTime(2026, 7, 1),
+      dueDate: DateTime(2026, 7, 15),
+    );
+    final loan =
+        (await loansWithNotifications.watchActiveLoans().first).single;
+
+    await loansWithNotifications.registerPayment(
+      loanId: loan.id,
+      amountCents: 5000,
+      date: DateTime(2026, 7, 15),
+    );
+
+    expect(notifications.cancelledLoanReminderIds, isEmpty);
+  });
+
+  test('editar la fecha de devolución reagenda el recordatorio', () async {
+    final notifications = FakeNotificationScheduler();
+    final loansWithNotifications = LoanRepository(db, notifications);
+    await loansWithNotifications.addLoan(
+      debtorName: 'Carlos',
+      principalCents: 10000,
+      loanDate: DateTime(2026, 7, 1),
+      dueDate: DateTime(2026, 7, 15),
+    );
+    final loan =
+        (await loansWithNotifications.watchActiveLoans().first).single;
+    notifications.scheduledLoanReminderIds.clear();
+
+    await loansWithNotifications.updateLoan(
+      id: loan.id,
+      debtorName: 'Carlos',
+      dueDate: DateTime(2026, 7, 22),
+    );
+
+    expect(notifications.scheduledLoanReminderIds, [loan.id]);
+  });
+
+  test('eliminar un préstamo sin pagos cancela su recordatorio', () async {
+    final notifications = FakeNotificationScheduler();
+    final loansWithNotifications = LoanRepository(db, notifications);
+    await loansWithNotifications.addLoan(
+      debtorName: 'Carlos',
+      principalCents: 10000,
+      loanDate: DateTime(2026, 7, 1),
+      dueDate: DateTime(2026, 7, 15),
+    );
+    final loan =
+        (await loansWithNotifications.watchActiveLoans().first).single;
+
+    final deleted = await loansWithNotifications.deleteLoan(loan.id);
+
+    expect(deleted, isTrue);
+    expect(notifications.cancelledLoanReminderIds, [loan.id]);
   });
 }

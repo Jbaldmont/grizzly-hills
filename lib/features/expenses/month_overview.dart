@@ -11,12 +11,14 @@ class MonthOverview {
       expense.kind == ExpenseKind.group ||
       expense.kind == ExpenseKind.savingsTransfer;
 
-  int spentInGroupCents(int groupId) => _sum(
-        expenses.where(
-          (expense) =>
-              countsAsGroupSpending(expense) && expense.groupId == groupId,
-        ),
-      );
+  static int spentCentsIn(List<Expense> expenses, int groupId) => expenses
+      .where(
+        (expense) =>
+            countsAsGroupSpending(expense) && expense.groupId == groupId,
+      )
+      .fold(0, (sum, expense) => sum + expense.amountCents);
+
+  int spentInGroupCents(int groupId) => spentCentsIn(expenses, groupId);
 
   static int extensionCentsIn(List<Expense> expenses, int groupId) =>
       expenses.fold(0, (sum, expense) {

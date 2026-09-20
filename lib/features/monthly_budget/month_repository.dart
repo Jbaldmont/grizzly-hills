@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../../core/db/app_database.dart';
+import '../../core/notifications/notification_scheduler.dart';
 
 class ActiveMonth {
   const ActiveMonth({required this.month, required this.groups});
@@ -21,9 +22,21 @@ class GroupDraft {
 }
 
 class MonthRepository {
-  MonthRepository(this._db);
+  MonthRepository(this._db, [NotificationScheduler? notifications])
+    : _notifications = notifications ?? const NoopNotificationScheduler();
 
   final AppDatabase _db;
+  final NotificationScheduler _notifications;
+
+  Future<ActiveMonth?> loadCurrentActiveMonth() async {
+    final month = await (_db.select(
+      _db.months,
+    )..where((row) => row.closedAt.isNull())).getSingleOrNull();
+    if (month == null) {
+      return null;
+    }
+    return loadActiveMonth(month.id);
+  }
 
   Stream<ActiveMonth?> watchActiveMonth() {
     final query =
@@ -76,8 +89,8 @@ class MonthRepository {
     required DateTime date,
     required int salaryCents,
     required List<GroupDraft> groups,
-  }) {
-    return _db.transaction(() async {
+  }) async {
+    await _db.transaction(() async {
       final monthId = await _db
           .into(_db.months)
           .insert(
@@ -99,6 +112,10 @@ class MonthRepository {
         ]);
       });
     });
+    await _notifications.scheduleMonthCloseReminder(
+      year: date.year,
+      month: date.month,
+    );
   }
 
   Future<void> updateMonth({
@@ -133,9 +150,9 @@ class MonthRepository {
     required int monthId,
     required int surplusCents,
     int? savingsLocationId,
-  }) {
+  }) async {
     final depositLocationId = surplusCents > 0 ? savingsLocationId : null;
-    return _db.transaction(() async {
+    await _db.transaction(() async {
       if (depositLocationId != null) {
         final location = await (_db.select(_db.savingsLocations)
               ..where((row) => row.id.equals(depositLocationId)))
@@ -156,6 +173,7 @@ class MonthRepository {
         ),
       );
     });
+    await _notifications.cancelMonthCloseReminder();
   }
 
   Future<void> _shiftGroupBudget(int groupId, int deltaCents) async {

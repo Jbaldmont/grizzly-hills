@@ -5,6 +5,8 @@ import 'package:grizzly_hills/features/expenses/expense_repository.dart';
 import 'package:grizzly_hills/features/expenses/month_overview.dart';
 import 'package:grizzly_hills/features/monthly_budget/month_repository.dart';
 
+import 'fake_notification_scheduler.dart';
+
 void main() {
   late AppDatabase db;
   late MonthRepository months;
@@ -293,4 +295,77 @@ void main() {
       expect(overview.closingSurplusCents, 300000 - 60000);
     },
   );
+
+  test('notifica al grupo al cruzar 75% y luego 90% de su presupuesto', () async {
+    final notifications = FakeNotificationScheduler();
+    final expensesWithNotifications = ExpenseRepository(db, notifications);
+    final month = await openMonth();
+    final casa = month.groups.first;
+
+    await expensesWithNotifications.addExpense(
+      monthId: month.month.id,
+      kind: ExpenseKind.group,
+      groupId: casa.id,
+      description: 'Mercado',
+      amountCents: 38000,
+      date: DateTime(2026, 7, 12),
+    );
+
+    expect(notifications.groupThresholdNotifications, hasLength(1));
+    expect(notifications.groupThresholdNotifications.single.thresholdPercent, 75);
+    expect(notifications.groupThresholdNotifications.single.groupId, casa.id);
+
+    await expensesWithNotifications.addExpense(
+      monthId: month.month.id,
+      kind: ExpenseKind.group,
+      groupId: casa.id,
+      description: 'Extra',
+      amountCents: 7000,
+      date: DateTime(2026, 7, 13),
+    );
+
+    expect(notifications.groupThresholdNotifications, hasLength(2));
+    expect(notifications.groupThresholdNotifications.last.thresholdPercent, 90);
+  });
+
+  test(
+    'un gasto que salta directo sobre ambos umbrales solo notifica el 90%',
+    () async {
+      final notifications = FakeNotificationScheduler();
+      final expensesWithNotifications = ExpenseRepository(db, notifications);
+      final month = await openMonth();
+      final casa = month.groups.first;
+
+      await expensesWithNotifications.addExpense(
+        monthId: month.month.id,
+        kind: ExpenseKind.group,
+        groupId: casa.id,
+        description: 'Compra grande',
+        amountCents: 48000,
+        date: DateTime(2026, 7, 12),
+      );
+
+      expect(notifications.groupThresholdNotifications, hasLength(1));
+      expect(
+        notifications.groupThresholdNotifications.single.thresholdPercent,
+        90,
+      );
+    },
+  );
+
+  test('un gasto sin grupo (imprevisto) no dispara alertas de grupo', () async {
+    final notifications = FakeNotificationScheduler();
+    final expensesWithNotifications = ExpenseRepository(db, notifications);
+    final month = await openMonth();
+
+    await expensesWithNotifications.addExpense(
+      monthId: month.month.id,
+      kind: ExpenseKind.unexpected,
+      description: 'Llanta pinchada',
+      amountCents: 8000,
+      date: DateTime(2026, 7, 12),
+    );
+
+    expect(notifications.groupThresholdNotifications, isEmpty);
+  });
 }
