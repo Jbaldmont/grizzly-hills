@@ -14,6 +14,18 @@ abstract final class Strings {
   static const themeModeLight = 'Claro';
   static const themeModeDark = 'Oscuro';
 
+  static const settingsSecuritySectionTitle = 'Seguridad';
+  static const settingsBiometricLock = 'Bloqueo con huella o PIN';
+  static const settingsBiometricLockSubtitle = 'Pide desbloqueo al abrir la app';
+  static const biometricNotAvailableMessage =
+      'Tu dispositivo no tiene huella ni PIN configurado';
+  static const biometricConfirmFailedMessage =
+      'No se pudo confirmar. Intenta de nuevo';
+  static const lockScreenTitle = 'Grizzly Hills bloqueado';
+  static const lockScreenBody = 'Desbloquea con tu huella o PIN para continuar';
+  static const lockScreenReason = 'Desbloquea Grizzly Hills';
+  static const unlockCta = 'Desbloquear';
+
   static const comingSoon = 'Próximamente';
   static const quickExpenseTooltip = 'Registrar gasto';
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grizzly_hills/app.dart';
 import 'package:grizzly_hills/core/db/app_database.dart';
+import 'package:grizzly_hills/core/security/lock_controller.dart';
 import 'package:grizzly_hills/core/strings.dart';
 import 'package:grizzly_hills/core/theme/theme_controller.dart';
 import 'package:grizzly_hills/features/expenses/expense_repository.dart';
@@ -10,11 +11,17 @@ import 'package:grizzly_hills/features/monthly_budget/month_repository.dart';
 import 'package:grizzly_hills/features/savings/savings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'fake_biometric_authenticator.dart';
+
 Future<GrizzlyApp> buildTestApp(AppDatabase db) async {
   SharedPreferences.setMockInitialValues(<String, Object>{});
   final themeController = await ThemeController.load();
+  final lockController = await LockController.load(
+    authenticator: FakeBiometricAuthenticator(),
+  );
   return GrizzlyApp(
     themeController: themeController,
+    lockController: lockController,
     monthRepository: MonthRepository(db),
     expenseRepository: ExpenseRepository(db),
     savingsRepository: SavingsRepository(db),
