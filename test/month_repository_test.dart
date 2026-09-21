@@ -4,6 +4,8 @@ import 'package:grizzly_hills/core/db/app_database.dart';
 import 'package:grizzly_hills/features/monthly_budget/month_repository.dart';
 import 'package:grizzly_hills/features/savings/savings_repository.dart';
 
+import 'fake_notification_scheduler.dart';
+
 void main() {
   late AppDatabase db;
   late MonthRepository repository;
@@ -147,6 +149,50 @@ void main() {
       expect(closed.month.closingSavingsLocationId, isNull);
       final location = (await savings.loadLocations()).single;
       expect(location.balanceCents, 0);
+    },
+  );
+
+  test(
+    'loadCurrentActiveMonth devuelve el mes abierto sin usar un stream',
+    () async {
+      expect(await repository.loadCurrentActiveMonth(), isNull);
+
+      await repository.startMonth(
+        date: DateTime(2026, 7, 1),
+        salaryCents: 100000,
+        groups: const [GroupDraft(name: 'Casa', budgetCents: 50000)],
+      );
+
+      final active = await repository.loadCurrentActiveMonth();
+      expect(active, isNotNull);
+      expect(active!.groups.single.name, 'Casa');
+    },
+  );
+
+  test(
+    'startMonth agenda el recordatorio de cierre y closeMonth lo cancela',
+    () async {
+      final notifications = FakeNotificationScheduler();
+      final repositoryWithNotifications = MonthRepository(db, notifications);
+
+      await repositoryWithNotifications.startMonth(
+        date: DateTime(2026, 7, 12),
+        salaryCents: 100000,
+        groups: const [],
+      );
+
+      expect(notifications.scheduledMonthCloseReminders, [
+        (year: 2026, month: 7),
+      ]);
+
+      final active =
+          (await repositoryWithNotifications.watchActiveMonth().first)!;
+      await repositoryWithNotifications.closeMonth(
+        monthId: active.month.id,
+        surplusCents: 100000,
+      );
+
+      expect(notifications.monthCloseCancelCount, 1);
     },
   );
 }

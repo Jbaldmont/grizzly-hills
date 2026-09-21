@@ -4,3 +4,5 @@ String formatShortDate(DateTime date) =>
 String formatDayMonth(DateTime date) => '${date.day}/${date.month}';
 
 DateTime dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
+
+DateTime lastDayOfMonth(int year, int month) => DateTime(year, month + 1, 0);

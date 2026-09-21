@@ -207,6 +207,19 @@ abstract final class Strings {
   static const closingNoSurplusLabel = 'Sin sobrante';
   static String closingDeficitLabel(String amount) => 'Déficit de $amount';
 
+  static String budgetThresholdTitle(int thresholdPercent) =>
+      thresholdPercent >= 90
+          ? 'Presupuesto casi agotado'
+          : 'Presupuesto en el 75%';
+  static String budgetThresholdBody(String groupName, int thresholdPercent) =>
+      'El grupo "$groupName" llegó al $thresholdPercent% de su presupuesto.';
+  static const loanDueTitle = 'Préstamo por cobrar';
+  static String loanDueBody(String debtorName) =>
+      'Hoy vence el plazo tentativo del préstamo a $debtorName.';
+  static const monthCloseReminderTitle = 'Cierra tu mes';
+  static const monthCloseReminderBody =
+      'Hoy es el último día del mes. No olvides cerrarlo en Grizzly Hills.';
+
   static const monthNames = [
     'Enero',
     'Febrero',

@@ -2,18 +2,27 @@ import 'package:drift/drift.dart';
 
 import '../../core/dates.dart';
 import '../../core/db/app_database.dart';
+import '../../core/notifications/notification_scheduler.dart';
 import 'loan_interest.dart';
 
 class LoanRepository {
-  LoanRepository(this._db);
+  LoanRepository(this._db, [NotificationScheduler? notifications])
+    : _notifications = notifications ?? const NoopNotificationScheduler();
 
   final AppDatabase _db;
+  final NotificationScheduler _notifications;
 
   Stream<List<Loan>> watchActiveLoans() {
     final query = _db.select(_db.loans)
       ..where((loan) => loan.closedAt.isNull())
       ..orderBy([(loan) => OrderingTerm.asc(loan.dueDate)]);
     return query.watch();
+  }
+
+  Future<List<Loan>> loadActiveLoans() {
+    final query = _db.select(_db.loans)
+      ..where((loan) => loan.closedAt.isNull());
+    return query.get();
   }
 
   Stream<List<Loan>> watchClosedLoans() {
@@ -65,9 +74,9 @@ class LoanRepository {
     required DateTime loanDate,
     required DateTime dueDate,
     double weeklyRatePercent = defaultWeeklyRatePercent,
-  }) {
+  }) async {
     final normalizedLoanDate = dateOnly(loanDate);
-    return _db.into(_db.loans).insert(
+    final id = await _db.into(_db.loans).insert(
           LoansCompanion.insert(
             debtorName: debtorName,
             principalCents: principalCents,
@@ -77,6 +86,7 @@ class LoanRepository {
             dueDate: dateOnly(dueDate),
           ),
         );
+    await _scheduleDueReminder(id);
   }
 
   Future<void> updateLoan({
@@ -85,8 +95,8 @@ class LoanRepository {
     required DateTime dueDate,
     int? principalCents,
     DateTime? loanDate,
-  }) {
-    return (_db.update(_db.loans)..where((loan) => loan.id.equals(id))).write(
+  }) async {
+    await (_db.update(_db.loans)..where((loan) => loan.id.equals(id))).write(
       LoansCompanion(
         debtorName: Value(debtorName),
         dueDate: Value(dateOnly(dueDate)),
@@ -98,25 +108,30 @@ class LoanRepository {
             loanDate == null ? const Value.absent() : Value(dateOnly(loanDate)),
       ),
     );
+    await _scheduleDueReminder(id);
   }
 
-  Future<bool> deleteLoan(int id) {
-    return _db.transaction(() async {
+  Future<bool> deleteLoan(int id) async {
+    final deleted = await _db.transaction(() async {
       if (await hasPayments(id)) {
         return false;
       }
       await (_db.delete(_db.loans)..where((loan) => loan.id.equals(id))).go();
       return true;
     });
+    if (deleted) {
+      await _notifications.cancelLoanDueReminder(id);
+    }
+    return deleted;
   }
 
   Future<bool> registerPayment({
     required int loanId,
     required int amountCents,
     required DateTime date,
-  }) {
+  }) async {
     final paymentDate = dateOnly(date);
-    return _db.transaction(() async {
+    final closes = await _db.transaction(() async {
       final loan = await (_db.select(
         _db.loans,
       )..where((row) => row.id.equals(loanId))).getSingle();
@@ -140,5 +155,16 @@ class LoanRepository {
       );
       return closes;
     });
+    if (closes) {
+      await _notifications.cancelLoanDueReminder(loanId);
+    }
+    return closes;
+  }
+
+  Future<void> _scheduleDueReminder(int loanId) async {
+    final loan = await (_db.select(
+      _db.loans,
+    )..where((row) => row.id.equals(loanId))).getSingle();
+    await _notifications.scheduleLoanDueReminder(loan);
   }
 }
