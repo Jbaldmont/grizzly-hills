@@ -1,9 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/dimens.dart';
 import '../../../core/money.dart';
 
+@immutable
 class TrendPoint {
   const TrendPoint({
     required this.label,
@@ -14,12 +16,37 @@ class TrendPoint {
   final String label;
   final int amountCents;
   final bool highlighted;
+
+  @override
+  bool operator ==(Object other) =>
+      other is TrendPoint &&
+      other.label == label &&
+      other.amountCents == amountCents &&
+      other.highlighted == highlighted;
+
+  @override
+  int get hashCode => Object.hash(label, amountCents, highlighted);
 }
 
-class TagTrendChart extends StatelessWidget {
+class TagTrendChart extends StatefulWidget {
   const TagTrendChart({super.key, required this.points});
 
   final List<TrendPoint> points;
+
+  @override
+  State<TagTrendChart> createState() => _TagTrendChartState();
+}
+
+class _TagTrendChartState extends State<TagTrendChart> {
+  int? _selectedIndex;
+
+  @override
+  void didUpdateWidget(TagTrendChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!listEquals(oldWidget.points, widget.points)) {
+      _selectedIndex = null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +59,7 @@ class TagTrendChart extends StatelessWidget {
           minY: 0,
           alignment: BarChartAlignment.spaceAround,
           barGroups: [
-            for (var index = 0; index < points.length; index++)
+            for (var index = 0; index < widget.points.length; index++)
               _buildGroup(index, colorScheme),
           ],
           gridData: FlGridData(
@@ -42,24 +69,44 @@ class TagTrendChart extends StatelessWidget {
           ),
           borderData: FlBorderData(show: false),
           titlesData: _buildTitles(theme),
-          barTouchData: BarTouchData(
-            touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (_) => colorScheme.inverseSurface,
-              getTooltipItem: (_, groupIndex, _, _) => BarTooltipItem(
-                formatBs(points[groupIndex].amountCents),
-                TextStyle(color: colorScheme.onInverseSurface),
-              ),
-            ),
-          ),
+          barTouchData: _buildTouchData(colorScheme),
         ),
       ),
     );
   }
 
+  BarTouchData _buildTouchData(ColorScheme colorScheme) {
+    return BarTouchData(
+      handleBuiltInTouches: false,
+      touchCallback: _handleTouch,
+      touchTooltipData: BarTouchTooltipData(
+        getTooltipColor: (_) => colorScheme.surfaceContainerHighest,
+        tooltipBorder: BorderSide(color: colorScheme.outlineVariant),
+        fitInsideHorizontally: true,
+        fitInsideVertically: true,
+        getTooltipItem: (_, groupIndex, _, _) => BarTooltipItem(
+          formatBs(widget.points[groupIndex].amountCents),
+          TextStyle(color: colorScheme.onSurface),
+        ),
+      ),
+    );
+  }
+
+  void _handleTouch(FlTouchEvent event, BarTouchResponse? response) {
+    if (event is! FlTapUpEvent) {
+      return;
+    }
+    final touchedIndex = response?.spot?.touchedBarGroupIndex;
+    setState(() {
+      _selectedIndex = touchedIndex == _selectedIndex ? null : touchedIndex;
+    });
+  }
+
   BarChartGroupData _buildGroup(int index, ColorScheme colorScheme) {
-    final point = points[index];
+    final point = widget.points[index];
     return BarChartGroupData(
       x: index,
+      showingTooltipIndicators: index == _selectedIndex ? const [0] : const [],
       barRods: [
         BarChartRodData(
           toY: point.amountCents / 100,
@@ -96,7 +143,7 @@ class TagTrendChart extends StatelessWidget {
         sideTitles: SideTitles(
           showTitles: true,
           getTitlesWidget: (value, meta) {
-            final point = points[value.toInt()];
+            final point = widget.points[value.toInt()];
             return SideTitleWidget(
               meta: meta,
               child: Text(
