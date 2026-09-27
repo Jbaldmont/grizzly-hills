@@ -5,8 +5,9 @@ final NumberFormat _bsFormat = NumberFormat('#,##0.##', 'es');
 
 final RegExp _amountPattern = RegExp(r'^\d+([.,]\d{1,2})?$');
 
-String formatBs(int cents) =>
-    '${Strings.currency} ${_bsFormat.format(cents / 100)}';
+String formatBs(int cents) => '${Strings.currency} ${formatAmount(cents)}';
+
+String formatAmount(int cents) => _bsFormat.format(cents / 100);
 
 String centsToEditableText(int cents) {
   if (cents % 100 == 0) {

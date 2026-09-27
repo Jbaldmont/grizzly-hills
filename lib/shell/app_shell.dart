@@ -14,6 +14,8 @@ import '../features/monthly_budget/month_repository.dart';
 import '../features/savings/savings_repository.dart';
 import '../features/savings/savings_screen.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/tags/tag_repository.dart';
+import '../features/tags/tag_statistics_screen.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({
@@ -24,6 +26,7 @@ class AppShell extends StatefulWidget {
     required this.expenseRepository,
     required this.savingsRepository,
     required this.loanRepository,
+    required this.tagRepository,
   });
 
   final ThemeController themeController;
@@ -32,6 +35,7 @@ class AppShell extends StatefulWidget {
   final ExpenseRepository expenseRepository;
   final SavingsRepository savingsRepository;
   final LoanRepository loanRepository;
+  final TagRepository tagRepository;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -54,6 +58,7 @@ class _AppShellState extends State<AppShell> {
       monthRepository: widget.monthRepository,
       expenseRepository: widget.expenseRepository,
       savingsRepository: widget.savingsRepository,
+      tagRepository: widget.tagRepository,
     ),
     LoansScreen(loanRepository: widget.loanRepository),
     SavingsScreen(
@@ -87,12 +92,18 @@ class _AppShellState extends State<AppShell> {
       appBar: AppBar(
         title: Text(_titles[_selectedIndex]),
         actions: [
-          if (_selectedIndex == 0)
+          if (_selectedIndex == 0) ...[
+            IconButton(
+              icon: const Icon(Icons.bar_chart),
+              tooltip: Strings.tagStatisticsTitle,
+              onPressed: _openTagStatistics,
+            ),
             IconButton(
               icon: const Icon(Icons.history),
               tooltip: Strings.monthHistoryTooltip,
               onPressed: _openMonthHistory,
             ),
+          ],
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: Strings.settingsTitle,
@@ -160,6 +171,18 @@ class _AppShellState extends State<AppShell> {
       activeMonth: activeMonth,
       expenseRepository: widget.expenseRepository,
       monthRepository: widget.monthRepository,
+      tagRepository: widget.tagRepository,
+    );
+  }
+
+  void _openTagStatistics() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => TagStatisticsScreen(
+          monthRepository: widget.monthRepository,
+          tagRepository: widget.tagRepository,
+        ),
+      ),
     );
   }
 
@@ -170,6 +193,7 @@ class _AppShellState extends State<AppShell> {
           monthRepository: widget.monthRepository,
           expenseRepository: widget.expenseRepository,
           savingsRepository: widget.savingsRepository,
+          tagRepository: widget.tagRepository,
         ),
       ),
     );
@@ -181,6 +205,7 @@ class _AppShellState extends State<AppShell> {
         builder: (_) => SettingsScreen(
           themeController: widget.themeController,
           lockController: widget.lockController,
+          tagRepository: widget.tagRepository,
         ),
       ),
     );

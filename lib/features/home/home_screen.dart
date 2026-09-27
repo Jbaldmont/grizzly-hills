@@ -11,6 +11,7 @@ import '../monthly_budget/close_month_sheet.dart';
 import '../monthly_budget/month_repository.dart';
 import '../monthly_budget/start_month_screen.dart';
 import '../savings/savings_repository.dart';
+import '../tags/tag_repository.dart';
 import 'widgets/fixed_expenses_card.dart';
 import 'widgets/group_card.dart';
 import 'widgets/month_header_card.dart';
@@ -22,11 +23,13 @@ class HomeScreen extends StatefulWidget {
     required this.monthRepository,
     required this.expenseRepository,
     required this.savingsRepository,
+    required this.tagRepository,
   });
 
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
   final SavingsRepository savingsRepository;
+  final TagRepository tagRepository;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -57,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
           monthRepository: widget.monthRepository,
           expenseRepository: widget.expenseRepository,
           savingsRepository: widget.savingsRepository,
+          tagRepository: widget.tagRepository,
           onEdit: () => _openEditMonth(activeMonth),
         );
       },
@@ -94,6 +98,7 @@ class _MonthContent extends StatefulWidget {
     required this.monthRepository,
     required this.expenseRepository,
     required this.savingsRepository,
+    required this.tagRepository,
     required this.onEdit,
   });
 
@@ -101,6 +106,7 @@ class _MonthContent extends StatefulWidget {
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
   final SavingsRepository savingsRepository;
+  final TagRepository tagRepository;
   final VoidCallback onEdit;
 
   @override
@@ -131,6 +137,7 @@ class _MonthContentState extends State<_MonthContent> {
           monthRepository: widget.monthRepository,
           expenseRepository: widget.expenseRepository,
           savingsRepository: widget.savingsRepository,
+          tagRepository: widget.tagRepository,
           onEdit: widget.onEdit,
         );
       },
@@ -144,6 +151,7 @@ class _MonthSummary extends StatelessWidget {
     required this.monthRepository,
     required this.expenseRepository,
     required this.savingsRepository,
+    required this.tagRepository,
     required this.onEdit,
   });
 
@@ -151,6 +159,7 @@ class _MonthSummary extends StatelessWidget {
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
   final SavingsRepository savingsRepository;
+  final TagRepository tagRepository;
   final VoidCallback onEdit;
 
   @override
@@ -215,6 +224,7 @@ class _MonthSummary extends StatelessWidget {
           month: overview.activeMonth.month,
           monthRepository: monthRepository,
           expenseRepository: expenseRepository,
+          tagRepository: tagRepository,
           group: group,
         ),
       ),

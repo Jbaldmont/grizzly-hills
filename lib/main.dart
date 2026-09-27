@@ -8,6 +8,7 @@ import 'features/expenses/expense_repository.dart';
 import 'features/loans/loan_repository.dart';
 import 'features/monthly_budget/month_repository.dart';
 import 'features/savings/savings_repository.dart';
+import 'features/tags/tag_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,7 @@ Future<void> main() async {
   final expenseRepository = ExpenseRepository(database, notificationService);
   final loanRepository = LoanRepository(database, notificationService);
   final savingsRepository = SavingsRepository(database);
+  final tagRepository = TagRepository(database);
   await notificationService.syncScheduledReminders(
     monthRepository: monthRepository,
     loanRepository: loanRepository,
@@ -35,6 +37,7 @@ Future<void> main() async {
       expenseRepository: expenseRepository,
       savingsRepository: savingsRepository,
       loanRepository: loanRepository,
+      tagRepository: tagRepository,
     ),
   );
 }

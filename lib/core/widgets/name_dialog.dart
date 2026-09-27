@@ -1,33 +1,51 @@
 import 'package:flutter/material.dart';
 
-import '../../core/strings.dart';
+import '../strings.dart';
 
-Future<String?> showLocationNameDialog(
+Future<String?> showNameDialog(
   BuildContext context, {
+  required String title,
+  required String confirmLabel,
   String? initialName,
+  Iterable<String> takenNames = const [],
 }) {
   return showDialog<String>(
     context: context,
-    builder: (_) => _LocationNameDialog(initialName: initialName),
+    builder: (_) => _NameDialog(
+      title: title,
+      confirmLabel: confirmLabel,
+      initialName: initialName,
+      takenNames: takenNames,
+    ),
   );
 }
 
-class _LocationNameDialog extends StatefulWidget {
-  const _LocationNameDialog({this.initialName});
+class _NameDialog extends StatefulWidget {
+  const _NameDialog({
+    required this.title,
+    required this.confirmLabel,
+    required this.takenNames,
+    this.initialName,
+  });
 
+  final String title;
+  final String confirmLabel;
+  final Iterable<String> takenNames;
   final String? initialName;
 
   @override
-  State<_LocationNameDialog> createState() => _LocationNameDialogState();
+  State<_NameDialog> createState() => _NameDialogState();
 }
 
-class _LocationNameDialogState extends State<_LocationNameDialog> {
+class _NameDialogState extends State<_NameDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController = TextEditingController(
     text: widget.initialName ?? '',
   );
-
-  bool get _isRenaming => widget.initialName != null;
+  late final Set<String> _takenKeys = {
+    for (final name in widget.takenNames)
+      if (name != widget.initialName) _normalize(name),
+  };
 
   @override
   void dispose() {
@@ -38,9 +56,7 @@ class _LocationNameDialogState extends State<_LocationNameDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
-        _isRenaming ? Strings.renameLocationTitle : Strings.newLocationTitle,
-      ),
+      title: Text(widget.title),
       content: Form(
         key: _formKey,
         child: TextFormField(
@@ -48,7 +64,7 @@ class _LocationNameDialogState extends State<_LocationNameDialog> {
           autofocus: true,
           textCapitalization: TextCapitalization.sentences,
           decoration: const InputDecoration(
-            labelText: Strings.locationNameLabel,
+            labelText: Strings.nameLabel,
             border: OutlineInputBorder(),
           ),
           validator: _validateName,
@@ -62,15 +78,19 @@ class _LocationNameDialogState extends State<_LocationNameDialog> {
         ),
         FilledButton(
           onPressed: _submit,
-          child: Text(_isRenaming ? Strings.save : Strings.add),
+          child: Text(widget.confirmLabel),
         ),
       ],
     );
   }
 
   String? _validateName(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return Strings.locationNameRequiredError;
+    final name = value?.trim() ?? '';
+    if (name.isEmpty) {
+      return Strings.nameRequiredError;
+    }
+    if (_takenKeys.contains(_normalize(name))) {
+      return Strings.nameTakenError;
     }
     return null;
   }
@@ -81,4 +101,6 @@ class _LocationNameDialogState extends State<_LocationNameDialog> {
     }
     Navigator.of(context).pop(_nameController.text.trim());
   }
+
+  static String _normalize(String name) => name.trim().toLowerCase();
 }

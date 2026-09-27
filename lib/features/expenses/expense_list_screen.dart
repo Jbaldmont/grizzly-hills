@@ -9,6 +9,7 @@ import '../../core/money.dart';
 import '../../core/strings.dart';
 import '../home/widgets/group_card.dart';
 import '../monthly_budget/month_repository.dart';
+import '../tags/tag_repository.dart';
 import 'expense_form_sheet.dart';
 import 'expense_repository.dart';
 import 'extension_request_dialog.dart';
@@ -20,6 +21,7 @@ class ExpenseListScreen extends StatefulWidget {
     required this.month,
     required this.monthRepository,
     required this.expenseRepository,
+    required this.tagRepository,
     this.group,
     this.readOnly = false,
   });
@@ -27,6 +29,7 @@ class ExpenseListScreen extends StatefulWidget {
   final Month month;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
+  final TagRepository tagRepository;
   final BudgetGroup? group;
   final bool readOnly;
 
@@ -39,6 +42,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       widget.expenseRepository.watchExpenses(widget.month.id);
   late final Stream<ActiveMonth?> _activeMonth =
       widget.monthRepository.watchActiveMonth();
+  late final Stream<List<ExpenseTag>> _tags = widget.tagRepository.watchTags();
 
   ExpenseDestination get _destination => widget.group == null
       ? const ExpenseDestination.unexpected()
@@ -59,39 +63,54 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             ),
       body: SafeArea(
         top: false,
-        child: StreamBuilder<List<Expense>>(
-          stream: _expenses,
-          builder: (context, expensesSnapshot) {
-            if (expensesSnapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final allExpenses = expensesSnapshot.data ?? [];
-            if (widget.group == null || widget.readOnly) {
-              return _buildList(allExpenses);
-            }
-            return StreamBuilder<ActiveMonth?>(
-              stream: _activeMonth,
-              builder: (context, monthSnapshot) {
-                final activeMonth = monthSnapshot.data;
-                final availableGeneralCents = activeMonth == null
-                    ? 0
-                    : MonthOverview(
-                        activeMonth: activeMonth,
-                        expenses: allExpenses,
-                      ).availableGeneralCents;
-                return _buildList(
-                  allExpenses,
-                  availableGeneralCents: availableGeneralCents,
-                );
-              },
-            );
-          },
+        child: StreamBuilder<List<ExpenseTag>>(
+          stream: _tags,
+          builder: (context, tagsSnapshot) => _buildExpenses({
+            for (final tag in tagsSnapshot.data ?? <ExpenseTag>[])
+              tag.id: tag.name,
+          }),
         ),
       ),
     );
   }
 
-  Widget _buildList(List<Expense> allExpenses, {int availableGeneralCents = 0}) {
+  Widget _buildExpenses(Map<int, String> tagNamesById) {
+    return StreamBuilder<List<Expense>>(
+      stream: _expenses,
+      builder: (context, expensesSnapshot) {
+        if (expensesSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final allExpenses = expensesSnapshot.data ?? [];
+        if (widget.group == null || widget.readOnly) {
+          return _buildList(allExpenses, tagNamesById);
+        }
+        return StreamBuilder<ActiveMonth?>(
+          stream: _activeMonth,
+          builder: (context, monthSnapshot) {
+            final activeMonth = monthSnapshot.data;
+            final availableGeneralCents = activeMonth == null
+                ? 0
+                : MonthOverview(
+                    activeMonth: activeMonth,
+                    expenses: allExpenses,
+                  ).availableGeneralCents;
+            return _buildList(
+              allExpenses,
+              tagNamesById,
+              availableGeneralCents: availableGeneralCents,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildList(
+    List<Expense> allExpenses,
+    Map<int, String> tagNamesById, {
+    int availableGeneralCents = 0,
+  }) {
     final group = widget.group;
     final expenses = _filter(allExpenses);
     final totalCents =
@@ -137,10 +156,14 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
         else
           for (final expense in expenses)
             if (widget.readOnly || _isLocked(expense))
-              _ExpenseTile(expense: expense)
+              _ExpenseTile(
+                expense: expense,
+                tagName: tagNamesById[expense.tagId],
+              )
             else
               _ExpenseTile(
                 expense: expense,
+                tagName: tagNamesById[expense.tagId],
                 onTap: () => _openForm(expenseToEdit: expense),
                 onConfirmDelete: () =>
                     widget.expenseRepository.deleteExpense(expense.id),
@@ -234,6 +257,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
         month: widget.month,
         expenseRepository: widget.expenseRepository,
         monthRepository: widget.monthRepository,
+        tagRepository: widget.tagRepository,
         lockedDestination: _destination,
         expenseToEdit: expenseToEdit,
       ),
@@ -244,11 +268,13 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
 class _ExpenseTile extends StatelessWidget {
   const _ExpenseTile({
     required this.expense,
+    this.tagName,
     this.onTap,
     this.onConfirmDelete,
   });
 
   final Expense expense;
+  final String? tagName;
   final VoidCallback? onTap;
   final Future<void> Function()? onConfirmDelete;
 
@@ -256,6 +282,8 @@ class _ExpenseTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final onConfirmDelete = this.onConfirmDelete;
+    final tagName = this.tagName;
+    final date = formatShortDate(expense.date);
     final tile = ListTile(
       contentPadding: EdgeInsets.zero,
       leading: onTap == null && onConfirmDelete == null
@@ -266,7 +294,9 @@ class _ExpenseTile extends StatelessWidget {
             ? Strings.noDescription
             : expense.description,
       ),
-      subtitle: Text(formatShortDate(expense.date)),
+      subtitle: Text(
+        tagName == null ? date : Strings.dateWithTag(date, tagName),
+      ),
       trailing: Text(
         formatBs(expense.amountCents),
         style: theme.textTheme.titleMedium,

@@ -8,6 +8,7 @@ import 'features/expenses/expense_repository.dart';
 import 'features/loans/loan_repository.dart';
 import 'features/monthly_budget/month_repository.dart';
 import 'features/savings/savings_repository.dart';
+import 'features/tags/tag_repository.dart';
 import 'shell/app_shell.dart';
 
 class GrizzlyApp extends StatelessWidget {
@@ -19,6 +20,7 @@ class GrizzlyApp extends StatelessWidget {
     required this.expenseRepository,
     required this.savingsRepository,
     required this.loanRepository,
+    required this.tagRepository,
   });
 
   final ThemeController themeController;
@@ -27,6 +29,7 @@ class GrizzlyApp extends StatelessWidget {
   final ExpenseRepository expenseRepository;
   final SavingsRepository savingsRepository;
   final LoanRepository loanRepository;
+  final TagRepository tagRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +49,7 @@ class GrizzlyApp extends StatelessWidget {
             expenseRepository: expenseRepository,
             savingsRepository: savingsRepository,
             loanRepository: loanRepository,
+            tagRepository: tagRepository,
           ),
         ),
       ),

@@ -1804,6 +1804,193 @@ class FixedExpenseTemplatesCompanion
   }
 }
 
+class $ExpenseTagsTable extends ExpenseTags
+    with TableInfo<$ExpenseTagsTable, ExpenseTag> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExpenseTagsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'expense_tags';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExpenseTag> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExpenseTag map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExpenseTag(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+    );
+  }
+
+  @override
+  $ExpenseTagsTable createAlias(String alias) {
+    return $ExpenseTagsTable(attachedDatabase, alias);
+  }
+}
+
+class ExpenseTag extends DataClass implements Insertable<ExpenseTag> {
+  final int id;
+  final String name;
+  const ExpenseTag({required this.id, required this.name});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    return map;
+  }
+
+  ExpenseTagsCompanion toCompanion(bool nullToAbsent) {
+    return ExpenseTagsCompanion(id: Value(id), name: Value(name));
+  }
+
+  factory ExpenseTag.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExpenseTag(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+    };
+  }
+
+  ExpenseTag copyWith({int? id, String? name}) =>
+      ExpenseTag(id: id ?? this.id, name: name ?? this.name);
+  ExpenseTag copyWithCompanion(ExpenseTagsCompanion data) {
+    return ExpenseTag(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpenseTag(')
+          ..write('id: $id, ')
+          ..write('name: $name')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExpenseTag && other.id == this.id && other.name == this.name);
+}
+
+class ExpenseTagsCompanion extends UpdateCompanion<ExpenseTag> {
+  final Value<int> id;
+  final Value<String> name;
+  const ExpenseTagsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+  });
+  ExpenseTagsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+  }) : name = Value(name);
+  static Insertable<ExpenseTag> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+    });
+  }
+
+  ExpenseTagsCompanion copyWith({Value<int>? id, Value<String>? name}) {
+    return ExpenseTagsCompanion(id: id ?? this.id, name: name ?? this.name);
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpenseTagsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -1864,6 +2051,18 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
       'REFERENCES fixed_expense_templates (id) ON DELETE SET NULL',
     ),
   );
+  static const VerificationMeta _tagIdMeta = const VerificationMeta('tagId');
+  @override
+  late final GeneratedColumn<int> tagId = GeneratedColumn<int>(
+    'tag_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES expense_tags (id) ON DELETE SET NULL',
+    ),
+  );
   @override
   late final GeneratedColumnWithTypeConverter<ExpenseKind, String> kind =
       GeneratedColumn<String>(
@@ -1910,6 +2109,7 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
     monthId,
     groupId,
     fixedTemplateId,
+    tagId,
     kind,
     description,
     amountCents,
@@ -1951,6 +2151,12 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
           data['fixed_template_id']!,
           _fixedTemplateIdMeta,
         ),
+      );
+    }
+    if (data.containsKey('tag_id')) {
+      context.handle(
+        _tagIdMeta,
+        tagId.isAcceptableOrUnknown(data['tag_id']!, _tagIdMeta),
       );
     }
     if (data.containsKey('description')) {
@@ -2008,6 +2214,10 @@ class $ExpensesTable extends Expenses with TableInfo<$ExpensesTable, Expense> {
         DriftSqlType.int,
         data['${effectivePrefix}fixed_template_id'],
       ),
+      tagId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tag_id'],
+      ),
       kind: $ExpensesTable.$converterkind.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -2043,6 +2253,7 @@ class Expense extends DataClass implements Insertable<Expense> {
   final int monthId;
   final int? groupId;
   final int? fixedTemplateId;
+  final int? tagId;
   final ExpenseKind kind;
   final String description;
   final int amountCents;
@@ -2052,6 +2263,7 @@ class Expense extends DataClass implements Insertable<Expense> {
     required this.monthId,
     this.groupId,
     this.fixedTemplateId,
+    this.tagId,
     required this.kind,
     required this.description,
     required this.amountCents,
@@ -2067,6 +2279,9 @@ class Expense extends DataClass implements Insertable<Expense> {
     }
     if (!nullToAbsent || fixedTemplateId != null) {
       map['fixed_template_id'] = Variable<int>(fixedTemplateId);
+    }
+    if (!nullToAbsent || tagId != null) {
+      map['tag_id'] = Variable<int>(tagId);
     }
     {
       map['kind'] = Variable<String>($ExpensesTable.$converterkind.toSql(kind));
@@ -2087,6 +2302,9 @@ class Expense extends DataClass implements Insertable<Expense> {
       fixedTemplateId: fixedTemplateId == null && nullToAbsent
           ? const Value.absent()
           : Value(fixedTemplateId),
+      tagId: tagId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tagId),
       kind: Value(kind),
       description: Value(description),
       amountCents: Value(amountCents),
@@ -2104,6 +2322,7 @@ class Expense extends DataClass implements Insertable<Expense> {
       monthId: serializer.fromJson<int>(json['monthId']),
       groupId: serializer.fromJson<int?>(json['groupId']),
       fixedTemplateId: serializer.fromJson<int?>(json['fixedTemplateId']),
+      tagId: serializer.fromJson<int?>(json['tagId']),
       kind: $ExpensesTable.$converterkind.fromJson(
         serializer.fromJson<String>(json['kind']),
       ),
@@ -2120,6 +2339,7 @@ class Expense extends DataClass implements Insertable<Expense> {
       'monthId': serializer.toJson<int>(monthId),
       'groupId': serializer.toJson<int?>(groupId),
       'fixedTemplateId': serializer.toJson<int?>(fixedTemplateId),
+      'tagId': serializer.toJson<int?>(tagId),
       'kind': serializer.toJson<String>(
         $ExpensesTable.$converterkind.toJson(kind),
       ),
@@ -2134,6 +2354,7 @@ class Expense extends DataClass implements Insertable<Expense> {
     int? monthId,
     Value<int?> groupId = const Value.absent(),
     Value<int?> fixedTemplateId = const Value.absent(),
+    Value<int?> tagId = const Value.absent(),
     ExpenseKind? kind,
     String? description,
     int? amountCents,
@@ -2145,6 +2366,7 @@ class Expense extends DataClass implements Insertable<Expense> {
     fixedTemplateId: fixedTemplateId.present
         ? fixedTemplateId.value
         : this.fixedTemplateId,
+    tagId: tagId.present ? tagId.value : this.tagId,
     kind: kind ?? this.kind,
     description: description ?? this.description,
     amountCents: amountCents ?? this.amountCents,
@@ -2158,6 +2380,7 @@ class Expense extends DataClass implements Insertable<Expense> {
       fixedTemplateId: data.fixedTemplateId.present
           ? data.fixedTemplateId.value
           : this.fixedTemplateId,
+      tagId: data.tagId.present ? data.tagId.value : this.tagId,
       kind: data.kind.present ? data.kind.value : this.kind,
       description: data.description.present
           ? data.description.value
@@ -2176,6 +2399,7 @@ class Expense extends DataClass implements Insertable<Expense> {
           ..write('monthId: $monthId, ')
           ..write('groupId: $groupId, ')
           ..write('fixedTemplateId: $fixedTemplateId, ')
+          ..write('tagId: $tagId, ')
           ..write('kind: $kind, ')
           ..write('description: $description, ')
           ..write('amountCents: $amountCents, ')
@@ -2190,6 +2414,7 @@ class Expense extends DataClass implements Insertable<Expense> {
     monthId,
     groupId,
     fixedTemplateId,
+    tagId,
     kind,
     description,
     amountCents,
@@ -2203,6 +2428,7 @@ class Expense extends DataClass implements Insertable<Expense> {
           other.monthId == this.monthId &&
           other.groupId == this.groupId &&
           other.fixedTemplateId == this.fixedTemplateId &&
+          other.tagId == this.tagId &&
           other.kind == this.kind &&
           other.description == this.description &&
           other.amountCents == this.amountCents &&
@@ -2214,6 +2440,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
   final Value<int> monthId;
   final Value<int?> groupId;
   final Value<int?> fixedTemplateId;
+  final Value<int?> tagId;
   final Value<ExpenseKind> kind;
   final Value<String> description;
   final Value<int> amountCents;
@@ -2223,6 +2450,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     this.monthId = const Value.absent(),
     this.groupId = const Value.absent(),
     this.fixedTemplateId = const Value.absent(),
+    this.tagId = const Value.absent(),
     this.kind = const Value.absent(),
     this.description = const Value.absent(),
     this.amountCents = const Value.absent(),
@@ -2233,6 +2461,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     required int monthId,
     this.groupId = const Value.absent(),
     this.fixedTemplateId = const Value.absent(),
+    this.tagId = const Value.absent(),
     required ExpenseKind kind,
     required String description,
     required int amountCents,
@@ -2247,6 +2476,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     Expression<int>? monthId,
     Expression<int>? groupId,
     Expression<int>? fixedTemplateId,
+    Expression<int>? tagId,
     Expression<String>? kind,
     Expression<String>? description,
     Expression<int>? amountCents,
@@ -2257,6 +2487,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       if (monthId != null) 'month_id': monthId,
       if (groupId != null) 'group_id': groupId,
       if (fixedTemplateId != null) 'fixed_template_id': fixedTemplateId,
+      if (tagId != null) 'tag_id': tagId,
       if (kind != null) 'kind': kind,
       if (description != null) 'description': description,
       if (amountCents != null) 'amount_cents': amountCents,
@@ -2269,6 +2500,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     Value<int>? monthId,
     Value<int?>? groupId,
     Value<int?>? fixedTemplateId,
+    Value<int?>? tagId,
     Value<ExpenseKind>? kind,
     Value<String>? description,
     Value<int>? amountCents,
@@ -2279,6 +2511,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
       monthId: monthId ?? this.monthId,
       groupId: groupId ?? this.groupId,
       fixedTemplateId: fixedTemplateId ?? this.fixedTemplateId,
+      tagId: tagId ?? this.tagId,
       kind: kind ?? this.kind,
       description: description ?? this.description,
       amountCents: amountCents ?? this.amountCents,
@@ -2300,6 +2533,9 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
     }
     if (fixedTemplateId.present) {
       map['fixed_template_id'] = Variable<int>(fixedTemplateId.value);
+    }
+    if (tagId.present) {
+      map['tag_id'] = Variable<int>(tagId.value);
     }
     if (kind.present) {
       map['kind'] = Variable<String>(
@@ -2325,6 +2561,7 @@ class ExpensesCompanion extends UpdateCompanion<Expense> {
           ..write('monthId: $monthId, ')
           ..write('groupId: $groupId, ')
           ..write('fixedTemplateId: $fixedTemplateId, ')
+          ..write('tagId: $tagId, ')
           ..write('kind: $kind, ')
           ..write('description: $description, ')
           ..write('amountCents: $amountCents, ')
@@ -3216,6 +3453,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $GroupTemplatesTable groupTemplates = $GroupTemplatesTable(this);
   late final $FixedExpenseTemplatesTable fixedExpenseTemplates =
       $FixedExpenseTemplatesTable(this);
+  late final $ExpenseTagsTable expenseTags = $ExpenseTagsTable(this);
   late final $ExpensesTable expenses = $ExpensesTable(this);
   late final $LoansTable loans = $LoansTable(this);
   late final $LoanPaymentsTable loanPayments = $LoanPaymentsTable(this);
@@ -3229,6 +3467,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     budgetGroups,
     groupTemplates,
     fixedExpenseTemplates,
+    expenseTags,
     expenses,
     loans,
     loanPayments,
@@ -3266,6 +3505,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'fixed_expense_templates',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('expenses', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'expense_tags',
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('expenses', kind: UpdateKind.update)],
@@ -5017,12 +5263,238 @@ typedef $$FixedExpenseTemplatesTableProcessedTableManager =
       FixedExpenseTemplate,
       PrefetchHooks Function({bool expensesRefs})
     >;
+typedef $$ExpenseTagsTableCreateCompanionBuilder =
+    ExpenseTagsCompanion Function({Value<int> id, required String name});
+typedef $$ExpenseTagsTableUpdateCompanionBuilder =
+    ExpenseTagsCompanion Function({Value<int> id, Value<String> name});
+
+final class $$ExpenseTagsTableReferences
+    extends BaseReferences<_$AppDatabase, $ExpenseTagsTable, ExpenseTag> {
+  $$ExpenseTagsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ExpensesTable, List<Expense>> _expensesRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.expenses,
+    aliasName: 'expense_tags__id__expenses__tag_id',
+  );
+
+  $$ExpensesTableProcessedTableManager get expensesRefs {
+    final manager = $$ExpensesTableTableManager(
+      $_db,
+      $_db.expenses,
+    ).filter((f) => f.tagId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_expensesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ExpenseTagsTableFilterComposer
+    extends Composer<_$AppDatabase, $ExpenseTagsTable> {
+  $$ExpenseTagsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> expensesRefs(
+    Expression<bool> Function($$ExpensesTableFilterComposer f) f,
+  ) {
+    final $$ExpensesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.tagId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableFilterComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ExpenseTagsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExpenseTagsTable> {
+  $$ExpenseTagsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ExpenseTagsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExpenseTagsTable> {
+  $$ExpenseTagsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  Expression<T> expensesRefs<T extends Object>(
+    Expression<T> Function($$ExpensesTableAnnotationComposer a) f,
+  ) {
+    final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.tagId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ExpenseTagsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExpenseTagsTable,
+          ExpenseTag,
+          $$ExpenseTagsTableFilterComposer,
+          $$ExpenseTagsTableOrderingComposer,
+          $$ExpenseTagsTableAnnotationComposer,
+          $$ExpenseTagsTableCreateCompanionBuilder,
+          $$ExpenseTagsTableUpdateCompanionBuilder,
+          (ExpenseTag, $$ExpenseTagsTableReferences),
+          ExpenseTag,
+          PrefetchHooks Function({bool expensesRefs})
+        > {
+  $$ExpenseTagsTableTableManager(_$AppDatabase db, $ExpenseTagsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExpenseTagsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExpenseTagsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExpenseTagsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+              }) => ExpenseTagsCompanion(id: id, name: name),
+          createCompanionCallback:
+              ({Value<int> id = const Value.absent(), required String name}) =>
+                  ExpenseTagsCompanion.insert(id: id, name: name),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ExpenseTagsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({expensesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (expensesRefs) db.expenses],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (expensesRefs)
+                    await $_getPrefetchedData<
+                      ExpenseTag,
+                      $ExpenseTagsTable,
+                      Expense
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ExpenseTagsTableReferences
+                          ._expensesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$ExpenseTagsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).expensesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.tagId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ExpenseTagsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExpenseTagsTable,
+      ExpenseTag,
+      $$ExpenseTagsTableFilterComposer,
+      $$ExpenseTagsTableOrderingComposer,
+      $$ExpenseTagsTableAnnotationComposer,
+      $$ExpenseTagsTableCreateCompanionBuilder,
+      $$ExpenseTagsTableUpdateCompanionBuilder,
+      (ExpenseTag, $$ExpenseTagsTableReferences),
+      ExpenseTag,
+      PrefetchHooks Function({bool expensesRefs})
+    >;
 typedef $$ExpensesTableCreateCompanionBuilder =
     ExpensesCompanion Function({
       Value<int> id,
       required int monthId,
       Value<int?> groupId,
       Value<int?> fixedTemplateId,
+      Value<int?> tagId,
       required ExpenseKind kind,
       required String description,
       required int amountCents,
@@ -5034,6 +5506,7 @@ typedef $$ExpensesTableUpdateCompanionBuilder =
       Value<int> monthId,
       Value<int?> groupId,
       Value<int?> fixedTemplateId,
+      Value<int?> tagId,
       Value<ExpenseKind> kind,
       Value<String> description,
       Value<int> amountCents,
@@ -5091,6 +5564,23 @@ final class $$ExpensesTableReferences
       $_db.fixedExpenseTemplates,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_fixedTemplateIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ExpenseTagsTable _tagIdTable(_$AppDatabase db) =>
+      db.expenseTags.createAlias('expenses__tag_id__expense_tags__id');
+
+  $$ExpenseTagsTableProcessedTableManager? get tagId {
+    final $_column = $_itemColumn<int>('tag_id');
+    if ($_column == null) return null;
+    final manager = $$ExpenseTagsTableTableManager(
+      $_db,
+      $_db.expenseTags,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_tagIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -5202,6 +5692,29 @@ class $$ExpensesTableFilterComposer
         );
     return composer;
   }
+
+  $$ExpenseTagsTableFilterComposer get tagId {
+    final $$ExpenseTagsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tagId,
+      referencedTable: $db.expenseTags,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpenseTagsTableFilterComposer(
+            $db: $db,
+            $table: $db.expenseTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$ExpensesTableOrderingComposer
@@ -5307,6 +5820,29 @@ class $$ExpensesTableOrderingComposer
         );
     return composer;
   }
+
+  $$ExpenseTagsTableOrderingComposer get tagId {
+    final $$ExpenseTagsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tagId,
+      referencedTable: $db.expenseTags,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpenseTagsTableOrderingComposer(
+            $db: $db,
+            $table: $db.expenseTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$ExpensesTableAnnotationComposer
@@ -5406,6 +5942,29 @@ class $$ExpensesTableAnnotationComposer
         );
     return composer;
   }
+
+  $$ExpenseTagsTableAnnotationComposer get tagId {
+    final $$ExpenseTagsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tagId,
+      referencedTable: $db.expenseTags,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpenseTagsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.expenseTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$ExpensesTableTableManager
@@ -5425,6 +5984,7 @@ class $$ExpensesTableTableManager
             bool monthId,
             bool groupId,
             bool fixedTemplateId,
+            bool tagId,
           })
         > {
   $$ExpensesTableTableManager(_$AppDatabase db, $ExpensesTable table)
@@ -5444,6 +6004,7 @@ class $$ExpensesTableTableManager
                 Value<int> monthId = const Value.absent(),
                 Value<int?> groupId = const Value.absent(),
                 Value<int?> fixedTemplateId = const Value.absent(),
+                Value<int?> tagId = const Value.absent(),
                 Value<ExpenseKind> kind = const Value.absent(),
                 Value<String> description = const Value.absent(),
                 Value<int> amountCents = const Value.absent(),
@@ -5453,6 +6014,7 @@ class $$ExpensesTableTableManager
                 monthId: monthId,
                 groupId: groupId,
                 fixedTemplateId: fixedTemplateId,
+                tagId: tagId,
                 kind: kind,
                 description: description,
                 amountCents: amountCents,
@@ -5464,6 +6026,7 @@ class $$ExpensesTableTableManager
                 required int monthId,
                 Value<int?> groupId = const Value.absent(),
                 Value<int?> fixedTemplateId = const Value.absent(),
+                Value<int?> tagId = const Value.absent(),
                 required ExpenseKind kind,
                 required String description,
                 required int amountCents,
@@ -5473,6 +6036,7 @@ class $$ExpensesTableTableManager
                 monthId: monthId,
                 groupId: groupId,
                 fixedTemplateId: fixedTemplateId,
+                tagId: tagId,
                 kind: kind,
                 description: description,
                 amountCents: amountCents,
@@ -5487,7 +6051,12 @@ class $$ExpensesTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({monthId = false, groupId = false, fixedTemplateId = false}) {
+              ({
+                monthId = false,
+                groupId = false,
+                fixedTemplateId = false,
+                tagId = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [],
@@ -5546,6 +6115,19 @@ class $$ExpensesTableTableManager
                                   )
                                   as T;
                         }
+                        if (tagId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.tagId,
+                                    referencedTable: $$ExpensesTableReferences
+                                        ._tagIdTable(db),
+                                    referencedColumn: $$ExpensesTableReferences
+                                        ._tagIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
 
                         return state;
                       },
@@ -5570,7 +6152,12 @@ typedef $$ExpensesTableProcessedTableManager =
       $$ExpensesTableUpdateCompanionBuilder,
       (Expense, $$ExpensesTableReferences),
       Expense,
-      PrefetchHooks Function({bool monthId, bool groupId, bool fixedTemplateId})
+      PrefetchHooks Function({
+        bool monthId,
+        bool groupId,
+        bool fixedTemplateId,
+        bool tagId,
+      })
     >;
 typedef $$LoansTableCreateCompanionBuilder =
     LoansCompanion Function({
@@ -6251,6 +6838,8 @@ class $AppDatabaseManager {
       $$GroupTemplatesTableTableManager(_db, _db.groupTemplates);
   $$FixedExpenseTemplatesTableTableManager get fixedExpenseTemplates =>
       $$FixedExpenseTemplatesTableTableManager(_db, _db.fixedExpenseTemplates);
+  $$ExpenseTagsTableTableManager get expenseTags =>
+      $$ExpenseTagsTableTableManager(_db, _db.expenseTags);
   $$ExpensesTableTableManager get expenses =>
       $$ExpensesTableTableManager(_db, _db.expenses);
   $$LoansTableTableManager get loans =>

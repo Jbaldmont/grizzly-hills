@@ -7,6 +7,8 @@ import '../../core/strings.dart';
 import '../../core/widgets/date_field.dart';
 import '../../core/widgets/sheet_padding.dart';
 import '../monthly_budget/month_repository.dart';
+import '../tags/tag_repository.dart';
+import '../tags/widgets/tag_selector.dart';
 import 'expense_repository.dart';
 import 'month_overview.dart';
 
@@ -32,6 +34,7 @@ void showQuickExpenseSheet(
   required ActiveMonth activeMonth,
   required ExpenseRepository expenseRepository,
   required MonthRepository monthRepository,
+  required TagRepository tagRepository,
 }) {
   showModalBottomSheet<void>(
     context: context,
@@ -40,6 +43,7 @@ void showQuickExpenseSheet(
       month: activeMonth.month,
       expenseRepository: expenseRepository,
       monthRepository: monthRepository,
+      tagRepository: tagRepository,
       destinations: [
         for (final group in activeMonth.groups) ExpenseDestination.group(group),
         const ExpenseDestination.unexpected(),
@@ -54,6 +58,7 @@ class ExpenseFormSheet extends StatefulWidget {
     required this.month,
     required this.expenseRepository,
     required this.monthRepository,
+    required this.tagRepository,
     this.destinations = const [],
     this.lockedDestination,
     this.expenseToEdit,
@@ -62,6 +67,7 @@ class ExpenseFormSheet extends StatefulWidget {
   final Month month;
   final ExpenseRepository expenseRepository;
   final MonthRepository monthRepository;
+  final TagRepository tagRepository;
   final List<ExpenseDestination> destinations;
   final ExpenseDestination? lockedDestination;
   final Expense? expenseToEdit;
@@ -76,6 +82,7 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
   late final TextEditingController _descriptionController;
   late DateTime _date;
   ExpenseDestination? _destination;
+  int? _tagId;
   bool _saving = false;
   bool _destinationMissing = false;
 
@@ -98,6 +105,7 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
     );
     _date = dateOnly(expense?.date ?? DateTime.now());
     _destination = widget.lockedDestination;
+    _tagId = expense?.tagId;
   }
 
   @override
@@ -139,6 +147,12 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
               const SizedBox(height: Dimens.spacingMd),
               _buildDestinationChips(theme),
             ],
+            const SizedBox(height: Dimens.spacingMd),
+            TagSelector(
+              tagRepository: widget.tagRepository,
+              selectedTagId: _tagId,
+              onChanged: (tagId) => setState(() => _tagId = tagId),
+            ),
             const SizedBox(height: Dimens.spacingMd),
             TextFormField(
               controller: _descriptionController,
@@ -393,6 +407,7 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
         description: description,
         amountCents: amountCents,
         date: _date,
+        tagId: _tagId,
         extensionRequest: extensionRequest,
       );
     }
@@ -403,6 +418,7 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
       description: description,
       amountCents: amountCents,
       date: _date,
+      tagId: _tagId,
       extensionRequest: extensionRequest,
     );
   }

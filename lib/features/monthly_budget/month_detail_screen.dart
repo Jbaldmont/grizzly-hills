@@ -11,6 +11,7 @@ import '../home/widgets/fixed_expenses_card.dart';
 import '../home/widgets/group_card.dart';
 import '../home/widgets/month_header_card.dart';
 import '../home/widgets/unexpected_card.dart';
+import '../tags/tag_repository.dart';
 import 'month_repository.dart';
 
 class MonthDetailScreen extends StatefulWidget {
@@ -19,11 +20,13 @@ class MonthDetailScreen extends StatefulWidget {
     required this.month,
     required this.monthRepository,
     required this.expenseRepository,
+    required this.tagRepository,
   });
 
   final Month month;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
+  final TagRepository tagRepository;
 
   @override
   State<MonthDetailScreen> createState() => _MonthDetailScreenState();
@@ -104,6 +107,7 @@ class _MonthDetailScreenState extends State<MonthDetailScreen> {
           month: widget.month,
           monthRepository: widget.monthRepository,
           expenseRepository: widget.expenseRepository,
+          tagRepository: widget.tagRepository,
           group: group,
           readOnly: true,
         ),
