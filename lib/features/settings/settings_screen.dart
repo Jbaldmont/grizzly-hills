@@ -4,16 +4,20 @@ import '../../core/security/lock_controller.dart';
 import '../../core/strings.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/theme/theme_controller.dart';
+import '../tags/tag_repository.dart';
+import '../tags/tags_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
     super.key,
     required this.themeController,
     required this.lockController,
+    required this.tagRepository,
   });
 
   final ThemeController themeController;
   final LockController lockController;
+  final TagRepository tagRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +50,32 @@ class SettingsScreen extends StatelessWidget {
                 builder: (context, _) =>
                     _BiometricLockTile(controller: lockController),
               ),
+              const SizedBox(height: Dimens.spacingLg),
+              Text(
+                Strings.settingsExpensesSectionTitle,
+                style: textTheme.titleMedium,
+              ),
+              const SizedBox(height: Dimens.spacingSm),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.sell_outlined),
+                  title: const Text(Strings.tagsTitle),
+                  subtitle: const Text(Strings.settingsTagsSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _openTags(context),
+                ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _openTags(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => TagsScreen(tagRepository: tagRepository),
       ),
     );
   }

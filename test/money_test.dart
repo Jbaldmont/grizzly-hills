@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grizzly_hills/core/money.dart';
+import 'package:grizzly_hills/core/strings.dart';
 
 void main() {
   group('parseBsToCents', () {
@@ -36,6 +37,19 @@ void main() {
     test('valores que redondean a entero no dejan separador colgante', () {
       expect(formatPercent(1.999), '2%');
       expect(formatPercent(0.999), '1%');
+    });
+  });
+
+  group('formatShare', () {
+    test('redondea la proporción a un porcentaje entero', () {
+      expect(formatShare(9000, 77990), '12%');
+      expect(formatShare(500, 1000), '50%');
+      expect(formatShare(1000, 1000), '100%');
+    });
+
+    test('un monto chico pero no nulo nunca se muestra como 0%', () {
+      expect(formatShare(100, 78090), Strings.lessThanOnePercent);
+      expect(formatShare(0, 1000), '0%');
     });
   });
 

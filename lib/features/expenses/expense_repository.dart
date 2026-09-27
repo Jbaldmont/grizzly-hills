@@ -53,6 +53,7 @@ class ExpenseRepository {
     required DateTime date,
     int? groupId,
     int? fixedTemplateId,
+    int? tagId,
     ExtensionRequest? extensionRequest,
   }) async {
     final usageBefore = groupId == null ? null : await _loadGroupUsage(groupId);
@@ -66,6 +67,7 @@ class ExpenseRepository {
               monthId: monthId,
               groupId: Value(groupId),
               fixedTemplateId: Value(fixedTemplateId),
+              tagId: Value(tagId),
               kind: kind,
               description: description,
               amountCents: amountCents,
@@ -87,6 +89,7 @@ class ExpenseRepository {
     required String description,
     required int amountCents,
     required DateTime date,
+    int? tagId,
     ExtensionRequest? extensionRequest,
   }) async {
     final expense = await (_db.select(
@@ -104,6 +107,7 @@ class ExpenseRepository {
           description: Value(description),
           amountCents: Value(amountCents),
           date: Value(date),
+          tagId: Value(tagId),
         ),
       );
     });

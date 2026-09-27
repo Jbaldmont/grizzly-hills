@@ -128,8 +128,9 @@ abstract final class Strings {
   static const addLocationCta = 'Agregar ubicación';
   static const newLocationTitle = 'Nueva ubicación';
   static const renameLocationTitle = 'Renombrar ubicación';
-  static const locationNameLabel = 'Nombre';
-  static const locationNameRequiredError = 'Ingresa un nombre';
+  static const nameLabel = 'Nombre';
+  static const nameRequiredError = 'Ingresa un nombre';
+  static const nameTakenError = 'Ese nombre ya existe';
   static const deleteLocationTitle = '¿Eliminar ubicación?';
   static const deleteLocationBody = 'Esta acción no se puede deshacer.';
   static const deleteLocationHasBalanceMessage =
@@ -232,6 +233,38 @@ abstract final class Strings {
   static const monthCloseReminderBody =
       'Hoy es el último día del mes. No olvides cerrarlo en Grizzly Hills.';
 
+  static const settingsExpensesSectionTitle = 'Gastos';
+  static const settingsTagsSubtitle = 'Crea, renombra o elimina etiquetas';
+  static const tagsTitle = 'Etiquetas';
+  static const tagFieldLabel = 'Etiqueta (opcional)';
+  static const newTagChip = 'Nueva';
+  static const newTagTitle = 'Nueva etiqueta';
+  static const renameTagTitle = 'Renombrar etiqueta';
+  static String deleteTagTitle(String tagName) => '¿Eliminar "$tagName"?';
+  static const deleteTagBody = 'Los gastos que la usan quedarán sin etiqueta.';
+  static const tagsEmptyTitle = 'Aún no tienes etiquetas';
+  static const tagsEmptyBody =
+      'Crea etiquetas como Comida o Bebidas para ver en qué se va tu dinero.';
+  static const untaggedLabel = 'Sin etiqueta';
+  static String dateWithTag(String date, String tagName) => '$date · $tagName';
+
+  static const tagStatisticsTitle = 'Gastos por etiqueta';
+  static const tagStatisticsEmptyTitle = 'Aún no hay meses para analizar';
+  static const tagStatisticsEmptyBody =
+      'Abre tu primer mes y etiqueta tus gastos.';
+  static const allScopeLabel = 'Todos';
+  static const previousMonthTooltip = 'Mes anterior';
+  static const nextMonthTooltip = 'Mes siguiente';
+  static const tagBreakdownTitle = 'En qué se fue el dinero';
+  static String amountWithShare(String amount, String share) =>
+      '$amount · $share';
+  static const lessThanOnePercent = '<1%';
+  static const noSpendingInScope = 'No hay gastos con este filtro';
+  static const tagTrendTitle = 'Últimos 6 meses';
+  static const noTagsForTrend = 'Crea una etiqueta para ver su evolución';
+  static const noTagSpendingInWindow =
+      'Sin gastos con esta etiqueta en estos meses';
+
   static const monthNames = [
     'Enero',
     'Febrero',
@@ -249,4 +282,7 @@ abstract final class Strings {
 
   static String monthLabel(int year, int month) =>
       '${monthNames[month - 1]} $year';
+
+  static String shortMonthLabel(int month) =>
+      monthNames[month - 1].substring(0, 3);
 }

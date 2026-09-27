@@ -5,8 +5,9 @@ final NumberFormat _bsFormat = NumberFormat('#,##0.##', 'es');
 
 final RegExp _amountPattern = RegExp(r'^\d+([.,]\d{1,2})?$');
 
-String formatBs(int cents) =>
-    '${Strings.currency} ${_bsFormat.format(cents / 100)}';
+String formatBs(int cents) => '${Strings.currency} ${formatAmount(cents)}';
+
+String formatAmount(int cents) => _bsFormat.format(cents / 100);
 
 String centsToEditableText(int cents) {
   if (cents % 100 == 0) {
@@ -34,6 +35,14 @@ String formatPercent(double percent) {
       .replaceAll(RegExp(r'0+$'), '')
       .replaceAll('.', ',');
   return '$text%';
+}
+
+String formatShare(int partCents, int totalCents) {
+  final percent = (partCents * 100 / totalCents).round();
+  if (partCents > 0 && percent == 0) {
+    return Strings.lessThanOnePercent;
+  }
+  return formatPercent(percent.toDouble());
 }
 
 int? parseWholePercent(String input) {

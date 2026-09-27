@@ -4,10 +4,10 @@ import '../../core/db/app_database.dart';
 import '../../core/dimens.dart';
 import '../../core/strings.dart';
 import '../../core/widgets/error_state.dart';
+import '../../core/widgets/name_dialog.dart';
 import '../../core/widgets/total_amount_card.dart';
 import '../expenses/expense_repository.dart';
 import '../monthly_budget/month_repository.dart';
-import 'location_name_dialog.dart';
 import 'savings_movement_sheet.dart';
 import 'savings_repository.dart';
 import 'transfer_sheet.dart';
@@ -116,7 +116,11 @@ class _SavingsScreenState extends State<SavingsScreen> {
   }
 
   Future<void> _addLocation() async {
-    final name = await showLocationNameDialog(context);
+    final name = await showNameDialog(
+      context,
+      title: Strings.newLocationTitle,
+      confirmLabel: Strings.add,
+    );
     if (name != null) {
       await widget.savingsRepository.addLocation(name);
     }
@@ -152,8 +156,10 @@ class _SavingsScreenState extends State<SavingsScreen> {
   }
 
   Future<void> _renameLocation(SavingsLocation location) async {
-    final name = await showLocationNameDialog(
+    final name = await showNameDialog(
       context,
+      title: Strings.renameLocationTitle,
+      confirmLabel: Strings.save,
       initialName: location.name,
     );
     if (name != null) {

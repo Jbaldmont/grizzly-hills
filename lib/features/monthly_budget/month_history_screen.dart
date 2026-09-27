@@ -8,6 +8,7 @@ import '../../core/strings.dart';
 import '../../core/widgets/error_state.dart';
 import '../expenses/expense_repository.dart';
 import '../savings/savings_repository.dart';
+import '../tags/tag_repository.dart';
 import 'month_detail_screen.dart';
 import 'month_repository.dart';
 
@@ -17,11 +18,13 @@ class MonthHistoryScreen extends StatefulWidget {
     required this.monthRepository,
     required this.expenseRepository,
     required this.savingsRepository,
+    required this.tagRepository,
   });
 
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
   final SavingsRepository savingsRepository;
+  final TagRepository tagRepository;
 
   @override
   State<MonthHistoryScreen> createState() => _MonthHistoryScreenState();
@@ -86,6 +89,7 @@ class _MonthHistoryScreenState extends State<MonthHistoryScreen> {
           month: month,
           monthRepository: widget.monthRepository,
           expenseRepository: widget.expenseRepository,
+          tagRepository: widget.tagRepository,
         ),
       ),
     );

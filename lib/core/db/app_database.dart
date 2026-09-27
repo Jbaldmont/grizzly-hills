@@ -57,10 +57,21 @@ class Expenses extends Table {
     onDelete: KeyAction.setNull,
   )();
 
+  IntColumn get tagId => integer().nullable().references(
+    ExpenseTags,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
+
   TextColumn get kind => textEnum<ExpenseKind>()();
   TextColumn get description => text()();
   IntColumn get amountCents => integer()();
   DateTimeColumn get date => dateTime()();
+}
+
+class ExpenseTags extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
 }
 
 class FixedExpenseTemplates extends Table {
@@ -111,12 +122,15 @@ const List<String> _defaultFixedTemplates = [
   'Natación Ale',
 ];
 
+const List<String> _defaultTags = ['Comida', 'Bebidas'];
+
 @DriftDatabase(
   tables: [
     Months,
     BudgetGroups,
     GroupTemplates,
     Expenses,
+    ExpenseTags,
     FixedExpenseTemplates,
     SavingsLocations,
     Loans,
@@ -129,7 +143,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -137,6 +151,7 @@ class AppDatabase extends _$AppDatabase {
       await migrator.createAll();
       await batch(_seedTemplates);
       await batch(_seedFixedTemplates);
+      await batch(_seedTags);
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
@@ -157,6 +172,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 6) {
         await migrator.addColumn(months, months.closingTransferCents);
         await migrator.addColumn(months, months.closingSavingsLocationId);
+      }
+      if (from < 7) {
+        await migrator.createTable(expenseTags);
+        await migrator.addColumn(expenses, expenses.tagId);
+        await batch(_seedTags);
       }
     },
     beforeOpen: (details) async {
@@ -182,6 +202,12 @@ class AppDatabase extends _$AppDatabase {
           name: _defaultFixedTemplates[i],
           position: i,
         ),
+    ]);
+  }
+
+  void _seedTags(Batch batch) {
+    batch.insertAll(expenseTags, [
+      for (final name in _defaultTags) ExpenseTagsCompanion.insert(name: name),
     ]);
   }
 }

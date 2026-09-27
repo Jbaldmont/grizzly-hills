@@ -9,6 +9,7 @@ import 'package:grizzly_hills/features/expenses/expense_repository.dart';
 import 'package:grizzly_hills/features/loans/loan_repository.dart';
 import 'package:grizzly_hills/features/monthly_budget/month_repository.dart';
 import 'package:grizzly_hills/features/savings/savings_repository.dart';
+import 'package:grizzly_hills/features/tags/tag_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fake_biometric_authenticator.dart';
@@ -26,6 +27,7 @@ Future<GrizzlyApp> buildTestApp(AppDatabase db) async {
     expenseRepository: ExpenseRepository(db),
     savingsRepository: SavingsRepository(db),
     loanRepository: LoanRepository(db),
+    tagRepository: TagRepository(db),
   );
 }
 
