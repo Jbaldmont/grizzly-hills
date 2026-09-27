@@ -39,6 +39,7 @@ void showQuickExpenseSheet(
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     builder: (_) => ExpenseFormSheet(
       month: activeMonth.month,
       expenseRepository: expenseRepository,

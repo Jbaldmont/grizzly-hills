@@ -240,7 +240,7 @@ abstract final class Strings {
   static const newTagChip = 'Nueva';
   static const newTagTitle = 'Nueva etiqueta';
   static const renameTagTitle = 'Renombrar etiqueta';
-  static const deleteTagTitle = '¿Eliminar etiqueta?';
+  static String deleteTagTitle(String tagName) => '¿Eliminar "$tagName"?';
   static const deleteTagBody = 'Los gastos que la usan quedarán sin etiqueta.';
   static const tagsEmptyTitle = 'Aún no tienes etiquetas';
   static const tagsEmptyBody =
@@ -258,6 +258,7 @@ abstract final class Strings {
   static const tagBreakdownTitle = 'En qué se fue el dinero';
   static String amountWithShare(String amount, String share) =>
       '$amount · $share';
+  static const lessThanOnePercent = '<1%';
   static const noSpendingInScope = 'No hay gastos con este filtro';
   static const tagTrendTitle = 'Últimos 6 meses';
   static const noTagsForTrend = 'Crea una etiqueta para ver su evolución';

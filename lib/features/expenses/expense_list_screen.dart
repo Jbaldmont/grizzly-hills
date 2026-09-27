@@ -253,6 +253,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (_) => ExpenseFormSheet(
         month: widget.month,
         expenseRepository: widget.expenseRepository,

@@ -51,21 +51,17 @@ class TagTrendCard extends StatelessWidget {
   }
 
   Widget _buildTagChips() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (final tag in tags)
-            Padding(
-              padding: const EdgeInsets.only(right: Dimens.spacingSm),
-              child: ChoiceChip(
-                label: Text(tag.name),
-                selected: tag.id == selectedTagId,
-                onSelected: (_) => onTagSelected(tag.id),
-              ),
-            ),
-        ],
-      ),
+    return Wrap(
+      spacing: Dimens.spacingSm,
+      runSpacing: Dimens.spacingXs,
+      children: [
+        for (final tag in tags)
+          ChoiceChip(
+            label: Text(tag.name),
+            selected: tag.id == selectedTagId,
+            onSelected: (_) => onTagSelected(tag.id),
+          ),
+      ],
     );
   }
 }

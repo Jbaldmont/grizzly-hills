@@ -37,6 +37,14 @@ String formatPercent(double percent) {
   return '$text%';
 }
 
+String formatShare(int partCents, int totalCents) {
+  final percent = (partCents * 100 / totalCents).round();
+  if (partCents > 0 && percent == 0) {
+    return Strings.lessThanOnePercent;
+  }
+  return formatPercent(percent.toDouble());
+}
+
 int? parseWholePercent(String input) {
   return int.tryParse(input.trim());
 }

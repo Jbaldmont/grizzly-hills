@@ -86,7 +86,6 @@ class _BreakdownRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final share = amountCents / totalCents;
     final labelStyle = theme.textTheme.bodyMedium?.copyWith(
       fontWeight: selected ? FontWeight.bold : null,
     );
@@ -105,14 +104,14 @@ class _BreakdownRow extends StatelessWidget {
                 Text(
                   Strings.amountWithShare(
                     formatBs(amountCents),
-                    formatPercent((share * 100).roundToDouble()),
+                    formatShare(amountCents, totalCents),
                   ),
                   style: labelStyle,
                 ),
               ],
             ),
             const SizedBox(height: Dimens.spacingXs),
-            _ShareBar(share: share, color: barColor),
+            _ShareBar(share: amountCents / totalCents, color: barColor),
           ],
         ),
       ),

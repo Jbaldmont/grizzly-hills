@@ -102,7 +102,7 @@ class _TagsScreenState extends State<TagsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text(Strings.deleteTagTitle),
+        title: Text(Strings.deleteTagTitle(tag.name)),
         content: const Text(Strings.deleteTagBody),
         actions: [
           TextButton(

@@ -149,6 +149,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    expect(find.text(Strings.deleteTagTitle('Bebidas')), findsOneWidget);
     expect(find.text(Strings.deleteTagBody), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, Strings.delete));
     await tester.pumpAndSettle();
