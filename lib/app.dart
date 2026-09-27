@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'core/security/app_lock_gate.dart';
+import 'core/security/lock_controller.dart';
 import 'core/strings.dart';
 import 'core/theme/app_themes.dart';
 import 'core/theme/theme_controller.dart';
@@ -12,6 +14,7 @@ class GrizzlyApp extends StatelessWidget {
   const GrizzlyApp({
     super.key,
     required this.themeController,
+    required this.lockController,
     required this.monthRepository,
     required this.expenseRepository,
     required this.savingsRepository,
@@ -19,6 +22,7 @@ class GrizzlyApp extends StatelessWidget {
   });
 
   final ThemeController themeController;
+  final LockController lockController;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
   final SavingsRepository savingsRepository;
@@ -33,12 +37,16 @@ class GrizzlyApp extends StatelessWidget {
         theme: buildLightTheme(themeController.scheme),
         darkTheme: buildDarkTheme(themeController.scheme),
         themeMode: themeController.mode,
-        home: AppShell(
-          themeController: themeController,
-          monthRepository: monthRepository,
-          expenseRepository: expenseRepository,
-          savingsRepository: savingsRepository,
-          loanRepository: loanRepository,
+        home: AppLockGate(
+          lockController: lockController,
+          child: AppShell(
+            themeController: themeController,
+            lockController: lockController,
+            monthRepository: monthRepository,
+            expenseRepository: expenseRepository,
+            savingsRepository: savingsRepository,
+            loanRepository: loanRepository,
+          ),
         ),
       ),
     );

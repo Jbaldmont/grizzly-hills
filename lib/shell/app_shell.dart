@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/security/lock_controller.dart';
 import '../core/strings.dart';
 import '../core/theme/theme_controller.dart';
 import '../features/business/business_screen.dart';
@@ -18,6 +19,7 @@ class AppShell extends StatefulWidget {
   const AppShell({
     super.key,
     required this.themeController,
+    required this.lockController,
     required this.monthRepository,
     required this.expenseRepository,
     required this.savingsRepository,
@@ -25,6 +27,7 @@ class AppShell extends StatefulWidget {
   });
 
   final ThemeController themeController;
+  final LockController lockController;
   final MonthRepository monthRepository;
   final ExpenseRepository expenseRepository;
   final SavingsRepository savingsRepository;
@@ -175,7 +178,10 @@ class _AppShellState extends State<AppShell> {
   void _openSettings() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => SettingsScreen(themeController: widget.themeController),
+        builder: (_) => SettingsScreen(
+          themeController: widget.themeController,
+          lockController: widget.lockController,
+        ),
       ),
     );
   }

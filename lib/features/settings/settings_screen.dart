@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../core/dimens.dart';
+import '../../core/security/lock_controller.dart';
 import '../../core/strings.dart';
 import '../../core/theme/app_themes.dart';
 import '../../core/theme/theme_controller.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key, required this.themeController});
+  const SettingsScreen({
+    super.key,
+    required this.themeController,
+    required this.lockController,
+  });
 
   final ThemeController themeController;
+  final LockController lockController;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +35,17 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: Dimens.spacingSm),
               for (final option in availableThemes)
                 _ThemeOptionTile(option: option, controller: themeController),
+              const SizedBox(height: Dimens.spacingLg),
+              Text(
+                Strings.settingsSecuritySectionTitle,
+                style: textTheme.titleMedium,
+              ),
+              const SizedBox(height: Dimens.spacingSm),
+              ListenableBuilder(
+                listenable: lockController,
+                builder: (context, _) =>
+                    _BiometricLockTile(controller: lockController),
+              ),
             ],
           ),
         ),
@@ -124,5 +141,62 @@ class _ColorDot extends StatelessWidget {
       height: Dimens.colorDotSize,
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
+  }
+}
+
+class _BiometricLockTile extends StatefulWidget {
+  const _BiometricLockTile({required this.controller});
+
+  final LockController controller;
+
+  @override
+  State<_BiometricLockTile> createState() => _BiometricLockTileState();
+}
+
+class _BiometricLockTileState extends State<_BiometricLockTile> {
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: SwitchListTile(
+        title: const Text(Strings.settingsBiometricLock),
+        subtitle: const Text(Strings.settingsBiometricLockSubtitle),
+        value: widget.controller.isEnabled,
+        onChanged: _busy ? null : _handleChanged,
+      ),
+    );
+  }
+
+  Future<void> _handleChanged(bool value) async {
+    if (!value) {
+      await widget.controller.setEnabled(false);
+      return;
+    }
+    setState(() => _busy = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final available = await widget.controller.checkAvailability();
+    if (!available) {
+      if (mounted) {
+        setState(() => _busy = false);
+        messenger.showSnackBar(
+          const SnackBar(content: Text(Strings.biometricNotAvailableMessage)),
+        );
+      }
+      return;
+    }
+    final confirmed = await widget.controller.authenticate(
+      Strings.lockScreenReason,
+    );
+    if (confirmed) {
+      await widget.controller.setEnabled(true);
+    } else if (mounted) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text(Strings.biometricConfirmFailedMessage)),
+      );
+    }
+    if (mounted) {
+      setState(() => _busy = false);
+    }
   }
 }
