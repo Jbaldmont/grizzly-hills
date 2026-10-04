@@ -201,9 +201,7 @@ void main() {
     await disposeTestApp(tester);
   });
 
-  testWidgets('un imprevisto descuenta del disponible general', (
-    tester,
-  ) async {
+  testWidgets('un imprevisto descuenta del disponible general', (tester) async {
     await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();
     await openTestMonth(tester);
@@ -211,9 +209,7 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField).first, '150');
-    await tester.tap(
-      find.widgetWithText(ChoiceChip, Strings.unexpectedLabel),
-    );
+    await tester.tap(find.widgetWithText(ChoiceChip, Strings.unexpectedLabel));
     await tester.pump();
     await tester.tap(find.text(Strings.save));
     await tester.pumpAndSettle();
@@ -233,9 +229,7 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField).first, '150');
-    await tester.tap(
-      find.widgetWithText(ChoiceChip, Strings.unexpectedLabel),
-    );
+    await tester.tap(find.widgetWithText(ChoiceChip, Strings.unexpectedLabel));
     await tester.pump();
     await tester.tap(find.text(Strings.save));
     await tester.pumpAndSettle();

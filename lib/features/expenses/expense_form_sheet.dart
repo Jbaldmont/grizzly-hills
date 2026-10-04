@@ -278,7 +278,8 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
     );
     final excludedId = widget.expenseToEdit?.id;
     final spentOthers = expenses.fold<int>(0, (sum, expense) {
-      final sameGroup = MonthOverview.countsAsGroupSpending(expense) &&
+      final sameGroup =
+          MonthOverview.countsAsGroupSpending(expense) &&
           expense.groupId == group.id;
       final isEditedExpense = excludedId != null && expense.id == excludedId;
       return sameGroup && !isEditedExpense ? sum + expense.amountCents : sum;
@@ -438,9 +439,7 @@ class _AmountRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: Dimens.spacingXs / 2),
       child: Row(
         children: [
-          Expanded(
-            child: Text(label, style: theme.textTheme.bodyMedium),
-          ),
+          Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
           const SizedBox(width: Dimens.spacingSm),
           Text(
             formatBs(amountCents),

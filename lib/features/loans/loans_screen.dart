@@ -38,10 +38,7 @@ class _LoansScreenState extends State<LoansScreen> {
         }
         final loans = snapshot.data ?? [];
         if (loans.isEmpty) {
-          return _EmptyState(
-            onNewLoan: _openNewLoan,
-            onHistory: _openHistory,
-          );
+          return _EmptyState(onNewLoan: _openNewLoan, onHistory: _openHistory);
         }
         return _buildContent(loans);
       },
@@ -57,10 +54,7 @@ class _LoansScreenState extends State<LoansScreen> {
     return ListView(
       padding: const EdgeInsets.all(Dimens.spacingMd),
       children: [
-        TotalAmountCard(
-          label: Strings.loansTotalLabel,
-          totalCents: totalCents,
-        ),
+        TotalAmountCard(label: Strings.loansTotalLabel, totalCents: totalCents),
         const SizedBox(height: Dimens.spacingSm),
         Row(
           children: [

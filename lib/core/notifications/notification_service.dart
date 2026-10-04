@@ -24,7 +24,8 @@ class NotificationService implements NotificationScheduler {
   static const _budgetImportantChannel = AndroidNotificationChannel(
     'budget_important',
     'Presupuesto al 90%',
-    description: 'Aviso importante cuando un grupo llega al 90% de su presupuesto',
+    description:
+        'Aviso importante cuando un grupo llega al 90% de su presupuesto',
     importance: Importance.high,
   );
   static const _loanDueChannel = AndroidNotificationChannel(
@@ -170,8 +171,7 @@ class NotificationService implements NotificationScheduler {
   }
 
   @override
-  Future<void> cancelMonthCloseReminder() =>
-      _plugin.cancel(id: _monthCloseId);
+  Future<void> cancelMonthCloseReminder() => _plugin.cancel(id: _monthCloseId);
 
   DateTime _atReminderHour(DateTime date) =>
       DateTime(date.year, date.month, date.day, _reminderHour);

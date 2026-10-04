@@ -180,10 +180,7 @@ class _LoanSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _DateRow(
-              label: Strings.lentOnLabel,
-              date: loan.loanDate,
-            ),
+            _DateRow(label: Strings.lentOnLabel, date: loan.loanDate),
             _DateRow(
               label: Strings.dueDateLabel,
               date: loan.dueDate,
@@ -208,9 +205,7 @@ class _LoanSummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: Dimens.spacingXs),
             Text(
-              Strings.weeklyInterestNote(
-                formatPercent(loan.weeklyRatePercent),
-              ),
+              Strings.weeklyInterestNote(formatPercent(loan.weeklyRatePercent)),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

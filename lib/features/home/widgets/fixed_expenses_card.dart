@@ -25,8 +25,9 @@ class FixedExpensesCard extends StatefulWidget {
 }
 
 class _FixedExpensesCardState extends State<FixedExpensesCard> {
-  late final Stream<List<FixedExpenseTemplate>> _templates =
-      widget.expenseRepository.watchFixedTemplates();
+  late final Stream<List<FixedExpenseTemplate>> _templates = widget
+      .expenseRepository
+      .watchFixedTemplates();
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +50,14 @@ class _FixedExpensesCardState extends State<FixedExpensesCard> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(Strings.fixedSectionTitle,
-                          style: theme.textTheme.titleMedium),
-                      Text(formatBs(widget.overview.fixedCents),
-                          style: theme.textTheme.titleMedium),
+                      Text(
+                        Strings.fixedSectionTitle,
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      Text(
+                        formatBs(widget.overview.fixedCents),
+                        style: theme.textTheme.titleMedium,
+                      ),
                     ],
                   ),
                 ),
@@ -157,12 +162,13 @@ class _FixedTile extends StatelessWidget {
         isPaid
             ? formatBs(expense.amountCents)
             : template.lastAmountCents > 0
-                ? formatBs(template.lastAmountCents)
-                : '',
+            ? formatBs(template.lastAmountCents)
+            : '',
         style: isPaid
             ? theme.textTheme.titleSmall
-            : theme.textTheme.bodySmall
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            : theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
       ),
       onTap: isPaid
           ? (onUnmark == null ? null : () => onUnmark(expense))
@@ -222,10 +228,7 @@ class _PayFixedDialogState extends State<_PayFixedDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text(Strings.cancel),
         ),
-        FilledButton(
-          onPressed: _submit,
-          child: const Text(Strings.pay),
-        ),
+        FilledButton(onPressed: _submit, child: const Text(Strings.pay)),
       ],
     );
   }

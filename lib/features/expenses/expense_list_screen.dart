@@ -38,10 +38,10 @@ class ExpenseListScreen extends StatefulWidget {
 }
 
 class _ExpenseListScreenState extends State<ExpenseListScreen> {
-  late final Stream<List<Expense>> _expenses =
-      widget.expenseRepository.watchExpenses(widget.month.id);
-  late final Stream<ActiveMonth?> _activeMonth =
-      widget.monthRepository.watchActiveMonth();
+  late final Stream<List<Expense>> _expenses = widget.expenseRepository
+      .watchExpenses(widget.month.id);
+  late final Stream<ActiveMonth?> _activeMonth = widget.monthRepository
+      .watchActiveMonth();
   late final Stream<List<ExpenseTag>> _tags = widget.tagRepository.watchTags();
 
   ExpenseDestination get _destination => widget.group == null
@@ -113,14 +113,19 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   }) {
     final group = widget.group;
     final expenses = _filter(allExpenses);
-    final totalCents =
-        expenses.fold(0, (sum, expense) => sum + expense.amountCents);
+    final totalCents = expenses.fold(
+      0,
+      (sum, expense) => sum + expense.amountCents,
+    );
     final extensionCents = group == null
         ? 0
         : MonthOverview.extensionCentsIn(allExpenses, group.id);
     final returnableCents = group == null
         ? 0
-        : max<int>(0, extensionCents - max<int>(0, totalCents - group.budgetCents));
+        : max<int>(
+            0,
+            extensionCents - max<int>(0, totalCents - group.budgetCents),
+          );
     return ListView(
       padding: const EdgeInsets.all(Dimens.spacingMd),
       children: [
@@ -178,9 +183,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       for (final expense in expenses)
         if (group != null
             ? MonthOverview.countsAsGroupSpending(expense) &&
-                expense.groupId == group.id
+                  expense.groupId == group.id
             : expense.kind == ExpenseKind.unexpected ||
-                expense.kind == ExpenseKind.budgetExtension)
+                  expense.kind == ExpenseKind.budgetExtension)
           expense,
     ];
   }
@@ -221,10 +226,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     }
   }
 
-  Future<void> _returnExtension(
-    BudgetGroup group,
-    int returnableCents,
-  ) async {
+  Future<void> _returnExtension(BudgetGroup group, int returnableCents) async {
     final amountCents = await showDialog<int>(
       context: context,
       builder: (_) => ExtensionAmountDialog(
@@ -314,8 +316,10 @@ class _ExpenseTile extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: Dimens.spacingMd),
         color: theme.colorScheme.errorContainer,
-        child: Icon(Icons.delete_outline,
-            color: theme.colorScheme.onErrorContainer),
+        child: Icon(
+          Icons.delete_outline,
+          color: theme.colorScheme.onErrorContainer,
+        ),
       ),
       confirmDismiss: (_) => _confirmDelete(context),
       onDismissed: (_) => onConfirmDelete(),
@@ -359,8 +363,10 @@ class _UnexpectedTotalCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(Strings.unexpectedSectionTitle,
-                style: theme.textTheme.titleMedium),
+            Text(
+              Strings.unexpectedSectionTitle,
+              style: theme.textTheme.titleMedium,
+            ),
             Text(formatBs(totalCents), style: theme.textTheme.titleMedium),
           ],
         ),
@@ -380,8 +386,9 @@ class _EmptyList extends StatelessWidget {
       child: Center(
         child: Text(
           Strings.noExpensesYet,
-          style: theme.textTheme.bodyMedium
-              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );

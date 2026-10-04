@@ -6,11 +6,7 @@ import '../../../core/widgets/amount_row.dart';
 import '../../expenses/month_overview.dart';
 
 class MonthHeaderCard extends StatelessWidget {
-  const MonthHeaderCard({
-    super.key,
-    required this.overview,
-    this.onEdit,
-  });
+  const MonthHeaderCard({super.key, required this.overview, this.onEdit});
 
   final MonthOverview overview;
   final VoidCallback? onEdit;

@@ -17,8 +17,7 @@ class TagsScreen extends StatefulWidget {
 }
 
 class _TagsScreenState extends State<TagsScreen> {
-  late final Stream<List<ExpenseTag>> _tags = widget.tagRepository
-      .watchTags();
+  late final Stream<List<ExpenseTag>> _tags = widget.tagRepository.watchTags();
 
   @override
   Widget build(BuildContext context) {

@@ -22,7 +22,9 @@ class SavingsRepository {
 
   Future<void> addLocation(String name) async {
     final maxPosition = await _loadMaxPosition();
-    await _db.into(_db.savingsLocations).insert(
+    await _db
+        .into(_db.savingsLocations)
+        .insert(
           SavingsLocationsCompanion.insert(
             name: name,
             position: maxPosition + 1,
@@ -38,27 +40,27 @@ class SavingsRepository {
 
   Future<bool> deleteLocation(int id) {
     return _db.transaction(() async {
-      final location = await (_db.select(_db.savingsLocations)
-            ..where((row) => row.id.equals(id)))
-          .getSingle();
+      final location = await (_db.select(
+        _db.savingsLocations,
+      )..where((row) => row.id.equals(id))).getSingle();
       if (location.balanceCents != 0) {
         return false;
       }
-      await (_db.delete(_db.savingsLocations)
-            ..where((row) => row.id.equals(id)))
-          .go();
+      await (_db.delete(
+        _db.savingsLocations,
+      )..where((row) => row.id.equals(id))).go();
       return true;
     });
   }
 
   Future<void> adjustBalance({required int id, required int deltaCents}) {
     return _db.transaction(() async {
-      final location = await (_db.select(_db.savingsLocations)
-            ..where((row) => row.id.equals(id)))
-          .getSingle();
-      await (_db.update(_db.savingsLocations)
-            ..where((row) => row.id.equals(id)))
-          .write(
+      final location = await (_db.select(
+        _db.savingsLocations,
+      )..where((row) => row.id.equals(id))).getSingle();
+      await (_db.update(
+        _db.savingsLocations,
+      )..where((row) => row.id.equals(id))).write(
         SavingsLocationsCompanion(
           balanceCents: Value(location.balanceCents + deltaCents),
         ),
@@ -74,7 +76,9 @@ class SavingsRepository {
     required int amountCents,
   }) {
     return _db.transaction(() async {
-      await _db.into(_db.expenses).insert(
+      await _db
+          .into(_db.expenses)
+          .insert(
             ExpensesCompanion.insert(
               monthId: monthId,
               groupId: Value(groupId),

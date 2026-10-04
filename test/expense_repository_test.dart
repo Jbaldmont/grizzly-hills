@@ -113,97 +113,103 @@ void main() {
     expect(updated.lastAmountCents, 3500);
   });
 
-  test('devolver extensión reduce las más recientes y borra las vacías', () async {
-    final month = await openMonth();
-    final casa = month.groups.first;
+  test(
+    'devolver extensión reduce las más recientes y borra las vacías',
+    () async {
+      final month = await openMonth();
+      final casa = month.groups.first;
 
-    await expenses.addExpense(
-      monthId: month.month.id,
-      kind: ExpenseKind.budgetExtension,
-      groupId: casa.id,
-      description: 'Extensión: Casa',
-      amountCents: 3000,
-      date: DateTime(2026, 7, 10),
-    );
-    await expenses.addExpense(
-      monthId: month.month.id,
-      kind: ExpenseKind.budgetExtension,
-      groupId: casa.id,
-      description: 'Extensión: Casa',
-      amountCents: 2000,
-      date: DateTime(2026, 7, 12),
-    );
-
-    await expenses.returnExtension(groupId: casa.id, amountCents: 4000);
-
-    final remaining = await expenses.watchExpenses(month.month.id).first;
-    expect(remaining.length, 1);
-    expect(remaining.single.amountCents, 1000);
-    expect(remaining.single.date, DateTime(2026, 7, 10));
-
-    final overview = MonthOverview(activeMonth: month, expenses: remaining);
-    expect(overview.extensionCentsForGroup(casa.id), 1000);
-    expect(overview.unexpectedCents, 1000);
-  });
-
-  test('un gasto con extensión registra ambas filas en una sola operación',
-      () async {
-    final month = await openMonth();
-    final casa = month.groups.first;
-
-    await expenses.addExpense(
-      monthId: month.month.id,
-      kind: ExpenseKind.group,
-      groupId: casa.id,
-      description: 'Mercado grande',
-      amountCents: 56000,
-      date: DateTime(2026, 7, 12),
-      extensionRequest: const ExtensionRequest(
-        amountCents: 6000,
+      await expenses.addExpense(
+        monthId: month.month.id,
+        kind: ExpenseKind.budgetExtension,
+        groupId: casa.id,
         description: 'Extensión: Casa',
-      ),
-    );
-
-    final rows = await expenses.loadExpenses(month.month.id);
-    expect(rows.length, 2);
-    final overview = MonthOverview(activeMonth: month, expenses: rows);
-    expect(overview.spentInGroupCents(casa.id), 56000);
-    expect(overview.extensionCentsForGroup(casa.id), 6000);
-    expect(overview.unexpectedCents, 6000);
-  });
-
-  test('editar un gasto puede otorgar la extensión en la misma operación',
-      () async {
-    final month = await openMonth();
-    final casa = month.groups.first;
-    await expenses.addExpense(
-      monthId: month.month.id,
-      kind: ExpenseKind.group,
-      groupId: casa.id,
-      description: 'Mercado',
-      amountCents: 40000,
-      date: DateTime(2026, 7, 12),
-    );
-    final created =
-        (await expenses.loadExpenses(month.month.id)).single;
-
-    await expenses.updateExpense(
-      id: created.id,
-      description: 'Mercado',
-      amountCents: 56000,
-      date: DateTime(2026, 7, 13),
-      extensionRequest: const ExtensionRequest(
-        amountCents: 6000,
+        amountCents: 3000,
+        date: DateTime(2026, 7, 10),
+      );
+      await expenses.addExpense(
+        monthId: month.month.id,
+        kind: ExpenseKind.budgetExtension,
+        groupId: casa.id,
         description: 'Extensión: Casa',
-      ),
-    );
+        amountCents: 2000,
+        date: DateTime(2026, 7, 12),
+      );
 
-    final rows = await expenses.loadExpenses(month.month.id);
-    expect(rows.length, 2);
-    final overview = MonthOverview(activeMonth: month, expenses: rows);
-    expect(overview.spentInGroupCents(casa.id), 56000);
-    expect(overview.extensionCentsForGroup(casa.id), 6000);
-  });
+      await expenses.returnExtension(groupId: casa.id, amountCents: 4000);
+
+      final remaining = await expenses.watchExpenses(month.month.id).first;
+      expect(remaining.length, 1);
+      expect(remaining.single.amountCents, 1000);
+      expect(remaining.single.date, DateTime(2026, 7, 10));
+
+      final overview = MonthOverview(activeMonth: month, expenses: remaining);
+      expect(overview.extensionCentsForGroup(casa.id), 1000);
+      expect(overview.unexpectedCents, 1000);
+    },
+  );
+
+  test(
+    'un gasto con extensión registra ambas filas en una sola operación',
+    () async {
+      final month = await openMonth();
+      final casa = month.groups.first;
+
+      await expenses.addExpense(
+        monthId: month.month.id,
+        kind: ExpenseKind.group,
+        groupId: casa.id,
+        description: 'Mercado grande',
+        amountCents: 56000,
+        date: DateTime(2026, 7, 12),
+        extensionRequest: const ExtensionRequest(
+          amountCents: 6000,
+          description: 'Extensión: Casa',
+        ),
+      );
+
+      final rows = await expenses.loadExpenses(month.month.id);
+      expect(rows.length, 2);
+      final overview = MonthOverview(activeMonth: month, expenses: rows);
+      expect(overview.spentInGroupCents(casa.id), 56000);
+      expect(overview.extensionCentsForGroup(casa.id), 6000);
+      expect(overview.unexpectedCents, 6000);
+    },
+  );
+
+  test(
+    'editar un gasto puede otorgar la extensión en la misma operación',
+    () async {
+      final month = await openMonth();
+      final casa = month.groups.first;
+      await expenses.addExpense(
+        monthId: month.month.id,
+        kind: ExpenseKind.group,
+        groupId: casa.id,
+        description: 'Mercado',
+        amountCents: 40000,
+        date: DateTime(2026, 7, 12),
+      );
+      final created = (await expenses.loadExpenses(month.month.id)).single;
+
+      await expenses.updateExpense(
+        id: created.id,
+        description: 'Mercado',
+        amountCents: 56000,
+        date: DateTime(2026, 7, 13),
+        extensionRequest: const ExtensionRequest(
+          amountCents: 6000,
+          description: 'Extensión: Casa',
+        ),
+      );
+
+      final rows = await expenses.loadExpenses(month.month.id);
+      expect(rows.length, 2);
+      final overview = MonthOverview(activeMonth: month, expenses: rows);
+      expect(overview.spentInGroupCents(casa.id), 56000);
+      expect(overview.extensionCentsForGroup(casa.id), 6000);
+    },
+  );
 
   test('editar y borrar un gasto', () async {
     final month = await openMonth();
@@ -214,8 +220,7 @@ void main() {
       amountCents: 1000,
       date: DateTime(2026, 7, 10),
     );
-    final created =
-        (await expenses.watchExpenses(month.month.id).first).single;
+    final created = (await expenses.watchExpenses(month.month.id).first).single;
 
     await expenses.updateExpense(
       id: created.id,
@@ -223,8 +228,7 @@ void main() {
       amountCents: 2500,
       date: DateTime(2026, 7, 11),
     );
-    final updated =
-        (await expenses.watchExpenses(month.month.id).first).single;
+    final updated = (await expenses.watchExpenses(month.month.id).first).single;
     expect(updated.description, 'Corregido');
     expect(updated.amountCents, 2500);
 
@@ -232,15 +236,12 @@ void main() {
     expect(await expenses.watchExpenses(month.month.id).first, isEmpty);
   });
 
-  test(
-    'closingSurplusCents sin gastos es el sueldo completo',
-    () async {
-      final month = await openMonth();
+  test('closingSurplusCents sin gastos es el sueldo completo', () async {
+    final month = await openMonth();
 
-      final overview = MonthOverview(activeMonth: month, expenses: const []);
-      expect(overview.closingSurplusCents, 300000);
-    },
-  );
+    final overview = MonthOverview(activeMonth: month, expenses: const []);
+    expect(overview.closingSurplusCents, 300000);
+  });
 
   test(
     'closingSurplusCents descuenta gastos de grupo, fijos e imprevistos',
@@ -296,37 +297,46 @@ void main() {
     },
   );
 
-  test('notifica al grupo al cruzar 75% y luego 90% de su presupuesto', () async {
-    final notifications = FakeNotificationScheduler();
-    final expensesWithNotifications = ExpenseRepository(db, notifications);
-    final month = await openMonth();
-    final casa = month.groups.first;
+  test(
+    'notifica al grupo al cruzar 75% y luego 90% de su presupuesto',
+    () async {
+      final notifications = FakeNotificationScheduler();
+      final expensesWithNotifications = ExpenseRepository(db, notifications);
+      final month = await openMonth();
+      final casa = month.groups.first;
 
-    await expensesWithNotifications.addExpense(
-      monthId: month.month.id,
-      kind: ExpenseKind.group,
-      groupId: casa.id,
-      description: 'Mercado',
-      amountCents: 38000,
-      date: DateTime(2026, 7, 12),
-    );
+      await expensesWithNotifications.addExpense(
+        monthId: month.month.id,
+        kind: ExpenseKind.group,
+        groupId: casa.id,
+        description: 'Mercado',
+        amountCents: 38000,
+        date: DateTime(2026, 7, 12),
+      );
 
-    expect(notifications.groupThresholdNotifications, hasLength(1));
-    expect(notifications.groupThresholdNotifications.single.thresholdPercent, 75);
-    expect(notifications.groupThresholdNotifications.single.groupId, casa.id);
+      expect(notifications.groupThresholdNotifications, hasLength(1));
+      expect(
+        notifications.groupThresholdNotifications.single.thresholdPercent,
+        75,
+      );
+      expect(notifications.groupThresholdNotifications.single.groupId, casa.id);
 
-    await expensesWithNotifications.addExpense(
-      monthId: month.month.id,
-      kind: ExpenseKind.group,
-      groupId: casa.id,
-      description: 'Extra',
-      amountCents: 7000,
-      date: DateTime(2026, 7, 13),
-    );
+      await expensesWithNotifications.addExpense(
+        monthId: month.month.id,
+        kind: ExpenseKind.group,
+        groupId: casa.id,
+        description: 'Extra',
+        amountCents: 7000,
+        date: DateTime(2026, 7, 13),
+      );
 
-    expect(notifications.groupThresholdNotifications, hasLength(2));
-    expect(notifications.groupThresholdNotifications.last.thresholdPercent, 90);
-  });
+      expect(notifications.groupThresholdNotifications, hasLength(2));
+      expect(
+        notifications.groupThresholdNotifications.last.thresholdPercent,
+        90,
+      );
+    },
+  );
 
   test(
     'un gasto que salta directo sobre ambos umbrales solo notifica el 90%',

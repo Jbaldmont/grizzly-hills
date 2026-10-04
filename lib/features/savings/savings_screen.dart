@@ -30,8 +30,7 @@ class SavingsScreen extends StatefulWidget {
 }
 
 class _SavingsScreenState extends State<SavingsScreen> {
-  late final Stream<List<SavingsLocation>> _locations = widget
-      .savingsRepository
+  late final Stream<List<SavingsLocation>> _locations = widget.savingsRepository
       .watchLocations();
   late final Stream<ActiveMonth?> _activeMonth = widget.monthRepository
       .watchActiveMonth();
@@ -126,11 +125,14 @@ class _SavingsScreenState extends State<SavingsScreen> {
     }
   }
 
-  void _openTransfer(ActiveMonth? activeMonth, List<SavingsLocation> locations) {
+  void _openTransfer(
+    ActiveMonth? activeMonth,
+    List<SavingsLocation> locations,
+  ) {
     if (activeMonth == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(Strings.openMonthFirst)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(Strings.openMonthFirst)));
       return;
     }
     showTransferSheet(

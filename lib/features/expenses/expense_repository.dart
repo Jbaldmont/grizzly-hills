@@ -10,7 +10,10 @@ import 'month_overview.dart';
 typedef _GroupUsage = ({String groupName, int budgetCents, int spentCents});
 
 class ExtensionRequest {
-  const ExtensionRequest({required this.amountCents, required this.description});
+  const ExtensionRequest({
+    required this.amountCents,
+    required this.description,
+  });
 
   final int amountCents;
   final String description;
@@ -62,7 +65,9 @@ class ExpenseRepository {
       if (extensionRequest != null && groupId != null) {
         await _insertExtension(monthId, groupId, extensionRequest);
       }
-      await _db.into(_db.expenses).insert(
+      await _db
+          .into(_db.expenses)
+          .insert(
             ExpensesCompanion.insert(
               monthId: monthId,
               groupId: Value(groupId),
@@ -167,7 +172,9 @@ class ExpenseRepository {
     int groupId,
     ExtensionRequest extensionRequest,
   ) {
-    return _db.into(_db.expenses).insert(
+    return _db
+        .into(_db.expenses)
+        .insert(
           ExpensesCompanion.insert(
             monthId: monthId,
             groupId: Value(groupId),
@@ -180,9 +187,9 @@ class ExpenseRepository {
   }
 
   Future<void> _rememberFixedAmount(int templateId, int amountCents) {
-    return (_db.update(_db.fixedExpenseTemplates)
-          ..where((t) => t.id.equals(templateId)))
-        .write(
+    return (_db.update(
+      _db.fixedExpenseTemplates,
+    )..where((t) => t.id.equals(templateId))).write(
       FixedExpenseTemplatesCompanion(lastAmountCents: Value(amountCents)),
     );
   }

@@ -47,7 +47,12 @@ void main() {
     await tester.pumpAndSettle();
     await openTestMonth(tester);
 
-    await addExpense(tester, amount: '50', destination: 'Gasolina', tag: 'Comida');
+    await addExpense(
+      tester,
+      amount: '50',
+      destination: 'Gasolina',
+      tag: 'Comida',
+    );
 
     await tester.scrollUntilVisible(
       find.text('Gasolina'),
@@ -71,7 +76,10 @@ void main() {
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    await tapVisible(tester, find.widgetWithText(ActionChip, Strings.newTagChip));
+    await tapVisible(
+      tester,
+      find.widgetWithText(ActionChip, Strings.newTagChip),
+    );
     await tester.enterText(find.byType(TextFormField).last, 'comida');
     await tester.tap(find.text(Strings.add));
     await tester.pumpAndSettle();
@@ -95,7 +103,12 @@ void main() {
     await tester.pumpWidget(await buildTestApp(db));
     await tester.pumpAndSettle();
     await openTestMonth(tester);
-    await addExpense(tester, amount: '50', destination: 'Gasolina', tag: 'Comida');
+    await addExpense(
+      tester,
+      amount: '50',
+      destination: 'Gasolina',
+      tag: 'Comida',
+    );
     await tester.pump(const Duration(seconds: 5));
     await addExpense(
       tester,

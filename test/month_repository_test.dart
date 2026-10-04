@@ -127,30 +127,24 @@ void main() {
     },
   );
 
-  test(
-    'closeMonth sin sobrante cierra el mes sin depositar nada',
-    () async {
-      await repository.startMonth(
-        date: DateTime(2026, 7, 1),
-        salaryCents: 100000,
-        groups: const [],
-      );
-      final active = (await repository.watchActiveMonth().first)!;
-      await savings.addLocation('Caja roja');
+  test('closeMonth sin sobrante cierra el mes sin depositar nada', () async {
+    await repository.startMonth(
+      date: DateTime(2026, 7, 1),
+      salaryCents: 100000,
+      groups: const [],
+    );
+    final active = (await repository.watchActiveMonth().first)!;
+    await savings.addLocation('Caja roja');
 
-      await repository.closeMonth(
-        monthId: active.month.id,
-        surplusCents: -5000,
-      );
+    await repository.closeMonth(monthId: active.month.id, surplusCents: -5000);
 
-      final closed = await repository.loadActiveMonth(active.month.id);
-      expect(closed!.month.closedAt, isNotNull);
-      expect(closed.month.closingTransferCents, -5000);
-      expect(closed.month.closingSavingsLocationId, isNull);
-      final location = (await savings.loadLocations()).single;
-      expect(location.balanceCents, 0);
-    },
-  );
+    final closed = await repository.loadActiveMonth(active.month.id);
+    expect(closed!.month.closedAt, isNotNull);
+    expect(closed.month.closingTransferCents, -5000);
+    expect(closed.month.closingSavingsLocationId, isNull);
+    final location = (await savings.loadLocations()).single;
+    expect(location.balanceCents, 0);
+  });
 
   test(
     'loadCurrentActiveMonth devuelve el mes abierto sin usar un stream',
@@ -185,8 +179,9 @@ void main() {
         (year: 2026, month: 7),
       ]);
 
-      final active =
-          (await repositoryWithNotifications.watchActiveMonth().first)!;
+      final active = (await repositoryWithNotifications
+          .watchActiveMonth()
+          .first)!;
       await repositoryWithNotifications.closeMonth(
         monthId: active.month.id,
         surplusCents: 100000,
