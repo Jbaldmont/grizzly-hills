@@ -23,8 +23,7 @@ class TagSelector extends StatefulWidget {
 }
 
 class _TagSelectorState extends State<TagSelector> {
-  late final Stream<List<ExpenseTag>> _tags = widget.tagRepository
-      .watchTags();
+  late final Stream<List<ExpenseTag>> _tags = widget.tagRepository.watchTags();
 
   @override
   Widget build(BuildContext context) {

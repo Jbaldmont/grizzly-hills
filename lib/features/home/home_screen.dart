@@ -246,10 +246,7 @@ class _StillOpenBanner extends StatelessWidget {
         padding: const EdgeInsets.all(Dimens.spacingMd),
         child: Row(
           children: [
-            Icon(
-              Icons.info_outline,
-              color: colorScheme.onTertiaryContainer,
-            ),
+            Icon(Icons.info_outline, color: colorScheme.onTertiaryContainer),
             const SizedBox(width: Dimens.spacingSm),
             Expanded(
               child: Text(

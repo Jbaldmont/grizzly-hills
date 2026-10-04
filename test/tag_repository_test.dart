@@ -96,71 +96,77 @@ void main() {
     expect((await tags.loadTags()).map((tag) => tag.name), ['Bebidas']);
   });
 
-  test('las estadísticas solo incluyen gastos de grupo e imprevistos', () async {
-    final month = await openMonth();
-    final monthId = month.month.id;
-    final gastosMios = month.groups.last;
-    final comida = (await tags.loadTags()).last;
-    await expenses.addExpense(
-      monthId: monthId,
-      kind: ExpenseKind.group,
-      groupId: gastosMios.id,
-      description: 'Salteñas',
-      amountCents: 3000,
-      date: DateTime(2026, 9, 2),
-      tagId: comida.id,
-    );
-    await expenses.addExpense(
-      monthId: monthId,
-      kind: ExpenseKind.unexpected,
-      description: 'Farmacia',
-      amountCents: 4000,
-      date: DateTime(2026, 9, 2),
-    );
-    await expenses.addExpense(
-      monthId: monthId,
-      kind: ExpenseKind.budgetExtension,
-      groupId: gastosMios.id,
-      description: 'Extensión: Gastos Míos',
-      amountCents: 10000,
-      date: DateTime(2026, 9, 2),
-    );
-    await expenses.addExpense(
-      monthId: monthId,
-      kind: ExpenseKind.savingsTransfer,
-      groupId: gastosMios.id,
-      description: 'Transferencia a ahorro',
-      amountCents: 5000,
-      date: DateTime(2026, 9, 2),
-    );
+  test(
+    'las estadísticas solo incluyen gastos de grupo e imprevistos',
+    () async {
+      final month = await openMonth();
+      final monthId = month.month.id;
+      final gastosMios = month.groups.last;
+      final comida = (await tags.loadTags()).last;
+      await expenses.addExpense(
+        monthId: monthId,
+        kind: ExpenseKind.group,
+        groupId: gastosMios.id,
+        description: 'Salteñas',
+        amountCents: 3000,
+        date: DateTime(2026, 9, 2),
+        tagId: comida.id,
+      );
+      await expenses.addExpense(
+        monthId: monthId,
+        kind: ExpenseKind.unexpected,
+        description: 'Farmacia',
+        amountCents: 4000,
+        date: DateTime(2026, 9, 2),
+      );
+      await expenses.addExpense(
+        monthId: monthId,
+        kind: ExpenseKind.budgetExtension,
+        groupId: gastosMios.id,
+        description: 'Extensión: Gastos Míos',
+        amountCents: 10000,
+        date: DateTime(2026, 9, 2),
+      );
+      await expenses.addExpense(
+        monthId: monthId,
+        kind: ExpenseKind.savingsTransfer,
+        groupId: gastosMios.id,
+        description: 'Transferencia a ahorro',
+        amountCents: 5000,
+        date: DateTime(2026, 9, 2),
+      );
 
-    final entries = await tags.loadSpendingEntries();
+      final entries = await tags.loadSpendingEntries();
 
-    expect(entries, hasLength(2));
-    final tagged = entries.singleWhere((entry) => entry.tagId != null);
-    expect(tagged.groupName, 'Gastos Míos');
-    expect(tagged.amountCents, 3000);
-    final unexpected = entries.singleWhere((entry) => entry.tagId == null);
-    expect(unexpected.groupName, isNull);
-    expect(unexpected.monthId, monthId);
-  });
+      expect(entries, hasLength(2));
+      final tagged = entries.singleWhere((entry) => entry.tagId != null);
+      expect(tagged.groupName, 'Gastos Míos');
+      expect(tagged.amountCents, 3000);
+      final unexpected = entries.singleWhere((entry) => entry.tagId == null);
+      expect(unexpected.groupName, isNull);
+      expect(unexpected.monthId, monthId);
+    },
+  );
 
-  test('loadAllMonths devuelve los meses del más reciente al más antiguo', () async {
-    await months.startMonth(
-      date: DateTime(2026, 8, 1),
-      salaryCents: 100000,
-      groups: const [],
-    );
-    final august = (await months.loadCurrentActiveMonth())!;
-    await months.closeMonth(monthId: august.month.id, surplusCents: 0);
-    await months.startMonth(
-      date: DateTime(2026, 9, 1),
-      salaryCents: 100000,
-      groups: const [],
-    );
+  test(
+    'loadAllMonths devuelve los meses del más reciente al más antiguo',
+    () async {
+      await months.startMonth(
+        date: DateTime(2026, 8, 1),
+        salaryCents: 100000,
+        groups: const [],
+      );
+      final august = (await months.loadCurrentActiveMonth())!;
+      await months.closeMonth(monthId: august.month.id, surplusCents: 0);
+      await months.startMonth(
+        date: DateTime(2026, 9, 1),
+        salaryCents: 100000,
+        groups: const [],
+      );
 
-    final all = await months.loadAllMonths();
+      final all = await months.loadAllMonths();
 
-    expect(all.map((month) => month.month), [9, 8]);
-  });
+      expect(all.map((month) => month.month), [9, 8]);
+    },
+  );
 }

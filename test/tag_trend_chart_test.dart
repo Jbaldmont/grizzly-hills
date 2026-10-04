@@ -19,7 +19,11 @@ void main() {
               SizedBox(height: 300),
               TagTrendChart(
                 points: [
-                  TrendPoint(label: 'Sep', amountCents: 9000, highlighted: true),
+                  TrendPoint(
+                    label: 'Sep',
+                    amountCents: 9000,
+                    highlighted: true,
+                  ),
                 ],
               ),
               SizedBox(height: 1000),

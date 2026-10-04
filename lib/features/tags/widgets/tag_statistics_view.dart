@@ -35,8 +35,7 @@ class _TagStatisticsViewState extends State<TagStatisticsView> {
 
   Month get _selectedMonth => widget.monthsNewestFirst[_monthIndex];
 
-  bool get _hasOlderMonth =>
-      _monthIndex < widget.monthsNewestFirst.length - 1;
+  bool get _hasOlderMonth => _monthIndex < widget.monthsNewestFirst.length - 1;
 
   bool get _hasNewerMonth => _monthIndex > 0;
 
@@ -46,7 +45,9 @@ class _TagStatisticsViewState extends State<TagStatisticsView> {
     final statistics = widget.statistics;
     final breakdown = statistics.tagBreakdown(month.id, _scope);
     final trendTagId =
-        _trendTagId ?? breakdown.firstOrNull?.tagId ?? widget.tags.firstOrNull?.id;
+        _trendTagId ??
+        breakdown.firstOrNull?.tagId ??
+        widget.tags.firstOrNull?.id;
     return ListView(
       padding: const EdgeInsets.all(Dimens.spacingMd),
       children: [

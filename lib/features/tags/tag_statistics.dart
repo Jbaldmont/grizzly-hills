@@ -55,9 +55,8 @@ class TagStatistics {
 
   final List<SpendingEntry> entries;
 
-  List<String> get groupNames => {
-    for (final entry in entries) ?entry.groupName,
-  }.toList();
+  List<String> get groupNames =>
+      {for (final entry in entries) ?entry.groupName}.toList();
 
   List<TagAmount> tagBreakdown(int monthId, SpendingScope scope) {
     final totalsByTagId = <int, int>{};
@@ -79,13 +78,11 @@ class TagStatistics {
   int totalCents(int monthId, SpendingScope scope) =>
       _sum(_entriesIn(monthId, scope));
 
-  int untaggedCents(int monthId, SpendingScope scope) => _sum(
-    _entriesIn(monthId, scope).where((entry) => entry.tagId == null),
-  );
+  int untaggedCents(int monthId, SpendingScope scope) =>
+      _sum(_entriesIn(monthId, scope).where((entry) => entry.tagId == null));
 
-  int tagCents(int monthId, int tagId, SpendingScope scope) => _sum(
-    _entriesIn(monthId, scope).where((entry) => entry.tagId == tagId),
-  );
+  int tagCents(int monthId, int tagId, SpendingScope scope) =>
+      _sum(_entriesIn(monthId, scope).where((entry) => entry.tagId == tagId));
 
   Iterable<SpendingEntry> _entriesIn(int monthId, SpendingScope scope) =>
       entries.where(

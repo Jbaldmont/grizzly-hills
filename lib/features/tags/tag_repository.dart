@@ -59,8 +59,7 @@ class TagRepository {
   }
 
   SimpleSelectStatement<$ExpenseTagsTable, ExpenseTag> _tagsQuery() {
-    return _db.select(_db.expenseTags)..orderBy([
-      (tag) => OrderingTerm.asc(tag.name.collate(Collate.noCase)),
-    ]);
+    return _db.select(_db.expenseTags)
+      ..orderBy([(tag) => OrderingTerm.asc(tag.name.collate(Collate.noCase))]);
   }
 }

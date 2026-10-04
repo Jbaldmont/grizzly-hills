@@ -66,44 +66,41 @@ void main() {
     },
   );
 
-  testWidgets(
-    'el detalle de un mes cerrado es de solo lectura',
-    (tester) async {
-      await tester.pumpWidget(await buildTestApp(db));
-      await tester.pumpAndSettle();
-      await openTestMonth(tester);
-      await addSavingsLocation(tester, 'Caja roja');
+  testWidgets('el detalle de un mes cerrado es de solo lectura', (
+    tester,
+  ) async {
+    await tester.pumpWidget(await buildTestApp(db));
+    await tester.pumpAndSettle();
+    await openTestMonth(tester);
+    await addSavingsLocation(tester, 'Caja roja');
 
-      await tester.scrollUntilVisible(
-        find.text(Strings.closeMonthCta),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(find.text(Strings.closeMonthCta));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(ChoiceChip, 'Caja roja'));
-      await tester.pump();
-      await tester.tap(
-        find.widgetWithText(FilledButton, Strings.closeMonthCta),
-      );
-      await tester.pumpAndSettle();
-      await tester.pump(const Duration(seconds: 5));
+    await tester.scrollUntilVisible(
+      find.text(Strings.closeMonthCta),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text(Strings.closeMonthCta));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Caja roja'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, Strings.closeMonthCta));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 5));
 
-      await tester.tap(find.byIcon(Icons.history));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byType(Card).first);
-      await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.history));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Card).first);
+    await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.edit_outlined), findsNothing);
-      expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byIcon(Icons.edit_outlined), findsNothing);
+    expect(find.byType(FloatingActionButton), findsNothing);
 
-      await tester.tap(find.text('Agua, Luz y Teléfonos').first);
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Agua, Luz y Teléfonos').first);
+    await tester.pumpAndSettle();
 
-      expect(find.byType(FloatingActionButton), findsNothing);
-      expect(find.text(Strings.requestExtension), findsNothing);
+    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.text(Strings.requestExtension), findsNothing);
 
-      await disposeTestApp(tester);
-    },
-  );
+    await disposeTestApp(tester);
+  });
 }

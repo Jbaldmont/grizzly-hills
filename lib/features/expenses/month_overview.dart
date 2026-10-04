@@ -32,25 +32,23 @@ class MonthOverview {
       extensionCentsIn(expenses, groupId);
 
   int remainingInGroupCents(int groupId) {
-    final group = activeMonth.groups.firstWhere(
-      (group) => group.id == groupId,
-    );
+    final group = activeMonth.groups.firstWhere((group) => group.id == groupId);
     return group.budgetCents +
         extensionCentsForGroup(groupId) -
         spentInGroupCents(groupId);
   }
 
   List<Expense> get fixedExpenses => [
-        for (final expense in expenses)
-          if (expense.kind == ExpenseKind.fixed) expense,
-      ];
+    for (final expense in expenses)
+      if (expense.kind == ExpenseKind.fixed) expense,
+  ];
 
   List<Expense> get unexpectedExpenses => [
-        for (final expense in expenses)
-          if (expense.kind == ExpenseKind.unexpected ||
-              expense.kind == ExpenseKind.budgetExtension)
-            expense,
-      ];
+    for (final expense in expenses)
+      if (expense.kind == ExpenseKind.unexpected ||
+          expense.kind == ExpenseKind.budgetExtension)
+        expense,
+  ];
 
   int get fixedCents => _sum(fixedExpenses);
 

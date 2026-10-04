@@ -39,8 +39,7 @@ class GroupCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child:
-                        Text(group.name, style: theme.textTheme.titleMedium),
+                    child: Text(group.name, style: theme.textTheme.titleMedium),
                   ),
                   if (extensionCents == 0)
                     Text(
@@ -80,8 +79,9 @@ class GroupCard extends StatelessWidget {
                 children: [
                   Text(
                     '${Strings.spentLabel}: ${formatBs(spentCents)}',
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   Text(
                     '${Strings.remainingLabel} '
@@ -100,7 +100,6 @@ class GroupCard extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _GroupProgressBar extends StatelessWidget {
@@ -194,5 +193,4 @@ class _GroupProgressBar extends StatelessWidget {
       ),
     );
   }
-
 }

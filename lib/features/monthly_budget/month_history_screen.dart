@@ -33,8 +33,7 @@ class MonthHistoryScreen extends StatefulWidget {
 class _MonthHistoryScreenState extends State<MonthHistoryScreen> {
   late final Stream<List<Month>> _closedMonths = widget.monthRepository
       .watchClosedMonths();
-  late final Stream<List<SavingsLocation>> _locations = widget
-      .savingsRepository
+  late final Stream<List<SavingsLocation>> _locations = widget.savingsRepository
       .watchLocations();
 
   @override
@@ -69,7 +68,8 @@ class _MonthHistoryScreenState extends State<MonthHistoryScreen> {
                     for (final month in months)
                       _ClosedMonthTile(
                         month: month,
-                        locationName: locationNames[month.closingSavingsLocationId],
+                        locationName:
+                            locationNames[month.closingSavingsLocationId],
                         onTap: () => _openDetail(month),
                       ),
                   ],

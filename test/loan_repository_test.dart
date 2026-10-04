@@ -128,13 +128,16 @@ void main() {
     expect(totals[loan.id], 5000);
   });
 
-  test('loadActiveLoans devuelve los préstamos abiertos sin usar un stream', () async {
-    final loan = await createLoan();
+  test(
+    'loadActiveLoans devuelve los préstamos abiertos sin usar un stream',
+    () async {
+      final loan = await createLoan();
 
-    final active = await loans.loadActiveLoans();
+      final active = await loans.loadActiveLoans();
 
-    expect(active.single.id, loan.id);
-  });
+      expect(active.single.id, loan.id);
+    },
+  );
 
   test(
     'agenda un recordatorio al crear el préstamo y lo cancela al cerrarlo',
@@ -171,8 +174,7 @@ void main() {
       loanDate: DateTime(2026, 7, 1),
       dueDate: DateTime(2026, 7, 15),
     );
-    final loan =
-        (await loansWithNotifications.watchActiveLoans().first).single;
+    final loan = (await loansWithNotifications.watchActiveLoans().first).single;
 
     await loansWithNotifications.registerPayment(
       loanId: loan.id,
@@ -192,8 +194,7 @@ void main() {
       loanDate: DateTime(2026, 7, 1),
       dueDate: DateTime(2026, 7, 15),
     );
-    final loan =
-        (await loansWithNotifications.watchActiveLoans().first).single;
+    final loan = (await loansWithNotifications.watchActiveLoans().first).single;
     notifications.scheduledLoanReminderIds.clear();
 
     await loansWithNotifications.updateLoan(
@@ -214,8 +215,7 @@ void main() {
       loanDate: DateTime(2026, 7, 1),
       dueDate: DateTime(2026, 7, 15),
     );
-    final loan =
-        (await loansWithNotifications.watchActiveLoans().first).single;
+    final loan = (await loansWithNotifications.watchActiveLoans().first).single;
 
     final deleted = await loansWithNotifications.deleteLoan(loan.id);
 

@@ -16,7 +16,8 @@ abstract final class Strings {
 
   static const settingsSecuritySectionTitle = 'Seguridad';
   static const settingsBiometricLock = 'Bloqueo con huella o PIN';
-  static const settingsBiometricLockSubtitle = 'Pide desbloqueo al abrir la app';
+  static const settingsBiometricLockSubtitle =
+      'Pide desbloqueo al abrir la app';
   static const biometricNotAvailableMessage =
       'Tu dispositivo no tiene huella ni PIN configurado';
   static const biometricConfirmFailedMessage =
@@ -76,8 +77,10 @@ abstract final class Strings {
   static const extensionAppliedMessage = 'Extensión registrada en imprevistos';
   static String extensionDescription(String groupName) =>
       'Extensión: $groupName';
-  static String budgetWithExtension(String baseAmount, String extensionAmount) =>
-      '$baseAmount + $extensionAmount ext.';
+  static String budgetWithExtension(
+    String baseAmount,
+    String extensionAmount,
+  ) => '$baseAmount + $extensionAmount ext.';
   static const generalBudgetAlsoInsufficient =
       'El presupuesto general tampoco alcanza para cubrir la diferencia.';
   static const unexpectedLabel = 'Imprevisto';
@@ -222,8 +225,8 @@ abstract final class Strings {
 
   static String budgetThresholdTitle(int thresholdPercent) =>
       thresholdPercent >= 90
-          ? 'Presupuesto casi agotado'
-          : 'Presupuesto en el 75%';
+      ? 'Presupuesto casi agotado'
+      : 'Presupuesto en el 75%';
   static String budgetThresholdBody(String groupName, int thresholdPercent) =>
       'El grupo "$groupName" llegó al $thresholdPercent% de su presupuesto.';
   static const loanDueTitle = 'Préstamo por cobrar';

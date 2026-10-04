@@ -53,11 +53,11 @@ class LoanRepository {
       ..addColumns([_db.loanPayments.loanId, totalPaid])
       ..groupBy([_db.loanPayments.loanId]);
     return query.watch().map(
-          (rows) => {
-            for (final row in rows)
-              row.read(_db.loanPayments.loanId)!: row.read(totalPaid) ?? 0,
-          },
-        );
+      (rows) => {
+        for (final row in rows)
+          row.read(_db.loanPayments.loanId)!: row.read(totalPaid) ?? 0,
+      },
+    );
   }
 
   Future<bool> hasPayments(int loanId) async {
@@ -76,7 +76,9 @@ class LoanRepository {
     double weeklyRatePercent = defaultWeeklyRatePercent,
   }) async {
     final normalizedLoanDate = dateOnly(loanDate);
-    final id = await _db.into(_db.loans).insert(
+    final id = await _db
+        .into(_db.loans)
+        .insert(
           LoansCompanion.insert(
             debtorName: debtorName,
             principalCents: principalCents,
@@ -100,12 +102,15 @@ class LoanRepository {
       LoansCompanion(
         debtorName: Value(debtorName),
         dueDate: Value(dateOnly(dueDate)),
-        principalCents:
-            principalCents == null ? const Value.absent() : Value(principalCents),
-        loanDate:
-            loanDate == null ? const Value.absent() : Value(dateOnly(loanDate)),
-        interestStartDate:
-            loanDate == null ? const Value.absent() : Value(dateOnly(loanDate)),
+        principalCents: principalCents == null
+            ? const Value.absent()
+            : Value(principalCents),
+        loanDate: loanDate == null
+            ? const Value.absent()
+            : Value(dateOnly(loanDate)),
+        interestStartDate: loanDate == null
+            ? const Value.absent()
+            : Value(dateOnly(loanDate)),
       ),
     );
     await _scheduleDueReminder(id);
@@ -138,15 +143,18 @@ class LoanRepository {
       final owedCents = totalOwedCents(loan, paymentDate);
       final remainingCents = owedCents - amountCents;
       final closes = remainingCents <= 0;
-      await _db.into(_db.loanPayments).insert(
+      await _db
+          .into(_db.loanPayments)
+          .insert(
             LoanPaymentsCompanion.insert(
               loanId: loanId,
               amountCents: amountCents,
               date: paymentDate,
             ),
           );
-      await (_db.update(_db.loans)..where((row) => row.id.equals(loanId)))
-          .write(
+      await (_db.update(
+        _db.loans,
+      )..where((row) => row.id.equals(loanId))).write(
         LoansCompanion(
           principalCents: Value(closes ? 0 : remainingCents),
           interestStartDate: Value(paymentDate),

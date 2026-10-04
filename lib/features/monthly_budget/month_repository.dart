@@ -163,12 +163,12 @@ class MonthRepository {
     final depositLocationId = surplusCents > 0 ? savingsLocationId : null;
     await _db.transaction(() async {
       if (depositLocationId != null) {
-        final location = await (_db.select(_db.savingsLocations)
-              ..where((row) => row.id.equals(depositLocationId)))
-            .getSingle();
-        await (_db.update(_db.savingsLocations)
-              ..where((row) => row.id.equals(depositLocationId)))
-            .write(
+        final location = await (_db.select(
+          _db.savingsLocations,
+        )..where((row) => row.id.equals(depositLocationId))).getSingle();
+        await (_db.update(
+          _db.savingsLocations,
+        )..where((row) => row.id.equals(depositLocationId))).write(
           SavingsLocationsCompanion(
             balanceCents: Value(location.balanceCents + surplusCents),
           ),

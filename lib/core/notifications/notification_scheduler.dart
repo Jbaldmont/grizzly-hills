@@ -11,7 +11,10 @@ abstract interface class NotificationScheduler {
 
   Future<void> cancelLoanDueReminder(int loanId);
 
-  Future<void> scheduleMonthCloseReminder({required int year, required int month});
+  Future<void> scheduleMonthCloseReminder({
+    required int year,
+    required int month,
+  });
 
   Future<void> cancelMonthCloseReminder();
 }

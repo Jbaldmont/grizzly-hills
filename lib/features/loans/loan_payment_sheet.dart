@@ -18,7 +18,8 @@ void showLoanPaymentSheet(
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    builder: (_) => LoanPaymentSheet(loan: loan, loanRepository: loanRepository),
+    builder: (_) =>
+        LoanPaymentSheet(loan: loan, loanRepository: loanRepository),
   );
 }
 
@@ -143,7 +144,9 @@ class _LoanPaymentSheetState extends State<LoanPaymentSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            closed ? Strings.loanClosedMessage : Strings.paymentRegisteredMessage,
+            closed
+                ? Strings.loanClosedMessage
+                : Strings.paymentRegisteredMessage,
           ),
         ),
       );
@@ -174,14 +177,14 @@ class _LoanPaymentSheetState extends State<LoanPaymentSheet> {
               closesLoan
                   ? Strings.paymentClosesLoanNote
                   : '${Strings.remainingDebtLabel}: '
-                      '${formatBs(owedCents - amountCents)}',
+                        '${formatBs(owedCents - amountCents)}',
             ),
             const SizedBox(height: Dimens.spacingSm),
             Text(
               Strings.paymentIrreversibleNote,
               style: Theme.of(dialogContext).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(dialogContext).colorScheme.error,
-                  ),
+                color: Theme.of(dialogContext).colorScheme.error,
+              ),
             ),
           ],
         ),

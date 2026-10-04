@@ -98,8 +98,7 @@ class CloseMonthSheet extends StatefulWidget {
 }
 
 class _CloseMonthSheetState extends State<CloseMonthSheet> {
-  late final Future<List<SavingsLocation>> _locations = widget
-      .savingsRepository
+  late final Future<List<SavingsLocation>> _locations = widget.savingsRepository
       .loadLocations();
 
   SavingsLocation? _location;

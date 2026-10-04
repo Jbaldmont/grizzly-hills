@@ -160,9 +160,7 @@ class _StartMonthScreenState extends State<StartMonthScreen> {
           ),
           const SizedBox(height: Dimens.spacingLg),
           FilledButton(
-            onPressed: _saving || (_isEditing && !_minimaLoaded)
-                ? null
-                : _save,
+            onPressed: _saving || (_isEditing && !_minimaLoaded) ? null : _save,
             child: Text(
               _isEditing ? Strings.saveChanges : Strings.startMonthConfirm,
             ),

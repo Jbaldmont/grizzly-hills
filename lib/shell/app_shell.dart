@@ -42,8 +42,8 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  late final Stream<ActiveMonth?> _activeMonth =
-      widget.monthRepository.watchActiveMonth();
+  late final Stream<ActiveMonth?> _activeMonth = widget.monthRepository
+      .watchActiveMonth();
 
   static const List<String> _titles = [
     Strings.tabHome,
@@ -161,9 +161,9 @@ class _AppShellState extends State<AppShell> {
 
   void _openQuickExpense(ActiveMonth? activeMonth) {
     if (activeMonth == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(Strings.openMonthFirst)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(Strings.openMonthFirst)));
       return;
     }
     showQuickExpenseSheet(

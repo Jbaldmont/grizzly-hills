@@ -14,7 +14,7 @@ class TransferDestination {
   const TransferDestination.group(BudgetGroup this.group) : location = null;
 
   const TransferDestination.savings(SavingsLocation this.location)
-      : group = null;
+    : group = null;
 
   final BudgetGroup? group;
   final SavingsLocation? location;
